@@ -32,7 +32,7 @@
       "addCapabilitiesDescription": "Add additional capabilities to your Teams app",
       "addResourcesTitle": "Add Resources",
       "addResourcesTitleNew": "Add cloud resources",
-      "addResourcesDescription": "Add additional Azure Resources to your Teams app",
+      "addResourcesDescription": "Add additional Azure resources to your Teams app",
       "manifestEditorTitle": "Manifest Editor",
       "manifestEditorTitleNew": "Edit manifest file",
       "manifestEditorDescription": "Edit the Teams app manifest",

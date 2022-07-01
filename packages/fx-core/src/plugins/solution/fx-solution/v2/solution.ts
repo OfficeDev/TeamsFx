@@ -33,6 +33,7 @@ import { provisionResource } from "./provision";
 import { provisionLocalResource } from "./provisionLocal";
 import { publishApplication } from "./publish";
 import { scaffoldSourceCode } from "./scaffolding";
+import "../../../resource/officeaddin";
 
 @Service(SolutionPluginsV2.AzureTeamsSolutionV2)
 export class TeamsAppSolutionV2 implements v2.SolutionPlugin {

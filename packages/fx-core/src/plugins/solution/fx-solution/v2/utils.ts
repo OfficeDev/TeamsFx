@@ -40,6 +40,7 @@ import {
   M365SsoLaunchPageOptionItem,
   MessageExtensionItem,
   NotificationOptionItem,
+  OfficeAddinItem,
   TabNonSsoItem,
   TabOptionItem,
   TabSPFxItem,
@@ -49,6 +50,7 @@ import { getActivatedV2ResourcePlugins, getAllV2ResourcePlugins } from "../Resou
 import { getPluginContext } from "../utils/util";
 import { PluginsWithContext } from "../types";
 import { getDefaultString, getLocalizedString } from "../../../../common/localizeUtils";
+import { isOfficeAddinEnabled } from "../../../../common";
 
 export function getSelectedPlugins(projectSettings: ProjectSettings): v2.ResourcePlugin[] {
   return getActivatedV2ResourcePlugins(projectSettings);
@@ -117,6 +119,19 @@ export function extractSolutionInputs(record: Json): v2.SolutionInputs {
 }
 
 export function setActivatedResourcePluginsV2(projectSettings: ProjectSettings): void {
+  if (isOfficeAddinEnabled()) {
+    // TODO: avoid hard coding activeResourcePlugins when we know how office addin co-exists
+    // with existing resources.
+    if (projectSettings.solutionSettings) {
+      projectSettings.solutionSettings.activeResourcePlugins = [
+        "fx-resource-office-addin",
+        "fx-resource-local-debug",
+        "fx-resource-frontend-hosting",
+        "fx-resource-appstudio",
+      ];
+    }
+    return;
+  }
   const activatedPluginNames = getAllV2ResourcePlugins()
     .filter((p) => p.activate && p.activate(projectSettings) === true)
     .map((p) => p.name);
@@ -322,6 +337,11 @@ export function fillInSolutionSettings(
     capabilities = [MessageExtensionItem.id];
     const scenarios = [M365SearchAppOptionItem.id];
     answers[AzureSolutionQuestionNames.Scenarios] = scenarios;
+    hostType = HostTypeOptionAzure.id;
+  } else if (isOfficeAddinEnabled() && capabilities.includes(OfficeAddinItem.id)) {
+    // Hard code Tab here, so that createEnv can pass.
+    // Needs to be changed once we figure out how office addin works with other resources.
+    capabilities = [OfficeAddinItem.id, TabOptionItem.id];
     hostType = HostTypeOptionAzure.id;
   }
   if (!hostType) {

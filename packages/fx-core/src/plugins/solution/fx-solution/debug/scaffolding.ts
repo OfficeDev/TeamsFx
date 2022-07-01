@@ -65,6 +65,7 @@ export async function _scaffoldLocalDebugSettings(
   const botCapabilities = ProjectSettingsHelper.getBotCapabilities(projectSetting);
   const programmingLanguage = projectSetting.programmingLanguage ?? "";
   const isM365 = projectSetting.isM365;
+  const includeOfficeAddin = ProjectSettingsHelper.includeOfficeAddin(projectSetting);
 
   const telemetryProperties = {
     platform: inputs.platform as string,
@@ -114,12 +115,22 @@ export async function _scaffoldLocalDebugSettings(
         const launchConfigurations = isM365
           ? LaunchNext.generateM365Configurations(includeFrontend, includeBackend, includeBot)
           : (await useNewTasks(inputs.projectPath))
-          ? LaunchNext.generateConfigurations(includeFrontend, includeBackend, includeBot)
+          ? LaunchNext.generateConfigurations(
+              includeFrontend,
+              includeBackend,
+              includeBot,
+              includeOfficeAddin
+            )
           : Launch.generateConfigurations(includeFrontend, includeBackend, includeBot);
         const launchCompounds = isM365
           ? LaunchNext.generateM365Compounds(includeFrontend, includeBackend, includeBot)
           : (await useNewTasks(inputs.projectPath))
-          ? LaunchNext.generateCompounds(includeFrontend, includeBackend, includeBot)
+          ? LaunchNext.generateCompounds(
+              includeFrontend,
+              includeBackend,
+              includeBot,
+              includeOfficeAddin
+            )
           : Launch.generateCompounds(includeFrontend, includeBackend, includeBot);
 
         const tasks = isM365
@@ -135,7 +146,8 @@ export async function _scaffoldLocalDebugSettings(
               includeBackend,
               includeBot,
               includeFuncHostedBot,
-              programmingLanguage
+              programmingLanguage,
+              includeOfficeAddin
             )
           : Tasks.generateTasks(
               includeFrontend,

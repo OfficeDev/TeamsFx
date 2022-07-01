@@ -3,6 +3,7 @@
 "use strict";
 
 import { ProductName } from "@microsoft/teamsfx-api";
+import { isOfficeAddinEnabled } from "../../../../../common";
 import { ProgrammingLanguage } from "../../../../../common/local/constants";
 
 // TODO: add spfx tasks with "validate-local-prerequisites"
@@ -11,7 +12,8 @@ export function generateTasks(
   includeBackend: boolean,
   includeBot: boolean,
   includeFuncHostedBot: boolean,
-  programmingLanguage: string
+  programmingLanguage: string,
+  includeOfficeAddin: boolean
 ): Record<string, unknown>[] {
   /**
    * Referenced by launch.json
@@ -61,6 +63,10 @@ export function generateTasks(
     } else {
       tasks.push(startBot(includeFrontend));
     }
+  }
+
+  if (isOfficeAddinEnabled() && includeOfficeAddin) {
+    // adds entries into tasks
   }
 
   return tasks;

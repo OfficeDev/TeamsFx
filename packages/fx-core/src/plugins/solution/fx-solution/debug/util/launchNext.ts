@@ -3,12 +3,14 @@
 "use strict";
 
 import * as os from "os";
+import { isOfficeAddinEnabled } from "../../../../../common";
 import { HubName, LaunchBrowser, LaunchUrl } from "../constants";
 
 export function generateConfigurations(
   includeFrontend: boolean,
   includeBackend: boolean,
-  includeBot: boolean
+  includeBot: boolean,
+  includeOfficeAddin: boolean
 ): Record<string, unknown>[] {
   let edgeOrder = 2,
     chromeOrder = 1;
@@ -42,13 +44,28 @@ export function generateConfigurations(
     launchConfigurations.push(attachToBackend());
   }
 
+  if (isOfficeAddinEnabled() && includeOfficeAddin) {
+    // add an entry to the launchConfigurations
+    launchConfigurations.push({
+      name: "Office Add-in sample",
+      type: "pwa-msedge",
+      url: "https://www.bing.com",
+      presentation: {
+        hidden: false,
+        group: "office-addin",
+        order: 1,
+      },
+    });
+  }
+
   return launchConfigurations;
 }
 
 export function generateCompounds(
   includeFrontend: boolean,
   includeBackend: boolean,
-  includeBot: boolean
+  includeBot: boolean,
+  includeOfficeAddin: boolean
 ): Record<string, unknown>[] {
   const launchCompounds: Record<string, unknown>[] = [];
   let edgeOrder = 2,
@@ -60,6 +77,10 @@ export function generateCompounds(
 
   launchCompounds.push(debug(includeFrontend, includeBackend, includeBot, "Edge", edgeOrder));
   launchCompounds.push(debug(includeFrontend, includeBackend, includeBot, "Chrome", chromeOrder));
+
+  if (isOfficeAddinEnabled() && includeOfficeAddin) {
+    // add an entry to the launchCompounds
+  }
 
   return launchCompounds;
 }

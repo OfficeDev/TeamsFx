@@ -46,6 +46,7 @@ import {
   MessageExtensionItem,
   MessageExtensionNewUIItem,
   NotificationOptionItem,
+  OfficeAddinItem,
   SingleSignOnOptionItem,
   TabNewUIOptionItem,
   TabNonSsoItem,
@@ -76,6 +77,7 @@ import {
 } from "../../../../common/tools";
 import {
   isBotNotificationEnabled,
+  isOfficeAddinEnabled,
   isPreviewFeaturesEnabled,
 } from "../../../../common/featureFlags";
 import {
@@ -227,6 +229,7 @@ export async function getQuestionsForScaffoldingPreview(
         ...(isAadManifestEnabled() ? [TabNonSsoItem.id] : []),
         M365SsoLaunchPageOptionItem.id,
         M365SearchAppOptionItem.id,
+        ...(isOfficeAddinEnabled() ? [OfficeAddinItem.id] : []),
       ],
     };
 
@@ -256,6 +259,16 @@ export async function getQuestionsForScaffoldingPreview(
     }
   } else {
     node.condition = { enum: [TabOptionItem.id, BotOptionItem.id, MessageExtensionItem.id] };
+  }
+
+  if (isOfficeAddinEnabled()) {
+    const officeAddinQuestions = await getOfficeAddinQuestions(ctx, inputs);
+    if (officeAddinQuestions.isErr()) {
+      return officeAddinQuestions;
+    }
+    if (officeAddinQuestions.value) {
+      node.addChild(officeAddinQuestions.value);
+    }
   }
 
   // 1.1.2 Azure Tab
@@ -315,6 +328,38 @@ export async function getQuestionsForScaffoldingPreview(
   }
 
   return ok(node);
+}
+
+export async function getOfficeAddinQuestions(
+  ctx: v2.Context,
+  inputs: Inputs
+): Promise<Result<QTreeNode | undefined, FxError>> {
+  const officeAddinPlugin: v2.ResourcePlugin = Container.get<v2.ResourcePlugin>(
+    ResourcePluginsV2.OfficeAddinPlugin
+  );
+
+  const root = new QTreeNode({ type: "group" });
+  if (officeAddinPlugin.getQuestionsForScaffolding) {
+    const res = await officeAddinPlugin.getQuestionsForScaffolding(ctx, inputs);
+    if (res.isErr()) return res;
+    if (res.value) {
+      root.addChild(res.value);
+      root.condition = {
+        validFunc: (input: any, inputs?: Inputs) => {
+          if (!inputs) {
+            return "Invalid inputs";
+          }
+          const cap = inputs[AzureSolutionQuestionNames.Capabilities] as string;
+          if (cap === OfficeAddinItem.id) {
+            return undefined;
+          }
+          return "Office Addin is not selected";
+        },
+      };
+      return ok(root);
+    }
+  }
+  return ok(undefined);
 }
 
 export async function getTabScaffoldQuestionsV2(

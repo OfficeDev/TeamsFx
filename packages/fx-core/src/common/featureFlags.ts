@@ -36,3 +36,7 @@ export function isPreviewFeaturesEnabled(): boolean {
 export function isCLIDotNetEnabled(): boolean {
   return isFeatureFlagEnabled(FeatureFlagName.CLIDotNet, false);
 }
+
+export function isOfficeAddinEnabled(): boolean {
+  return isFeatureFlagEnabled(FeatureFlagName.OfficeAddin, false);
+}

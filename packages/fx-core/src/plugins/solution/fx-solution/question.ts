@@ -12,6 +12,14 @@ import {
 import { isBotNotificationEnabled } from "../../../common/featureFlags";
 import { getLocalizedString } from "../../../common/localizeUtils";
 
+export const OfficeAddinItem: OptionItem = {
+  id: "office-addin",
+  label: "office addin label",
+  cliName: "tab",
+  description: "Office Addin description",
+  detail: "Office Addin detail",
+};
+
 export const TabOptionItem: OptionItem = {
   id: "Tab",
   label: getLocalizedString("core.TabOption.label"),

@@ -41,6 +41,7 @@ export const ResourcePluginsV2 = {
   KeyVaultPlugin: "KeyVaultPluginV2",
   CICDPlugin: "CICDPluginV2",
   ApiConnectorPlugin: "ApiConnectorPluginV2",
+  OfficeAddinPlugin: "OfficeAddinPluginV2",
 };
 
 /**

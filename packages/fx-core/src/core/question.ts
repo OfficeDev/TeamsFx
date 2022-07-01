@@ -19,7 +19,11 @@ import * as os from "os";
 import { environmentManager } from "./environment";
 import { sampleProvider } from "../common/samples";
 import { isAadManifestEnabled, isExistingTabAppEnabled, isM365AppEnabled } from "../common/tools";
-import { isBotNotificationEnabled, isPreviewFeaturesEnabled } from "../common/featureFlags";
+import {
+  isBotNotificationEnabled,
+  isOfficeAddinEnabled,
+  isPreviewFeaturesEnabled,
+} from "../common/featureFlags";
 import { getLocalizedString } from "../common/localizeUtils";
 import {
   BotOptionItem,
@@ -36,6 +40,7 @@ import {
   TabSPFxNewUIItem,
   MessageExtensionNewUIItem,
   BotNewUIOptionItem,
+  OfficeAddinItem,
 } from "../plugins/solution/fx-solution/question";
 
 export enum CoreQuestionNames {
@@ -284,6 +289,17 @@ export function createCapabilityQuestion(): MultiSelectQuestion {
       validFunc: validateCapabilities,
     },
     onDidChangeSelection: onChangeSelectionForCapabilities,
+  };
+}
+
+export function createCapabilityForOfficeAddin(): SingleSelectQuestion {
+  return {
+    name: CoreQuestionNames.Capabilities,
+    title: getLocalizedString("core.createCapabilityQuestion.title"),
+    type: "singleSelect",
+    staticOptions: [OfficeAddinItem],
+    placeholder: getLocalizedString("core.createCapabilityQuestion.placeholder"),
+    skipSingleOption: true,
   };
 }
 
@@ -536,6 +552,13 @@ export const ScratchOptionNoVSC: OptionItem = {
   detail: getLocalizedString("core.ScratchOptionNoVSC.detail"),
 };
 
+// TODO: localize the strings
+export const CreateNewOfficeAddinOption: OptionItem = {
+  id: "create-office-addin",
+  label: "Create an Office Addin",
+  detail: `Create an Office Addin`,
+};
+
 export const RuntimeOptionNodeJs: OptionItem = {
   id: "node",
   label: "Node.js",
@@ -580,6 +603,9 @@ export function getCreateNewOrFromSampleQuestion(platform: Platform): SingleSele
   } else {
     staticOptions.push(ScratchOptionYes);
     staticOptions.push(ScratchOptionNo);
+  }
+  if (isOfficeAddinEnabled()) {
+    staticOptions.push(CreateNewOfficeAddinOption);
   }
   return {
     type: "singleSelect",

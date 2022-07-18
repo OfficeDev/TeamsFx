@@ -555,6 +555,8 @@
   "core.QuestionNewResourceGroupName.title": "New resource group name",
   "core.QuestionNewResourceGroupName.validation": "The name can only contain alphanumeric characters or the symbols ._-()",
   "core.QuestionNewResourceGroupLocation.title": "Location for the new resource group",
+  "core.question.workspaceFolder.title": "Workspace folder",
+  "core.question.workspaceFolder.placeholder": "Select the folder that will contain your project root folder",
   "core.ScratchOptionYesVSC.label": "Create a new Teams app",
   "core.ScratchOptionYesVSC.detail": "Use the Teams Toolkit to create a new Teams application.",
   "core.ScratchOptionYes.label": "Create a new Teams app",

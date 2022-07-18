@@ -3,60 +3,61 @@
 
 import { remove } from "lodash";
 import {
+  commands,
   Disposable,
+  env,
+  ExtensionContext,
+  extensions,
   InputBox,
+  ProgressLocation,
+  QuickInputButton,
   QuickInputButtons,
   QuickPick,
   QuickPickItem,
+  QuickPickItemKind,
+  ThemeIcon,
   Uri,
   window,
-  env,
-  ProgressLocation,
-  ExtensionContext,
-  commands,
-  extensions,
-  QuickInputButton,
-  ThemeIcon,
-  QuickPickItemKind,
 } from "vscode";
+
 import {
-  UserCancelError,
+  assembleError,
+  Colors,
+  err,
+  ExecuteFuncConfig,
   FxError,
   InputResult,
-  SingleSelectResult,
-  MultiSelectResult,
+  InputTextConfig,
   InputTextResult,
-  SelectFileResult,
-  SelectFilesResult,
-  SelectFolderResult,
+  IProgressHandler,
+  MultiSelectConfig,
+  MultiSelectResult,
+  ok,
   OptionItem,
   Result,
-  SelectFileConfig,
-  SelectFilesConfig,
-  SelectFolderConfig,
-  SingleSelectConfig,
-  MultiSelectConfig,
-  InputTextConfig,
-  ExecuteFuncConfig,
   RunnableTask,
-  UIConfig,
-  err,
-  assembleError,
-  ok,
-  TaskConfig,
-  UserInteraction,
-  Colors,
-  IProgressHandler,
-  SystemError,
+  SelectFileConfig,
+  SelectFileResult,
+  SelectFilesConfig,
+  SelectFilesResult,
+  SelectFolderConfig,
+  SelectFolderResult,
+  SingleSelectConfig,
+  SingleSelectResult,
   StaticOptions,
+  SystemError,
+  TaskConfig,
+  UIConfig,
+  UserCancelError,
+  UserInteraction,
 } from "@microsoft/teamsfx-api";
-import { ExtensionErrors, ExtensionSource } from "../error";
-import { sleep } from "../utils/commonUtils";
-import { ProgressHandler } from "../progressHandler";
-import * as exp from "../exp";
-import { TreatmentVariables } from "../exp/treatmentVariables";
+
 import * as packageJson from "../../package.json";
+import { ExtensionErrors, ExtensionSource } from "../error";
+import { TreatmentVariableValue } from "../exp/treatmentVariables";
+import { ProgressHandler } from "../progressHandler";
 import { ExtTelemetry } from "../telemetry/extTelemetry";
+import { sleep } from "../utils/commonUtils";
 import { getDefaultString, localize } from "../utils/localizeUtils";
 
 export interface FxQuickPickItem extends QuickPickItem {
@@ -446,7 +447,78 @@ export class VsCodeUI implements UserInteraction {
   }
 
   async selectFolder(config: SelectFolderConfig): Promise<Result<SelectFolderResult, FxError>> {
-    return this.selectFileInQuickPick(config, "folder", config.default);
+    if (!TreatmentVariableValue.useFolderSelection) {
+      return this.selectFileInQuickPick(config, "folder", config.default);
+    } else {
+      const disposables: Disposable[] = [];
+      try {
+        const quickPick = window.createQuickPick<FxQuickPickItem>();
+        quickPick.title = config.title;
+        if (config.step && config.step > 1) {
+          quickPick.buttons = [QuickInputButtons.Back];
+        }
+        quickPick.placeholder = config.placeholder;
+        quickPick.ignoreFocusOut = true;
+        quickPick.matchOnDescription = true;
+        quickPick.matchOnDetail = true;
+        quickPick.canSelectMany = false;
+        return await new Promise<Result<SelectFolderResult, FxError>>(
+          async (resolve): Promise<void> => {
+            // set options
+            quickPick.items = [
+              {
+                id: "default",
+                label: localize("teamstoolkit.qm.defaultFolder"),
+                description: config.default,
+              },
+              {
+                id: "browse",
+                label: `$(folder) ${localize("teamstoolkit.qm.browse")}`,
+              },
+            ];
+
+            const onDidAccept = async () => {
+              const selectedItems = quickPick.selectedItems;
+              if (selectedItems && selectedItems.length > 0) {
+                const item = selectedItems[0];
+                if (item.id === "default") {
+                  resolve(ok({ type: "success", result: config.default }));
+                } else {
+                  const uriList: Uri[] | undefined = await window.showOpenDialog({
+                    defaultUri: config.default ? Uri.file(config.default) : undefined,
+                    canSelectFiles: false,
+                    canSelectFolders: true,
+                    canSelectMany: false,
+                    title: config.title,
+                  });
+                  if (uriList && uriList.length > 0) {
+                    const result = uriList[0].fsPath;
+                    resolve(ok({ type: "success", result: result }));
+                  }
+                }
+              }
+            };
+
+            disposables.push(
+              quickPick.onDidAccept(onDidAccept),
+              quickPick.onDidHide(() => {
+                resolve(err(UserCancelError));
+              }),
+              quickPick.onDidTriggerButton((button) => {
+                if (button === QuickInputButtons.Back) resolve(ok({ type: "back" }));
+              })
+            );
+
+            disposables.push(quickPick);
+            quickPick.show();
+          }
+        );
+      } finally {
+        disposables.forEach((d) => {
+          d.dispose();
+        });
+      }
+    }
   }
 
   async selectFile(config: SelectFileConfig): Promise<Result<SelectFileResult, FxError>> {

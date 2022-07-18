@@ -17,7 +17,7 @@ import {
   TelemetryProperty,
   TelemetrySuccess,
 } from "../common/telemetry";
-import { FetchSampleError, InvalidInputError } from "./error";
+import { FetchSampleError, InvalidInputError, ProjectFolderInvalidError } from "./error";
 import { loadProjectSettings } from "./middleware/projectSettingsLoader";
 import { CoreQuestionNames, QuestionRootFolder } from "./question";
 import { CoreHookContext } from "./types";
@@ -112,6 +112,11 @@ export async function downloadSample(
   };
   try {
     const folder = inputs[QuestionRootFolder.name] as string;
+    try {
+      await fs.ensureDir(folder);
+    } catch (e) {
+      throw new ProjectFolderInvalidError(folder);
+    }
     const sampleId = inputs[CoreQuestionNames.Samples] as string;
     if (!(sampleId && folder)) {
       throw InvalidInputError(`invalid answer for '${CoreQuestionNames.Samples}'`, inputs);

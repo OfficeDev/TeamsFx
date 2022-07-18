@@ -87,6 +87,7 @@ import {
   ObjectIsUndefinedError,
   OperationNotPermittedError,
   ProjectFolderExistError,
+  ProjectFolderInvalidError,
   TaskNotSupportError,
   WriteFileError,
 } from "./error";
@@ -183,6 +184,11 @@ export class FxCore implements v3.ICore {
     setCurrentStage(Stage.create);
     inputs.stage = Stage.create;
     const folder = inputs[QuestionRootFolder.name] as string;
+    try {
+      await fs.ensureDir(folder);
+    } catch (e) {
+      throw new ProjectFolderInvalidError(folder);
+    }
 
     if (isPreviewFeaturesEnabled()) {
       const capability = inputs[CoreQuestionNames.Capabilities] as string;
@@ -349,6 +355,11 @@ export class FxCore implements v3.ICore {
     const folder = inputs[QuestionRootFolder.name] as string;
     if (!folder) {
       return err(InvalidInputError("folder is undefined"));
+    }
+    try {
+      await fs.ensureDir(folder);
+    } catch (e) {
+      throw new ProjectFolderInvalidError(folder);
     }
     inputs.folder = folder;
     const scratch = inputs[CoreQuestionNames.CreateFromScratch] as string;

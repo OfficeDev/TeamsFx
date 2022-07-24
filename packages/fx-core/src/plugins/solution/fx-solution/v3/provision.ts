@@ -445,20 +445,6 @@ function clearEnvInfoStateResource(envInfo: v3.EnvInfoV3): void {
   envInfo.state.solution.resourceGroupName = "";
   envInfo.state.solution.resourceNameSuffix = "";
 
-  // we need to have another bot id if provisioning a new azure bot service.
-  // const botResource = envInfo.state[BuiltInFeaturePluginNames.bot] ?? envInfo.state["teams-bot"];
-  // if (botResource) {
-  //   if (botResource[LocalStateBotKeys.BotId]) {
-  //     botResource[LocalStateBotKeys.BotId] = undefined;
-  //   }
-  //   if (botResource[LocalStateBotKeys.BotPassword]) {
-  //     botResource[LocalStateBotKeys.BotPassword] = undefined;
-  //   }
-  //   if (botResource[LocalStateAuthKeys.ObjectId]) {
-  //     botResource[LocalStateAuthKeys.ObjectId] = undefined;
-  //   }
-  // }
-
   const keysToClear = [
     BuiltInFeaturePluginNames.bot,
     BuiltInFeaturePluginNames.frontend,

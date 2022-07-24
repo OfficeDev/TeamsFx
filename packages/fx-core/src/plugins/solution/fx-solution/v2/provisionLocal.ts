@@ -15,7 +15,7 @@ import {
 import { ResourcePluginsV2 } from "../ResourcePluginContainer";
 import { executeConcurrently } from "./executor";
 import {
-  checkWhetherLocalDebugM365TenantMatches,
+  checkLocalDebugM365Tenant,
   ensurePermissionRequest,
   getAzureSolutionSettings,
   getSelectedPlugins,
@@ -62,13 +62,16 @@ export async function provisionLocalResource(
   let localDebugTenantId = "";
   localDebugTenantId = envInfo?.state.solution.teamsAppTenantId;
 
-  const m365TenantMatches = await checkWhetherLocalDebugM365TenantMatches(
+  const checklocalDebugM365TenantRes = await checkLocalDebugM365Tenant(
+    ctx,
+    envInfo,
     localDebugTenantId,
     tokenProvider.m365TokenProvider,
     inputs.projectPath
   );
-  if (m365TenantMatches.isErr()) {
-    return new v2.FxFailure(m365TenantMatches.error);
+  if (checklocalDebugM365TenantRes.isErr()) {
+    //return new v2.FxFailure(m365TenantMatches.error);
+    return new v2.FxFailure(checklocalDebugM365TenantRes.error);
   }
 
   const plugins = getSelectedPlugins(ctx.projectSetting);

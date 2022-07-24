@@ -55,6 +55,7 @@ import {
 } from "../../../../common/projectSettingsHelper";
 import { getLocalizedString } from "../../../../common/localizeUtils";
 import { sendErrorTelemetryThenReturnError } from "../utils/util";
+import { checkProvisionM365Tenant } from "../../../../component/fx/preProvisionAction";
 
 function getSubscriptionId(state: Json): string {
   if (state && state[GLOBAL_CONFIG] && state[GLOBAL_CONFIG][SUBSCRIPTION_ID]) {
@@ -136,18 +137,21 @@ async function provisionResourceImpl(
   }
   const tenantIdInToken = tenantIdInTokenRes.value;
   if (tenantIdInConfig && tenantIdInToken && tenantIdInToken !== tenantIdInConfig) {
-    return err(
-      new UserError(
-        "Solution",
-        SolutionError.TeamsAppTenantIdNotRight,
-        getLocalizedString("error.M365AccountNotMatch", envInfo.envName)
-      )
+    const checkM365TenantRes = await checkProvisionM365Tenant(
+      ctx,
+      envInfo as v3.EnvInfoV3,
+      tenantIdInToken,
+      tenantIdInConfig,
+      inputs.projectPath
     );
+    if (checkM365TenantRes.isErr()) {
+      return err(checkM365TenantRes.error);
+    }
   }
-  if (!tenantIdInConfig) {
-    teamsAppResource.tenantId = tenantIdInToken;
-    solutionConfig.teamsAppTenantId = tenantIdInToken;
-  }
+
+  teamsAppResource.tenantId = tenantIdInToken;
+  solutionConfig.teamsAppTenantId = tenantIdInToken;
+
   if (isAzureProject(azureSolutionSettings) && hasAzureResource(ctx.projectSetting, true)) {
     if (hasAAD(ctx.projectSetting)) {
       if (ctx.permissionRequestProvider === undefined) {

@@ -15,6 +15,7 @@ import {
   UserError,
   SystemError,
   M365TokenProvider,
+  v3,
 } from "@microsoft/teamsfx-api";
 import fs from "fs-extra";
 import { LocalSettingsTeamsAppKeys } from "../../../../common/localSettingsConstants";
@@ -49,6 +50,7 @@ import { getActivatedV2ResourcePlugins, getAllV2ResourcePlugins } from "../Resou
 import { getPluginContext } from "../utils/util";
 import { PluginsWithContext } from "../types";
 import { getDefaultString, getLocalizedString } from "../../../../common/localizeUtils";
+import { handleSwitchLocalDebugM365Tenant } from "../../../../component/fx/preProvisionAction";
 
 export function getSelectedPlugins(projectSettings: ProjectSettings): v2.ResourcePlugin[] {
   return getActivatedV2ResourcePlugins(projectSettings);
@@ -212,15 +214,12 @@ export async function checkWhetherLocalDebugM365TenantMatches(
     if (maybeM365TenantId.isErr()) {
       return maybeM365TenantId;
     }
-
     const maybeM365UserAccount = parseUserName(appStudioTokenJson);
     if (maybeM365UserAccount.isErr()) {
       return maybeM365UserAccount;
     }
-
     if (maybeM365TenantId.value !== localDebugTenantId) {
       const localFiles = [".fx/states/state.local.json"];
-
       // add notification local file if exist
       if (
         projectPath !== undefined &&
@@ -238,6 +237,45 @@ export async function checkWhetherLocalDebugM365TenantMatches(
       return err(
         new UserError("Solution", SolutionError.CannotLocalDebugInDifferentTenant, errorMessage)
       );
+    }
+  }
+
+  return ok(Void);
+}
+
+export async function checkLocalDebugM365Tenant(
+  ctx: v2.Context,
+  envInfo: v2.EnvInfoV2 | undefined,
+  localDebugTenantId?: string,
+  m365TokenProvider?: M365TokenProvider,
+  projectPath?: string
+): Promise<Result<Void, FxError>> {
+  if (localDebugTenantId) {
+    const appStudioTokenJsonRes = await m365TokenProvider?.getJsonObject({
+      scopes: AppStudioScopes,
+    });
+    const appStudioTokenJson = appStudioTokenJsonRes?.isOk()
+      ? appStudioTokenJsonRes.value
+      : undefined;
+    const maybeM365TenantId = parseTeamsAppTenantId(appStudioTokenJson);
+    if (maybeM365TenantId.isErr()) {
+      return maybeM365TenantId;
+    }
+
+    const maybeM365UserAccount = parseUserName(appStudioTokenJson);
+    if (maybeM365UserAccount.isErr()) {
+      return maybeM365UserAccount;
+    }
+
+    if (!!envInfo && maybeM365TenantId.value !== localDebugTenantId) {
+      const res = await handleSwitchLocalDebugM365Tenant(
+        ctx,
+        envInfo as v3.EnvInfoV3,
+        maybeM365TenantId.value,
+        localDebugTenantId,
+        projectPath
+      );
+      return res;
     }
   }
 

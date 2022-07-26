@@ -16,7 +16,7 @@ import {
   Stage,
 } from "@microsoft/teamsfx-api";
 import "reflect-metadata";
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 import { format } from "util";
 import { getLocalizedString } from "../../common/localizeUtils";
 import { isVSProject } from "../../common/projectSettingsHelper";
@@ -33,6 +33,7 @@ import { getComponent, getComponentByScenario, runActionByName } from "../workfl
 import { assign, cloneDeep } from "lodash";
 import { hasTab } from "../../common/projectSettingsHelperV3";
 import { generateConfigBiceps } from "../utils";
+import { TabCodeProvider } from "../code/tabCode";
 
 @Service("teams-tab")
 export class TeamsTab {
@@ -64,7 +65,15 @@ export class TeamsTab {
               ? ""
               : FrontendPathInfo.WorkingDir;
           clonedInputs.language = inputs[CoreQuestionNames.ProgrammingLanguage];
-          const res = await runActionByName("tab-code.generate", context, clonedInputs);
+          const tabCode = Container.get(ComponentNames.TabCode) as TabCodeProvider;
+          // const res = await runActionByName("tab-code.generate", context, clonedInputs);
+          const res = await tabCode.generateNew(
+            context,
+            inputs.projectPath,
+            clonedInputs.folder,
+            clonedInputs.language,
+            inputs[CoreQuestionNames.SafeProjectName]
+          );
           if (res.isErr()) return err(res.error);
           effects.push("generate tab code");
           tabConfig = {

@@ -43,7 +43,7 @@ import {
 import { Messages } from "../../plugins/resource/frontend/resources/messages";
 import { Scenario, TemplateInfo } from "../../plugins/resource/frontend/resources/templateInfo";
 import { ComponentNames } from "../constants";
-import { getComponent } from "../workflow";
+import { ActionExecutionMW, getComponent } from "../workflow";
 import { convertToLangKey } from "./botCode";
 import { envFilePath, EnvKeys, saveEnvFile } from "../../plugins/resource/frontend/env";
 import { isVSProject } from "../../common/projectSettingsHelper";
@@ -54,12 +54,87 @@ import { isAadManifestEnabled } from "../../common/tools";
 import { hasAAD, hasApi } from "../../common/projectSettingsHelperV3";
 import { ScaffoldProgress } from "../../plugins/resource/frontend/resources/steps";
 import { Plans, ProgressMessages, ProgressTitles } from "../messages";
+import { hooks } from "@feathersjs/hooks/lib";
 /**
  * tab scaffold
  */
 @Service("tab-code")
 export class TabCodeProvider implements SourceCodeProvider {
   name = "tab-code";
+  @hooks([
+    ActionExecutionMW({
+      componentName: "tab-code",
+      enableTelemetry: true,
+      telemetryComponentName: FrontendPluginInfo.PluginName,
+      telemetryEventName: "scaffold",
+      errorSource: FrontendPluginInfo.ShortName,
+      errorIssueLink: FrontendPluginInfo.IssueLink,
+      errorHelpLink: FrontendPluginInfo.HelpLink,
+      enableProgressBar: true,
+      progressTitle: ProgressTitles.scaffoldTab,
+      progressSteps: Object.keys(ScaffoldProgress.steps).length,
+    }),
+  ])
+  async generateNew(
+    ctx: ContextV3,
+    projectPath: string,
+    folder: string,
+    language: string,
+    safeProjectName?: string,
+    actionContext?: {
+      progress?: IProgressHandler;
+      telemetryProps?: Record<string, string>;
+    }
+  ): Promise<Result<string, FxError>> {
+    folder = folder ?? (language === "csharp" ? "" : FrontendPathInfo.WorkingDir);
+    const langKey = convertToLangKey(language);
+    const workingDir = path.join(projectPath, folder);
+    const hasFunction = hasApi(ctx.projectSetting);
+    safeProjectName = safeProjectName ?? convertToAlphanumericOnly(ctx.projectSetting.appName);
+    const variables = {
+      showFunction: hasFunction.toString(),
+      ProjectName: ctx.projectSetting.appName,
+      SafeProjectName: safeProjectName,
+    };
+
+    const scenario = ctx.projectSetting.isM365
+      ? Scenario.M365
+      : isAadManifestEnabled() && !hasAAD(ctx.projectSetting)
+      ? Scenario.NonSso
+      : Scenario.Default;
+    await actionContext?.progress?.next(ProgressMessages.scaffoldTab);
+    await scaffoldFromTemplates({
+      group: TemplateInfo.TemplateGroupName,
+      lang: langKey,
+      scenario: scenario,
+      dst: workingDir,
+      fileNameReplaceFn: (name: string, data: Buffer) =>
+        name.replace(/ProjectName/, ctx.projectSetting.appName).replace(/\.tpl/, ""),
+      fileDataReplaceFn: genTemplateRenderReplaceFn(variables),
+      onActionEnd: async (action: ScaffoldAction, context: ScaffoldContext) => {
+        if (action.name === ScaffoldActionName.FetchTemplatesUrlWithTag) {
+          ctx.logProvider.info(Messages.getTemplateFrom(context.zipUrl ?? Constants.EmptyString));
+        }
+      },
+      onActionError: async (action: ScaffoldAction, context: ScaffoldContext, error: Error) => {
+        ctx.logProvider.info(error.toString());
+        switch (action.name) {
+          case ScaffoldActionName.FetchTemplatesUrlWithTag:
+          case ScaffoldActionName.FetchTemplatesZipFromUrl:
+            ctx.logProvider.info(Messages.FailedFetchTemplate);
+            break;
+          case ScaffoldActionName.FetchTemplateZipFromLocal:
+            throw new TemplateZipFallbackError();
+          case ScaffoldActionName.Unzip:
+            throw new UnzipTemplateError();
+          default:
+            throw new UnknownScaffoldError();
+        }
+      },
+    });
+
+    return ok(folder);
+  }
   generate(
     context: ContextV3,
     inputs: InputsWithProjectPath

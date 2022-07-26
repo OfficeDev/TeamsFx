@@ -22,19 +22,19 @@ export interface CloudResource {
   generateBicep?: (
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ) => MaybePromise<Result<Action | undefined, FxError>>;
+  ) => MaybePromise<Result<Action | undefined, FxError>>; // MaybePromise<Result<Bicep, FxError>>
   provision?: (
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ) => MaybePromise<Result<Action | undefined, FxError>>;
+  ) => MaybePromise<Result<Action | undefined, FxError>>; // MaybePromise<Result<undefined, FxError>>
   configure?: (
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ) => MaybePromise<Result<Action | undefined, FxError>>;
+  ) => MaybePromise<Result<Action | undefined, FxError>>; // MaybePromise<Result<undefined, FxError>>
   deploy?: (
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ) => MaybePromise<Result<Action | undefined, FxError>>;
+  ) => MaybePromise<Result<Action | undefined, FxError>>; // MaybePromise<Result<undefined, FxError>>
 }
 
 export interface SourceCodeProvider {
@@ -43,9 +43,9 @@ export interface SourceCodeProvider {
   generate: (
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ) => MaybePromise<Result<Action | undefined, FxError>>;
+  ) => MaybePromise<Result<Action | undefined, FxError>>; // MaybePromise<Result<undefined, FxError>>
   build?: (
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ) => MaybePromise<Result<Action | undefined, FxError>>;
+  ) => MaybePromise<Result<Action | undefined, FxError>>; // MaybePromise<Result<undefined, FxError>>
 }

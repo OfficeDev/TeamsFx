@@ -216,11 +216,12 @@ export async function handleSwitchLocalDebugM365Tenant(
     if (confirmResult.isErr()) {
       return err(confirmResult.error);
     } else {
-      const keys = Object.keys(envInfo.state);
-      for (let index = 0; index < keys.length; index++) {
-        envInfo.state[keys[index]] = {};
-      }
-      // todo: delete local files.
+      // const keys = Object.keys(envInfo.state);
+
+      // for (let index = 0; index < keys.length; index++) {
+      //   delete(envInfo.state)
+      // }
+      envInfo.state = { solution: {} };
     }
 
     return ok({ hasSwitchedM365Tenant: true });

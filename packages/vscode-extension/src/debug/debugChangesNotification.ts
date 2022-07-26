@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { LocalEnvManager } from "@microsoft/teamsfx-core";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import VsCodeLogInstance from "../commonlib/log";
 import * as globalVariables from "../globalVariables";
 import { vscodeHelper } from "./depsChecker/vscodeHelper";

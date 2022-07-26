@@ -20,7 +20,7 @@
     ]
   },
   "engines": {
-    "vscode": "^1.64.0"
+    "vscode": "^1.65.0"
   },
   "license": "MIT",
   "keywords": [
@@ -42,7 +42,7 @@
   "activationEvents": [
     "onStartupFinished",
     "onCommand:fx-extension.create",
-    "onCommand:fx-extension.getNewProjectPath",
+    "onCommand:fx-extension.createFromWalkthrough",
     "onCommand:fx-extension.openDeploymentTreeview",
     "onCommand:fx-extension.openDocument",
     "onCommand:fx-extension.openReadMe",
@@ -448,8 +448,8 @@
         "category": "Teams"
       },
       {
-        "command": "fx-extension.getNewProjectPath",
-        "title": "Teams - Get Path",
+        "command": "fx-extension.createFromWalkthrough",
+        "title": "Teams - Create Project",
         "enablement": "never"
       },
       {
@@ -990,7 +990,7 @@
           {
             "id": "teamsToolkitBuildApp",
             "title": "Build your first Teams app",
-            "description": "Choose [Teams app capabilities](https://aka.ms/teamsfx-capabilities-overview) and build your first Teams app.\nYou can create it from the scratch or explore our samples to help you quickly get started with the real-world examples and code structures.\n[Create a new Teams app](command:fx-extension.getNewProjectPath?%5B%22WalkThrough%22%5D)\n[View samples](command:fx-extension.openSamples?%5B%22WalkThrough%22%5D)",
+            "description": "Choose [Teams app capabilities](https://aka.ms/teamsfx-capabilities-overview) and build your first Teams app.\nYou can create it from the scratch or explore our samples to help you quickly get started with the real-world examples and code structures.\n[Create a new Teams app](command:fx-extension.createFromWalkthrough?%5B%22WalkThrough%22%5D)\n[View samples](command:fx-extension.openSamples?%5B%22WalkThrough%22%5D)",
             "media": {
               "svg": "media/walkthrough/Create.svg",
               "altText": "Build your first Teams app"
@@ -1088,7 +1088,7 @@
     "@types/underscore": "^1.11.0",
     "@types/uuid": "^8.3.0",
     "@types/validator": "^13.1.1",
-    "@types/vscode": "^1.64.0",
+    "@types/vscode": "^1.65.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "@vscode/codicons": "0.0.21",

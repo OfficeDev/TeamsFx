@@ -9,7 +9,7 @@ import {
   getExperimentationServiceAsync,
 } from "vscode-tas-client";
 import * as pkg from "./../../package.json";
-import { ExtTelemetry } from "./../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 
 let expService: IExperimentationService;
 

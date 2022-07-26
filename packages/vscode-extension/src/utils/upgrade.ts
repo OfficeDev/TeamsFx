@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as versionUtil from "./versionUtil";
 import { SyncedState, UserState } from "../constants";
 import * as util from "util";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import { TelemetryEvent } from "../telemetry/extTelemetryEvents";
 import * as folder from "../folder";
 import { localize } from "./localizeUtils";

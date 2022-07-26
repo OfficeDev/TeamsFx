@@ -22,7 +22,7 @@ import AzureAccountManager from "../commonlib/azureLogin";
 import { GlobalKey } from "../constants";
 import * as globalVariables from "../globalVariables";
 import { downloadSample, getSystemInputs } from "../handlers";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import {
   AccountType,
   TelemetryEvent,

@@ -31,7 +31,7 @@ import {
   signingIn,
 } from "./common/constant";
 import * as util from "util";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import {
   AccountType,
   TelemetryErrorType,

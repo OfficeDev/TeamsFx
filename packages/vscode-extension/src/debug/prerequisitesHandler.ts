@@ -45,7 +45,7 @@ import { ExtensionSource, ExtensionErrors } from "../error";
 import { VS_CODE_UI } from "../extension";
 import * as globalVariables from "../globalVariables";
 import { showError, tools } from "../handlers";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import {
   TelemetryDebugDevCertStatus,
   TelemetryEvent,

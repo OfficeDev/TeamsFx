@@ -17,7 +17,7 @@ import { AddressInfo } from "net";
 import { loadAccountId, saveAccountId, UTF8 } from "./cacheAccess";
 import * as stringUtil from "util";
 import { loggedIn, loggedOut, loggingIn } from "./common/constant";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import {
   TelemetryErrorType,
   TelemetryEvent,

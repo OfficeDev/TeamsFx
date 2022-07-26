@@ -43,7 +43,7 @@ import { initializeGlobalVariables, isSPFxProject, workspaceUri } from "./global
 import * as handlers from "./handlers";
 import { ManifestTemplateHoverProvider } from "./hoverProvider";
 import { VsCodeUI } from "./qm/vsc_ui";
-import { ExtTelemetry } from "./telemetry/extTelemetry";
+import * as ExtTelemetry from "./telemetry/telemetry";
 import {
   TelemetryEvent,
   TelemetryProperty,
@@ -54,7 +54,6 @@ import {
   canUpgradeToArmAndMultiEnv,
   delay,
   isM365Project,
-  isSupportAutoOpenAPI,
   isValidNode,
   syncFeatureFlags,
 } from "./utils/commonUtils";
@@ -73,7 +72,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // load the feature flags.
   syncFeatureFlags();
 
-  context.subscriptions.push(new ExtTelemetry.Reporter(context));
+  ExtTelemetry.initializeExtensionTelemetryReporter();
 
   VS_CODE_UI = new VsCodeUI(context);
   initializeGlobalVariables(context);
@@ -135,7 +134,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export async function deactivate() {
-  await ExtTelemetry.cacheTelemetryEventAsync(TelemetryEvent.Deactivate);
   await ExtTelemetry.dispose();
   handlers.cmdHdlDisposeTreeView();
   disableRunIcon();
@@ -167,17 +165,13 @@ function registerActivateCommands(context: vscode.ExtensionContext) {
     "createProject"
   );
   context.subscriptions.push(
-    vscode.commands.registerCommand("fx-extension.getNewProjectPath", async (...args) => {
-      if (!isSupportAutoOpenAPI()) {
-        Correlator.run(handlers.createNewProjectHandler, args);
-      } else {
-        const targetUri = await Correlator.run(handlers.getNewProjectPathHandler, args);
-        if (targetUri.isOk()) {
-          await handlers.updateAutoOpenGlobalKey(true, false, targetUri.value, args);
-          await ExtTelemetry.dispose();
-          await delay(2000);
-          return { openFolder: targetUri.value };
-        }
+    vscode.commands.registerCommand("fx-extension.createFromWalkthrough", async (...args) => {
+      const targetUri = await Correlator.run(handlers.createProjectFromWalkthroughHandler, args);
+      if (targetUri.isOk()) {
+        await handlers.updateAutoOpenGlobalKey(true, false, targetUri.value, args);
+        await ExtTelemetry.dispose();
+        await delay(2000);
+        return { openFolder: targetUri.value };
       }
     })
   );
@@ -818,11 +812,11 @@ async function runBackgroundAsyncTasks(
   context: vscode.ExtensionContext,
   isTeamsFxProject: boolean
 ) {
-  ExtTelemetry.isFromSample = await handlers.getIsFromSample();
-  ExtTelemetry.settingsVersion = await handlers.getSettingsVersion();
-  ExtTelemetry.isM365 = await handlers.getIsM365();
+  const isFromSample = await handlers.getIsFromSample();
+  const settingsVersion = await handlers.getSettingsVersion();
+  const isM365 = await handlers.getIsM365();
 
-  await ExtTelemetry.sendCachedTelemetryEventsAsync();
+  await ExtTelemetry.initializeTelemetry(isFromSample, isM365, settingsVersion);
   await handlers.postUpgrade();
   const upgrade = new ExtensionUpgrade(context);
   upgrade.showChangeLog();

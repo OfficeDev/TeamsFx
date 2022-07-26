@@ -6,7 +6,7 @@ import { Mutex } from "async-mutex";
 import { FxError, Result } from "@microsoft/teamsfx-api";
 
 import { VS_CODE_UI } from "./extension";
-import { ExtTelemetry } from "./telemetry/extTelemetry";
+import * as ExtTelemetry from "./telemetry/telemetry";
 import { TelemetryEvent, TelemetryProperty } from "./telemetry/extTelemetryEvents";
 import treeViewManager from "./treeview/treeViewManager";
 import { getTriggerFromProperty } from "./utils/commonUtils";

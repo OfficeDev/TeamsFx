@@ -32,7 +32,7 @@ import {
 } from "./common/constant";
 import { login, LoginStatus } from "./common/login";
 import * as util from "util";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import VsCodeLogInstance from "./log";
 import {
   TelemetryEvent,

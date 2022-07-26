@@ -4,11 +4,10 @@
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as uuid from "uuid";
-import * as vscode from "vscode";
 import * as constants from "./constants";
 import { ConfigFolderName, InputConfigsFolderName, UserError } from "@microsoft/teamsfx-api";
 import VsCodeLogInstance from "../commonlib/log";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import { getTeamsAppTelemetryInfoByEnv } from "../utils/commonUtils";
 import { core, getSystemInputs, showError } from "../handlers";
 import * as globalVariables from "../globalVariables";

@@ -56,7 +56,7 @@ import { ProgressHandler } from "../progressHandler";
 import * as exp from "../exp";
 import { TreatmentVariables } from "../exp/treatmentVariables";
 import * as packageJson from "../../package.json";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import { getDefaultString, localize } from "../utils/localizeUtils";
 
 export interface FxQuickPickItem extends QuickPickItem {

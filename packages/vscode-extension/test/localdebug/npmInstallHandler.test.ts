@@ -14,7 +14,7 @@ import * as extension from "../../src/extension";
 import * as globalVariables from "../../src/globalVariables";
 import * as teamsfxTaskHandler from "../../src/debug/teamsfxTaskHandler";
 import { automaticNpmInstallHandler } from "../../src/debug/npmInstallHandler";
-import { ExtTelemetry } from "../../src/telemetry/extTelemetry";
+import * as ExtTelemetry from "../../src/telemetry/telemetry";
 
 describe("npmInstallHandler", () => {
   describe("automaticNpmInstallHandler", () => {

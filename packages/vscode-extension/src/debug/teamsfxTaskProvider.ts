@@ -23,7 +23,7 @@ import { vscodeLogger } from "./depsChecker/vscodeLogger";
 import { vscodeTelemetry } from "./depsChecker/vscodeTelemetry";
 import VsCodeLogInstance from "../commonlib/log";
 import { detectVsCodeEnv, showError } from "../handlers";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import {
   DepsType,
   ITaskDefinition,

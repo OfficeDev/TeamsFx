@@ -4,7 +4,7 @@
 import { FxError } from "@microsoft/teamsfx-api";
 import { LocalTelemetryReporter } from "@microsoft/teamsfx-core";
 import { performance } from "perf_hooks";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import {
   TelemetryEvent,
   TelemetryMeasurements,

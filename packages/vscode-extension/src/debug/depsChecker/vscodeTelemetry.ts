@@ -5,7 +5,7 @@ import * as os from "os";
 import { performance } from "perf_hooks";
 import { SystemError, UserError } from "@microsoft/teamsfx-api";
 import { TelemetryProperty } from "../../telemetry/extTelemetryEvents";
-import { ExtTelemetry } from "../../telemetry/extTelemetry";
+import * as ExtTelemetry from "../../telemetry/telemetry";
 import { DepsTelemetry, DepsCheckerEvent, TelemetryMessurement } from "@microsoft/teamsfx-core";
 
 export class VSCodeTelemetry implements DepsTelemetry {

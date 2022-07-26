@@ -16,7 +16,7 @@ import { getConfiguration } from "../utils/commonUtils";
 import { runTask } from "./teamsfxTaskHandler";
 import { createTask } from "./teamsfxTaskProvider";
 import VsCodeLogInstance from "../commonlib/log";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import {
   TelemetryEvent,
   TelemetryProperty,

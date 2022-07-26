@@ -10,7 +10,7 @@ import jscodeshift = require("jscodeshift");
 import transform from "./migrationTool/replaceSDK";
 import transformTs from "./migrationTool/ts/replaceTsSDK";
 import { ExtensionErrors, ExtensionSource } from "../error";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import * as ExtTelemetry from "../telemetry/telemetry";
 import { TelemetryEvent } from "../telemetry/extTelemetryEvents";
 import * as constants from "./constants";
 import * as util from "util";

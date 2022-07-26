@@ -342,4 +342,13 @@ export enum TelemetryDebugDevCertStatus {
   NotTrusted = "not-trusted",
 }
 
+export interface TelemetryEventCache {
+  type: "error" | "normal";
+  occurTime: Date;
+  sendTime?: Date;
+  eventName: string;
+  properties?: { [p: string]: string };
+  measurements?: { [p: string]: number };
+}
+
 export const TelemetryComponentType = "extension";

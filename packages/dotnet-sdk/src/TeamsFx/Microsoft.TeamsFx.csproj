@@ -28,7 +28,7 @@
       <_Parameter1>Microsoft.TeamsFx.Test</_Parameter1>
     </AssemblyAttribute>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Bot.Builder" Version="4.16.0" />
+    <PackageReference Include="Microsoft.Bot.Builder" Version="4.16.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />

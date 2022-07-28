@@ -29,7 +29,7 @@
       "name": "Launch provision command (non-interactive)",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/cli.js",
-      "args": ["provision", "--folder", "../../../teams/app01"],
+      "args": ["preview", "--local","--folder", "../../../../POCProjetcs/cli0727/tab2"],
       "outFiles": [
         "${workspaceFolder}/lib/**/*.js",
         "${workspaceFolder}/../fx-core/build/**/*.js",

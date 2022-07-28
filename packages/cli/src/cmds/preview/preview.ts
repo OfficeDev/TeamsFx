@@ -6,7 +6,7 @@
 import * as path from "path";
 import * as os from "os";
 import * as fs from "fs-extra";
-import { Argv } from "yargs";
+import { Argv, locale } from "yargs";
 import {
   assembleError,
   AzureSolutionSettings,
@@ -343,7 +343,11 @@ export default class Preview extends YargsCommand {
         }
 
         // check account
-        const accountRes = await this.checkM365Account();
+        const accountRes = await this.checkM365Account(
+          localEnvManager,
+          workspaceFolder,
+          projectSettings
+        );
         if (accountRes.isErr()) {
           return err(accountRes.error);
         }
@@ -1428,14 +1432,22 @@ export default class Preview extends YargsCommand {
     return ok(null);
   }
 
-  private checkM365Account(): Promise<Result<null, FxError>> {
+  private checkM365Account(
+    localEnvManager: LocalEnvManager,
+    projectPath: string,
+    projectSettings: ProjectSettings
+  ): Promise<Result<null, FxError>> {
     return localTelemetryReporter.runWithTelemetry(
       TelemetryEvent.PreviewPrereqsCheckM365Account,
-      this._checkM365Account
+      () => this._checkM365Account(localEnvManager, projectPath, projectSettings)
     );
   }
 
-  private async _checkM365Account(): Promise<Result<null, FxError>> {
+  private async _checkM365Account(
+    localEnvManager: LocalEnvManager,
+    projectPath: string,
+    projectSettings: ProjectSettings
+  ): Promise<Result<null, FxError>> {
     let result = true;
     let summaryMsg = `${Checker.M365Account}`;
     let error = undefined;
@@ -1443,6 +1455,7 @@ export default class Preview extends YargsCommand {
     await accountBar.start(ProgressMessage[Checker.M365Account]);
     await accountBar.next(ProgressMessage[Checker.M365Account]);
     let loginHint = undefined;
+    let tenantId = undefined;
     try {
       let loginStatusRes = await M365TokenInstance.getStatus({ scopes: AppStudioScopes });
       let token = loginStatusRes.isOk() ? loginStatusRes.value.token : undefined;
@@ -1471,6 +1484,10 @@ export default class Preview extends YargsCommand {
       if (tokenObject && tokenObject.upn) {
         loginHint = tokenObject.upn;
       }
+
+      if (tokenObject && tokenObject.tid) {
+        tenantId = tokenObject.tid;
+      }
     } catch (err: any) {
       result = false;
       error = this.assembleError(err, cliSource);
@@ -1485,6 +1502,28 @@ export default class Preview extends YargsCommand {
     if (!result) {
       return error ? err(error) : err(errors.PrerequisitesValidationM365AccountError(summaryMsg));
     }
+
+    if (tenantId) {
+      const localEnv = await localEnvManager.getLocalEnvInfo(projectPath, {
+        projectId: projectSettings.projectId,
+      });
+
+      if (
+        localEnv &&
+        localEnv.state["solution"] &&
+        localEnv.state["solution"]["teamsAppTenantId"] &&
+        localEnv.state["solution"]["teamsAppTenantId"] != tenantId
+      ) {
+        const message = [
+          {
+            content: constants.m365SwitchedMessage,
+            color: Colors.WHITE,
+          },
+        ];
+        cliLogger.necessaryLog(LogLevel.Info, utils.getColorizedString(message));
+      }
+    }
+
     return ok(null);
   }
 

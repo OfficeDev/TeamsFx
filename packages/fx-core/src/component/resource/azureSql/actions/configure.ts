@@ -7,7 +7,7 @@ import {
   InputsWithProjectPath,
   ok,
   FunctionAction,
-  ProvisionContextV3,
+  ResourceContextV3,
   v3,
   AzureAccountProvider,
   LogProvider,
@@ -66,7 +66,7 @@ export class ConfigureActionImplement {
     context: ContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<Effect[], FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     const actionContext = context as ActionContext;
     const solutionConfig = ctx.envInfo.state.solution as v3.AzureSolutionConfig;
     const state = ctx.envInfo.state[ComponentNames.AzureSQL];
@@ -191,7 +191,7 @@ export class UtilFunctions {
     }
   }
 
-  static getIdentity(ctx: ProvisionContextV3): string {
+  static getIdentity(ctx: ResourceContextV3): string {
     const config = ctx.envInfo.state[ComponentNames.Identity];
     const identity = config[Constants.identityName] as string;
     if (!identity) {

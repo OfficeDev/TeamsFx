@@ -289,7 +289,7 @@ export interface ContextV3 extends Context {
   tokenProvider?: TokenProvider;
   projectPath?: string;
 }
-export interface ProvisionContextV3 extends ContextV3 {
+export interface ResourceContextV3 extends ContextV3 {
   envInfo: EnvInfoV3;
   tokenProvider: TokenProvider;
 }

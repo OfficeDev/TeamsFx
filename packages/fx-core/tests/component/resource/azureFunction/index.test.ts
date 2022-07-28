@@ -12,7 +12,7 @@ import {
   ContextV3,
   InputsWithProjectPath,
   Platform,
-  ProvisionContextV3,
+  ResourceContextV3,
 } from "@microsoft/teamsfx-api";
 import { newEnvInfoV3 } from "../../../../src";
 import path from "path";
@@ -44,7 +44,7 @@ describe("Azure-Function Component", () => {
   });
 
   it("configure happy path", async function () {
-    const configureAction = await component.configure(context as ProvisionContextV3, inputs);
+    const configureAction = await component.configure(context as ResourceContextV3, inputs);
     chai.assert.isTrue(configureAction.isOk());
   });
 

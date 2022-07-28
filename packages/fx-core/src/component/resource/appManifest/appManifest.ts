@@ -12,7 +12,7 @@ import {
   MaybePromise,
   ok,
   Platform,
-  ProvisionContextV3,
+  ResourceContextV3,
   QTreeNode,
   Result,
   SystemError,
@@ -121,11 +121,11 @@ export class AppManifest implements CloudResource {
     }),
   ])
   async provision(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath,
     actionContext?: ActionContext
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     await actionContext?.progressBar?.next(
       getLocalizedString("plugins.appstudio.provisionProgress", ctx.projectSetting.appName)
     );
@@ -143,11 +143,11 @@ export class AppManifest implements CloudResource {
     }),
   ])
   async configure(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath,
     actionContext?: ActionContext
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     await actionContext?.progressBar?.next(
       getLocalizedString("plugins.appstudio.postProvisionProgress", ctx.projectSetting.appName)
     );
@@ -164,7 +164,7 @@ export class AppManifest implements CloudResource {
     }),
   ])
   publish(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): MaybePromise<Result<Action | undefined, FxError>> {
     const action: Action = {
@@ -201,7 +201,7 @@ export class AppManifest implements CloudResource {
         progress?: IProgressHandler,
         telemetryProps?: Record<string, string>
       ) => {
-        const ctx = context as ProvisionContextV3;
+        const ctx = context as ResourceContextV3;
         if (
           inputs.platform === Platform.VSCode &&
           inputs[Constants.BUILD_OR_PUBLISH_QUESTION] === manuallySubmitOption.id

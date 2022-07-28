@@ -14,7 +14,7 @@ import {
   ok,
   Platform,
   ProjectSettingsV3,
-  ProvisionContextV3,
+  ResourceContextV3,
   Result,
   UserError,
 } from "@microsoft/teamsfx-api";
@@ -268,7 +268,7 @@ export class TeamsfxCore {
         return await getQuestionsForProvisionV3(context, context.envInfo!, inputs);
       },
       execute: async (context, inputs) => {
-        const ctx = context as ProvisionContextV3;
+        const ctx = context as ResourceContextV3;
         ctx.envInfo.state.solution = ctx.envInfo.state.solution || {};
         ctx.envInfo.state.solution.provisionSucceeded = false;
 
@@ -452,7 +452,7 @@ export class TeamsfxCore {
         return await getQuestionsForDeployV3(context, context.envInfo!, inputs);
       },
       execute: async (context, inputs) => {
-        const ctx = context as ProvisionContextV3;
+        const ctx = context as ResourceContextV3;
         const projectSettings = ctx.projectSetting as ProjectSettingsV3;
         const inputPlugins = inputs[AzureSolutionQuestionNames.PluginSelectionDeploy] || [];
         const inputComponentNames = inputPlugins.map(pluginName2ComponentName) as string[];
@@ -591,7 +591,7 @@ async function preProvision(
   context: ContextV3,
   inputs: InputsWithProjectPath
 ): Promise<Result<undefined, FxError>> {
-  const ctx = context as ProvisionContextV3;
+  const ctx = context as ResourceContextV3;
   const envInfo = ctx.envInfo;
   // 1. check M365 tenant
   envInfo.state[ComponentNames.AppManifest] = envInfo.state[ComponentNames.AppManifest] || {};

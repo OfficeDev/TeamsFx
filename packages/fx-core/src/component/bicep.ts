@@ -6,7 +6,7 @@ import {
   ok,
   Result,
   InputsWithProjectPath,
-  ProvisionContextV3,
+  ResourceContextV3,
 } from "@microsoft/teamsfx-api";
 import fs from "fs-extra";
 import * as path from "path";
@@ -51,10 +51,10 @@ export class BicepComponent {
     return ok(undefined);
   }
   async deploy(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     return await arm.deployArmTemplates(
       ctx,
       inputs,

@@ -8,7 +8,7 @@ import {
   FxError,
   InputsWithProjectPath,
   ok,
-  ProvisionContextV3,
+  ResourceContextV3,
   Result,
 } from "@microsoft/teamsfx-api";
 import "reflect-metadata";
@@ -32,7 +32,7 @@ export class SpfxResource implements CloudResource {
     }),
   ])
   async deploy(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<undefined, FxError>> {
     const buildRes = await this.spfxPluginImpl.buildSPPackage(context, inputs);

@@ -1,7 +1,7 @@
 import { Result } from "neverthrow";
 import { FxError } from "./error";
 import { InputsWithProjectPath } from "./v2/types";
-import { ContextV3, ProvisionContextV3 } from "./types";
+import { ContextV3, ResourceContextV3 } from "./types";
 import { Bicep } from "./bicep";
 import { IProgressHandler } from "./qm";
 export { InputsWithProjectPath };
@@ -26,17 +26,17 @@ export interface CloudResource {
     actionContext?: ActionContext
   ) => Promise<Result<Bicep[], FxError>>;
   provision?: (
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath,
     actionContext?: ActionContext
   ) => Promise<Result<undefined, FxError>>;
   configure?: (
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath,
     actionContext?: ActionContext
   ) => Promise<Result<undefined, FxError>>;
   deploy?: (
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath,
     actionContext?: ActionContext
   ) => Promise<Result<undefined, FxError>>;

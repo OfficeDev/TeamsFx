@@ -6,7 +6,7 @@ import {
   InputsWithProjectPath,
   ok,
   FunctionAction,
-  ProvisionContextV3,
+  ResourceContextV3,
 } from "@microsoft/teamsfx-api";
 import { ComponentNames, ActionTypeFunction } from "../../../constants";
 import { AadAppForTeamsImpl } from "../../../../plugins/resource/aad/plugin";
@@ -26,7 +26,7 @@ export function GetActionSetApplication(): FunctionAction {
       ]);
     },
     execute: async (context: ContextV3, inputs: InputsWithProjectPath) => {
-      const ctx = context as ProvisionContextV3;
+      const ctx = context as ResourceContextV3;
       const aadAppImplement = new AadAppForTeamsImpl();
       const convertCtx = convertContext(ctx, inputs);
       await aadAppImplement.setApplicationInContext(convertCtx);

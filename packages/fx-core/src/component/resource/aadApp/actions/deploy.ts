@@ -6,7 +6,7 @@ import {
   InputsWithProjectPath,
   ok,
   FunctionAction,
-  ProvisionContextV3,
+  ResourceContextV3,
   Platform,
   QTreeNode,
 } from "@microsoft/teamsfx-api";
@@ -47,7 +47,7 @@ export function GetActionDeploy(): FunctionAction {
       ]);
     },
     execute: async (context: ContextV3, inputs: InputsWithProjectPath) => {
-      const ctx = context as ProvisionContextV3;
+      const ctx = context as ResourceContextV3;
       const aadAppImplement = new AadAppForTeamsImpl();
       const convertCtx = convertContext(ctx, inputs);
       await aadAppImplement.deploy(convertCtx);

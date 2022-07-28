@@ -13,7 +13,7 @@ import {
   MaybePromise,
   ok,
   Platform,
-  ProvisionContextV3,
+  ResourceContextV3,
   Result,
   Stage,
   v3,
@@ -224,7 +224,7 @@ const configureTab: FunctionAction = {
   type: "function",
   execute: async (context, inputs) => {
     const tabCode = Container.get(ComponentNames.TabCode) as TabCodeProvider;
-    const res = await tabCode.configure(context as ProvisionContextV3, inputs);
+    const res = await tabCode.configure(context as ResourceContextV3, inputs);
     if (res.isErr()) return err(res.error);
     return ok([]);
   },
@@ -234,7 +234,7 @@ const buildTab: FunctionAction = {
   type: "function",
   execute: async (context, inputs) => {
     const tabCode = Container.get(ComponentNames.TabCode) as TabCodeProvider;
-    const res = await tabCode.build(context as ProvisionContextV3, inputs);
+    const res = await tabCode.build(context as ResourceContextV3, inputs);
     if (res.isErr()) return err(res.error);
     return ok([]);
   },

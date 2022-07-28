@@ -338,9 +338,9 @@ export const CLIPlatforms: Platform[];
 // @public (undocumented)
 export interface CloudResource {
     // (undocumented)
-    configure?: (context: ProvisionContextV3, inputs: InputsWithProjectPath, actionContext?: ActionContext) => Promise<Result<undefined, FxError>>;
+    configure?: (context: ResourceContextV3, inputs: InputsWithProjectPath, actionContext?: ActionContext) => Promise<Result<undefined, FxError>>;
     // (undocumented)
-    deploy?: (context: ProvisionContextV3, inputs: InputsWithProjectPath, actionContext?: ActionContext) => Promise<Result<undefined, FxError>>;
+    deploy?: (context: ResourceContextV3, inputs: InputsWithProjectPath, actionContext?: ActionContext) => Promise<Result<undefined, FxError>>;
     // (undocumented)
     readonly description?: string;
     // (undocumented)
@@ -352,7 +352,7 @@ export interface CloudResource {
     // (undocumented)
     readonly outputs: ResourceOutputs;
     // (undocumented)
-    provision?: (context: ProvisionContextV3, inputs: InputsWithProjectPath, actionContext?: ActionContext) => Promise<Result<undefined, FxError>>;
+    provision?: (context: ResourceContextV3, inputs: InputsWithProjectPath, actionContext?: ActionContext) => Promise<Result<undefined, FxError>>;
     // (undocumented)
     readonly secretKeys?: string[];
 }
@@ -1389,14 +1389,6 @@ export interface ProvisionBicep {
 }
 
 // @public (undocumented)
-export interface ProvisionContextV3 extends ContextV3 {
-    // (undocumented)
-    envInfo: EnvInfoV3;
-    // (undocumented)
-    tokenProvider: TokenProvider;
-}
-
-// @public (undocumented)
 type ProvisionInputs = InputsWithProjectPath & SolutionInputs;
 
 // @public
@@ -1444,6 +1436,14 @@ export type ResourceConfig = ResourceTemplate;
 
 // @public (undocumented)
 export type ResourceConfigs = ResourceTemplates;
+
+// @public (undocumented)
+export interface ResourceContextV3 extends ContextV3 {
+    // (undocumented)
+    envInfo: EnvInfoV3;
+    // (undocumented)
+    tokenProvider: TokenProvider;
+}
 
 // @public (undocumented)
 export interface ResourceOutput {

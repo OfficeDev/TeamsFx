@@ -7,7 +7,7 @@ import {
   InputsWithProjectPath,
   ok,
   FunctionAction,
-  ProvisionContextV3,
+  ResourceContextV3,
   Effect,
   FxError,
   Result,
@@ -47,7 +47,7 @@ export class ProvisionActionImplement {
     context: ContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<Effect[], FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     const state = (ctx.envInfo.state[ComponentNames.AzureSQL] ??= {});
     removeDatabases(state);
     let shouldAsk;

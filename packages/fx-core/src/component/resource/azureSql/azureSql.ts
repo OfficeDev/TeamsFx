@@ -9,7 +9,7 @@ import {
   ContextV3,
   InputsWithProjectPath,
   Bicep,
-  ProvisionContextV3,
+  ResourceContextV3,
   err,
 } from "@microsoft/teamsfx-api";
 import "reflect-metadata";
@@ -61,7 +61,7 @@ export class AzureSqlResource implements CloudResource {
     return ok([bicep]);
   }
   async provision(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<undefined, FxError>> {
     const res = await ProvisionActionImplement.execute(context, inputs);
@@ -69,7 +69,7 @@ export class AzureSqlResource implements CloudResource {
     return ok(undefined);
   }
   async configure(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<undefined, FxError>> {
     const res = await ConfigureActionImplement.execute(context, inputs);

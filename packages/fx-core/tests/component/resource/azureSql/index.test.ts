@@ -15,7 +15,7 @@ import {
   InputsWithProjectPath,
   ok,
   Platform,
-  ProvisionContextV3,
+  ResourceContextV3,
 } from "@microsoft/teamsfx-api";
 import { ComponentNames } from "../../../../src/component/constants";
 import { Constants } from "../../../../src/component/resource/azureSql/constants";
@@ -95,7 +95,7 @@ describe("Azure-SQL Component", () => {
     context.envInfo!.state[ComponentNames.Identity] = {
       [Constants.identityName]: "mock-identity",
     };
-    const configureAction = await component.configure(context as ProvisionContextV3, inputs);
+    const configureAction = await component.configure(context as ResourceContextV3, inputs);
     chai.assert.isTrue(configureAction.isOk());
   });
 
@@ -104,15 +104,12 @@ describe("Azure-SQL Component", () => {
     sandbox
       .stub(MockUserInteraction.prototype, "inputText")
       .resolves(ok({ type: "success", result: "" }));
-    const provisionAction = await component.provision(context as ProvisionContextV3, inputs);
+    const provisionAction = await component.provision(context as ResourceContextV3, inputs);
     chai.assert.isTrue(provisionAction.isOk());
   });
 
   it("generateBicep happy path", async function () {
-    const generateBicepAction = await component.generateBicep(
-      context as ProvisionContextV3,
-      inputs
-    );
+    const generateBicepAction = await component.generateBicep(context as ResourceContextV3, inputs);
     chai.assert.isTrue(generateBicepAction.isOk());
   });
 });

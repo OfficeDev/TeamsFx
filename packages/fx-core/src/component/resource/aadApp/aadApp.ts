@@ -9,7 +9,7 @@ import {
   FxError,
   InputsWithProjectPath,
   ok,
-  ProvisionContextV3,
+  ResourceContextV3,
   Result,
 } from "@microsoft/teamsfx-api";
 import "reflect-metadata";
@@ -115,10 +115,10 @@ export class AadApp implements CloudResource {
     return ok([bicep]);
   }
   async provision(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     ctx.envInfo!.state[ComponentNames.AadApp] ??= {};
     const aadAppImplement = new AadAppForTeamsImpl();
     const convertCtx = convertContext(ctx, inputs);
@@ -130,10 +130,10 @@ export class AadApp implements CloudResource {
     return ok(undefined);
   }
   async configure(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     const aadAppImplement = new AadAppForTeamsImpl();
     const convertCtx = convertContext(ctx, inputs);
     await aadAppImplement.postProvisionUsingManifest(convertCtx);
@@ -144,10 +144,10 @@ export class AadApp implements CloudResource {
     return ok(undefined);
   }
   async setApplicationInContext(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     const aadAppImplement = new AadAppForTeamsImpl();
     const convertCtx = convertContext(ctx, inputs);
     await aadAppImplement.setApplicationInContext(convertCtx);

@@ -8,7 +8,7 @@ import {
   FxError,
   InputsWithProjectPath,
   ok,
-  ProvisionContextV3,
+  ResourceContextV3,
   Result,
   UserError,
   v3,
@@ -51,11 +51,11 @@ export class AzureStorageResource extends AzureResource {
     }),
   ])
   async configure(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath,
     actionContext?: ActionContext
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     if (context.envInfo.envName !== "local") {
       const frontendConfigRes = await buildFrontendConfig(
         ctx.envInfo,
@@ -87,11 +87,11 @@ export class AzureStorageResource extends AzureResource {
     }),
   ])
   async deploy(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath,
     actionContext?: ActionContext
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     const deployDir = path.resolve(inputs.projectPath, inputs.folder);
     const frontendConfigRes = await buildFrontendConfig(
       ctx.envInfo,

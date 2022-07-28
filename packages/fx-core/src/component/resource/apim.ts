@@ -8,7 +8,7 @@ import {
   InputsWithProjectPath,
   ok,
   Result,
-  ProvisionContextV3,
+  ResourceContextV3,
 } from "@microsoft/teamsfx-api";
 import "reflect-metadata";
 import { Service, Container } from "typedi";
@@ -32,30 +32,30 @@ export class APIMResource extends AzureResource {
   secretKeys = ["apimClientAADClientSecret"];
 
   async provision(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<Action | undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     const apimV3 = Container.get<ApimPluginV3>(BuiltInFeaturePluginNames.apim);
     const res = await apimV3.provisionResource(ctx, inputs, ctx.envInfo, ctx.tokenProvider);
     if (res.isErr()) return err(res.error);
     return ok(undefined);
   }
   async configure(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     const apimV3 = Container.get<ApimPluginV3>(BuiltInFeaturePluginNames.apim);
     const res = await apimV3.configureResource(ctx, inputs, ctx.envInfo, ctx.tokenProvider);
     if (res.isErr()) return err(res.error);
     return ok(undefined);
   }
   async deploy(
-    context: ProvisionContextV3,
+    context: ResourceContextV3,
     inputs: InputsWithProjectPath
   ): Promise<Result<undefined, FxError>> {
-    const ctx = context as ProvisionContextV3;
+    const ctx = context as ResourceContextV3;
     const apimV3 = Container.get<ApimPluginV3>(BuiltInFeaturePluginNames.apim);
     const res = await apimV3.deploy(ctx, inputs, ctx.envInfo, ctx.tokenProvider);
     if (res.isErr()) return err(res.error);

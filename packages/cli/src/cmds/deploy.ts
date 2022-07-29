@@ -19,7 +19,7 @@ import {
 
 import activate from "../activate";
 import { YargsCommand } from "../yargsCommand";
-import { flattenNodes, getSystemInputs, toLocaleLowerCase } from "../utils";
+import { flattenNodes, getSystemInputs, promptSPFxUpgrade, toLocaleLowerCase } from "../utils";
 import CliTelemetry, { makeEnvRelatedProperty } from "../telemetry/cliTelemetry";
 import {
   TelemetryEvent,
@@ -103,6 +103,7 @@ export default class Deploy extends YargsCommand {
           }
         }
       }
+      promptSPFxUpgrade(rootFolder);
       const result = await core.deployArtifacts(inputs);
       if (result.isErr()) {
         CliTelemetry.sendTelemetryErrorEvent(

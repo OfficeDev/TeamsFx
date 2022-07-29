@@ -71,3 +71,5 @@ export const AddFeatureFunc = {
 };
 
 export const EmptyQTreeNode = new QTreeNode({ type: "group" });
+
+export const SUPPORTED_SPFX_VERSION = "1.15.0";

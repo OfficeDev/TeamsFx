@@ -89,8 +89,10 @@ import {
   AadManifestDeployConstants,
   AzureAssignRoleHelpUrl,
   AzurePortalUrl,
+  CLI_FOR_M365,
   GlobalKey,
   SpfxManageSiteAdminUrl,
+  SUPPORTED_SPFX_VERSION,
 } from "./constants";
 import { PanelType } from "./controls/PanelType";
 import { WebviewPanel } from "./controls/webviewPanel";
@@ -150,6 +152,7 @@ import {
   sendDebugAllEvent,
   sendDebugAllStartEvent,
 } from "./debug/localTelemetryReporter";
+import { compare } from "./utils/versionUtil";
 
 export let core: FxCore;
 export let tools: Tools;
@@ -1598,6 +1601,62 @@ export async function openReadMeHandler(args: any[]) {
       const PreviewMarkdownCommand = "markdown.showPreview";
       commands.executeCommand(PreviewMarkdownCommand, uri);
     });
+  }
+}
+
+export async function promptSPFxUpgrade() {
+  if (globalVariables.isSPFxProject) {
+    let projectSPFxVersion = null;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+    const yoInfoPath = path.join(globalVariables.workspaceUri?.fsPath!, "SPFx", ".yo-rc.json");
+    if (await fs.pathExists(yoInfoPath)) {
+      const yoInfo = await fs.readJson(yoInfoPath);
+      projectSPFxVersion = yoInfo["@microsoft/generator-sharepoint"]?.version;
+    }
+
+    if (!projectSPFxVersion) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+      const packagePath = path.join(globalVariables.workspaceUri?.fsPath!, "SPFx", "package.json");
+      if (await fs.pathExists(packagePath)) {
+        const packageInfo = await fs.readJSON(packagePath);
+        projectSPFxVersion = packageInfo.dependencies["@microsoft/sp-webpart-base"];
+      }
+    }
+
+    if (projectSPFxVersion) {
+      const cmp = compare(projectSPFxVersion, SUPPORTED_SPFX_VERSION);
+      if (cmp === 1 || cmp === -1) {
+        VS_CODE_UI.showMessage(
+          "warn",
+          util.format(
+            localize(
+              cmp === 1
+                ? "teamstoolkit.handlers.promptSPFx.upgradeToolkit.description"
+                : "teamstoolkit.handlers.promptSPFx.upgradeProject.description"
+            ),
+            SUPPORTED_SPFX_VERSION
+          ),
+          false,
+          localize(
+            cmp === 1
+              ? "teamstoolkit.handlers.promptSPFx.upgradeToolkit.title"
+              : "teamstoolkit.handlers.promptSPFx.upgradeProject.title"
+          )
+        ).then(async (result) => {
+          if (result.isOk()) {
+            if (
+              result.value === localize("teamstoolkit.handlers.promptSPFx.upgradeToolkit.title")
+            ) {
+              await vscode.commands.executeCommand("workbench.extensions.search", "Teams Toolkit");
+            } else if (
+              result.value === localize("teamstoolkit.handlers.promptSPFx.upgradeProject.title")
+            ) {
+              await VS_CODE_UI.openUrl(CLI_FOR_M365);
+            }
+          }
+        });
+      }
+    }
   }
 }
 

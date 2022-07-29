@@ -34,3 +34,7 @@ export enum AadManifestDeployConstants {
 
 export const manifestConfigDataRegex = /{{config.manifest[\.a-zA-Z]+}}/g;
 export const manifestStateDataRegex = /{{state\.[a-zA-Z-_]+\.\w+}}/g;
+
+export const SUPPORTED_SPFX_VERSION = "1.15.0";
+export const CLI_FOR_M365 =
+  "https://pnp.github.io/cli-microsoft365/cmd/spfx/project/project-upgrade/";

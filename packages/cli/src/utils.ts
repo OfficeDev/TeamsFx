@@ -34,7 +34,7 @@ import {
 
 import { ConfigNotFoundError, UserdataNotFound, EnvUndefined, ReadFileError } from "./error";
 import AzureAccountManager from "./commonlib/azureLogin";
-import { FeatureFlags } from "./constants";
+import { FeatureFlags, SUPPORTED_SPFX_VERSION } from "./constants";
 import {
   environmentManager,
   WriteFileError,
@@ -48,6 +48,8 @@ import {
 } from "@microsoft/teamsfx-core";
 import { WorkspaceNotSupported } from "./cmds/preview/errors";
 import CLIUIInstance from "./userInteraction";
+import { CliTelemetry } from "./telemetry/cliTelemetry";
+import cliLogger from "./commonlib/log";
 
 export type Json = { [_: string]: any };
 
@@ -572,4 +574,79 @@ export async function isSpfxProject(
   const config = configResult.value;
   const projectSettings = config?.settings;
   return ok(isSPFxProject(projectSettings));
+}
+
+export async function promptSPFxUpgrade(rootFolder: string) {
+  const localEnvManager = new LocalEnvManager(cliLogger, CliTelemetry.getReporter());
+  const projectSettings = await localEnvManager.getProjectSettings(rootFolder);
+  const isSpfx = ProjectSettingsHelper.isSpfx(projectSettings);
+  if (isSpfx) {
+    let projectSPFxVersion = null;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+    const yoInfoPath = path.join(rootFolder, "SPFx", ".yo-rc.json");
+    if (await fs.pathExists(yoInfoPath)) {
+      const yoInfo = await fs.readJson(yoInfoPath);
+      projectSPFxVersion = yoInfo["@microsoft/generator-sharepoint"]?.version;
+    }
+
+    if (!projectSPFxVersion) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+      const packagePath = path.join(rootFolder, "SPFx", "package.json");
+      if (await fs.pathExists(packagePath)) {
+        const packageInfo = await fs.readJSON(packagePath);
+        projectSPFxVersion = packageInfo.dependencies["@microsoft/sp-webpart-base"];
+      }
+    }
+
+    if (projectSPFxVersion) {
+      const cmp = compare(projectSPFxVersion, SUPPORTED_SPFX_VERSION);
+      if (cmp === 1 || cmp === -1) {
+        CLIUIInstance.showMessage(
+          "warn",
+          cmp === 1
+            ? `You are using a newer version of SPFx in your project while the current version of TeamsFx CLI supports SPFx v${SUPPORTED_SPFX_VERSION}. Please upgrade to the latest version of TeamsFx CLI.`
+            : `You are using a legacy version of SPFx in your project while the current version of TeamsFx CLI supports SPFx v${SUPPORTED_SPFX_VERSION}. Please upgrade your project using 'CLI for Microsoft 365'("https://pnp.github.io/cli-microsoft365/cmd/spfx/project/project-upgrade/") to continue.`,
+          false
+        );
+      }
+    }
+  }
+}
+
+export function compare(v1: string | any, v2: string | any) {
+  if (typeof v1 === "string") {
+    v1 = fromString(v1);
+  }
+  if (typeof v2 === "string") {
+    v2 = fromString(v2);
+  }
+
+  if (v1.major > v2.major) return 1;
+  if (v1.major < v2.major) return -1;
+
+  if (v1.minor > v2.minor) return 1;
+  if (v1.minor < v2.minor) return -1;
+
+  if (v1.patch > v2.patch) return 1;
+  if (v1.patch < v2.patch) return -1;
+
+  if (v1.pre === undefined && v2.pre !== undefined) return 1;
+  if (v1.pre !== undefined && v2.pre === undefined) return -1;
+
+  if (v1.pre !== undefined && v2.pre !== undefined) {
+    return v1.pre.localeCompare(v2.pre);
+  }
+
+  return 0;
+}
+
+export function fromString(version: string): any {
+  const [ver, pre] = version.split("-");
+  const [major, minor, patch] = ver.split(".");
+  return {
+    major: typeof major === "string" ? parseInt(major, 10) : major,
+    minor: typeof minor === "string" ? parseInt(minor, 10) : minor,
+    patch: patch == null ? 0 : typeof patch === "string" ? parseInt(patch, 10) : patch,
+    pre: pre,
+  };
 }

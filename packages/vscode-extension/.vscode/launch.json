@@ -49,10 +49,6 @@
         "--recursive",
         "--colors",
       ],
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "!${workspaceFolder}/**/node_modules**/*"
-      ],
       "preLaunchTask": "npm: compile",
       "skipFiles": [
         "<node_internals>/**"

@@ -820,6 +820,7 @@ async function runBackgroundAsyncTasks(
 
   if (isTeamsFxProject) {
     await handlers.autoOpenProjectHandler();
+    await handlers.promptSPFxUpgrade();
     await TreeViewManagerInstance.updateTreeViewsByContent();
     await AzureAccountManager.updateSubscriptionInfo();
   }

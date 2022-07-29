@@ -42,6 +42,7 @@ import * as path from "path";
 import * as util from "util";
 import * as os from "os";
 import { vscodeHelper } from "../../src/debug/depsChecker/vscodeHelper";
+import { SUPPORTED_SPFX_VERSION } from "../../src/constants";
 
 describe("handlers", () => {
   describe("activate()", function () {
@@ -660,5 +661,68 @@ describe("handlers", () => {
     sinon.assert.calledOnce(deployArtifacts);
     chai.assert.equal(deployArtifacts.getCall(0).args[0]["include-aad-manifest"], "yes");
     sinon.restore();
+  });
+
+  describe("promptSPFxUpgrade", async () => {
+    it("Prompt user to upgrade toolkit when project SPFx version higher than toolkit", async () => {
+      sinon.stub(globalVariables, "isSPFxProject").value(true);
+      sinon.stub(globalVariables, "workspaceUri").value(Uri.file(""));
+      sinon.stub(fs, "pathExists").resolves(true);
+      sinon.stub(fs, "readJson").resolves({
+        "@microsoft/generator-sharepoint": {
+          version: `1.${parseInt(SUPPORTED_SPFX_VERSION.split(".")[1]) + 1}.0`,
+        },
+      });
+      const stubShowMessage = sinon.stub().resolves(ok({}));
+      sinon.stub(extension, "VS_CODE_UI").value({
+        showMessage: stubShowMessage,
+      });
+
+      await handlers.promptSPFxUpgrade();
+
+      chai.assert(stubShowMessage.calledOnce);
+      chai.assert.equal(stubShowMessage.args[0].length, 4);
+      sinon.restore();
+    });
+
+    it("Prompt user to upgrade project when project SPFx version lower than toolkit", async () => {
+      sinon.stub(globalVariables, "isSPFxProject").value(true);
+      sinon.stub(globalVariables, "workspaceUri").value(Uri.file(""));
+      sinon.stub(fs, "pathExists").resolves(true);
+      sinon.stub(fs, "readJson").resolves({
+        "@microsoft/generator-sharepoint": {
+          version: `1.${parseInt(SUPPORTED_SPFX_VERSION.split(".")[1]) - 1}.0`,
+        },
+      });
+
+      const stubShowMessage = sinon.stub().resolves(ok({}));
+      sinon.stub(extension, "VS_CODE_UI").value({
+        showMessage: stubShowMessage,
+      });
+
+      await handlers.promptSPFxUpgrade();
+
+      chai.assert(stubShowMessage.calledOnce);
+      chai.assert.equal(stubShowMessage.args[0].length, 4);
+      sinon.restore();
+    });
+
+    it("Dont show notification when project SPFx version is the same with toolkit", async () => {
+      sinon.stub(globalVariables, "isSPFxProject").value(true);
+      sinon.stub(globalVariables, "workspaceUri").value(Uri.file(""));
+      sinon.stub(fs, "pathExists").resolves(true);
+      sinon.stub(fs, "readJson").resolves({
+        "@microsoft/generator-sharepoint": { version: SUPPORTED_SPFX_VERSION },
+      });
+      const stubShowMessage = sinon.stub();
+      sinon.stub(extension, "VS_CODE_UI").value({
+        showMessage: stubShowMessage,
+      });
+
+      await handlers.promptSPFxUpgrade();
+
+      chai.assert.equal(stubShowMessage.callCount, 0);
+      sinon.restore();
+    });
   });
 });

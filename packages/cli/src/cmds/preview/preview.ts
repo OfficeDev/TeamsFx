@@ -236,6 +236,7 @@ export default class Preview extends YargsCommand {
   ): Promise<Result<null, FxError>> {
     try {
       let result: Result<null, FxError>;
+      utils.promptSPFxUpgrade(workspaceFolder);
       if (previewType === "local") {
         if (await this.isExistingTabApp(workspaceFolder)) {
           result = await this.localPreviewMinimalApp(workspaceFolder, browser, browserArguments);

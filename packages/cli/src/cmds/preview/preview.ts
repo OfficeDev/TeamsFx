@@ -6,7 +6,7 @@
 import * as path from "path";
 import * as os from "os";
 import * as fs from "fs-extra";
-import { Argv, locale } from "yargs";
+import { Argv } from "yargs";
 import {
   assembleError,
   AzureSolutionSettings,

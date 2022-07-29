@@ -12,7 +12,6 @@ import accountTreeViewProviderInstance from "./account/accountTreeViewProvider";
 import { CommandsTreeViewProvider } from "./commandsTreeViewProvider";
 import envTreeProviderInstance from "./environmentTreeViewProvider";
 import { CommandStatus, TreeViewCommand } from "./treeViewCommand";
-import { isSPFxProject } from "../globalVariables";
 
 class TreeViewManager {
   private static instance: TreeViewManager;
@@ -40,7 +39,7 @@ class TreeViewManager {
 
     this.registerAccount(disposables);
     this.registerEnvironment(disposables);
-    this.registerDevelopment(disposables, !isSPFxProject);
+    this.registerDevelopment(disposables);
     this.registerDeployment(disposables);
     this.registerHelper(disposables);
 
@@ -129,7 +128,7 @@ class TreeViewManager {
     this.treeviewMap.set("teamsfx-environment", envTreeProviderInstance);
   }
 
-  private registerDevelopment(disposables: vscode.Disposable[], isNonSPFx: boolean) {
+  private registerDevelopment(disposables: vscode.Disposable[]) {
     const developmentCommands = [
       new TreeViewCommand(
         localize("teamstoolkit.commandsTreeViewProvider.createProjectTitleNew"),
@@ -148,17 +147,15 @@ class TreeViewManager {
       ),
     ];
 
-    if (isNonSPFx) {
-      developmentCommands.push(
-        new TreeViewCommand(
-          localize("teamstoolkit.commandsTreeViewProvider.addFeatureTitle"),
-          localize("teamstoolkit.commandsTreeViewProvider.addFeatureDescription"),
-          "fx-extension.addFeature",
-          "addFeature",
-          { name: "teamsfx-add-feature", custom: false }
-        )
-      );
-    }
+    developmentCommands.push(
+      new TreeViewCommand(
+        localize("teamstoolkit.commandsTreeViewProvider.addFeatureTitle"),
+        localize("teamstoolkit.commandsTreeViewProvider.addFeatureDescription"),
+        "fx-extension.addFeature",
+        "addFeature",
+        { name: "teamsfx-add-feature", custom: false }
+      )
+    );
 
     developmentCommands.push(
       new TreeViewCommand(

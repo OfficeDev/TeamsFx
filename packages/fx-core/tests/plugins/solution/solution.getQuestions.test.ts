@@ -517,6 +517,59 @@ describe("getQuestionsForScaffolding()", async () => {
       }
     }
   });
+
+  it("getQuestionsForUserTask - addFeature: SPFx can add CICD", async () => {
+    sandbox.stub(featureFlags, "isPreviewFeaturesEnabled").returns(true);
+    sandbox.stub(featureFlags, "isBotNotificationEnabled").returns(true);
+    sandbox.stub<any, any>(tool, "canAddCICDWorkflows").resolves(true);
+    const spfxProjectSettings = {
+      appName: "my app",
+      projectId: uuid.v4(),
+      solutionSettings: {
+        hostType: HostTypeOptionSPFx.id,
+        name: "test",
+        version: "1.0",
+        activeResourcePlugins: [
+          "fx-resource-spfx",
+          "fx-resource-local-debug",
+          "fx-resource-appstudio",
+          "fx-resource-cicd",
+        ],
+        capabilities: [TabNewUIOptionItem.id],
+        azureResources: [],
+      },
+    };
+    const mockedCtx = new MockedV2Context(spfxProjectSettings);
+    const mockedInputs: Inputs = {
+      platform: Platform.VSCode,
+      stage: Stage.addFeature,
+      projectPath: "test path",
+    };
+    const func: Func = {
+      method: "addFeature",
+      namespace: "fx-solution-azure",
+    };
+    const res = await getQuestionsForUserTask(
+      mockedCtx,
+      mockedInputs,
+      func,
+      envInfo,
+      mockedProvider
+    );
+    assert.isTrue(res.isOk() && res.value && res.value.data !== undefined);
+    if (res.isOk()) {
+      const node = res.value;
+      assert.isTrue(
+        node && node.data && node.data.type === "singleSelect",
+        "result should be singleSelect"
+      );
+      if (node && node.data && node.data.type === "singleSelect") {
+        const options = (node.data as SingleSelectQuestion).staticOptions as OptionItem[];
+        assert.deepEqual(options, [CicdOptionItem], "option item should match");
+      }
+    }
+  });
+
   it("getQuestionsForUserTask - addFeature: message extension", async () => {
     sandbox.stub(featureFlags, "isPreviewFeaturesEnabled").returns(true);
     sandbox.stub(featureFlags, "isBotNotificationEnabled").returns(true);

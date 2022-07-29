@@ -941,10 +941,6 @@ export async function getQuestionsForAddFeature(
       );
       options.push(...addResourceOptions);
     }
-    // Only return error when both of them are errors.
-    if (canAddCapabilityResult.isErr() && canAddResourceResult.isErr()) {
-      return err(canAddCapabilityResult.error);
-    }
   }
 
   // check and generate additional feature options

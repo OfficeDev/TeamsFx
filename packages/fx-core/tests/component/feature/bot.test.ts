@@ -18,7 +18,7 @@ import * as path from "path";
 import fs from "fs-extra";
 import { createSandbox } from "sinon";
 import * as utils from "../../../src/component/utils";
-import { getComponent, runActionByName } from "../../../src/component/workflow";
+import { getComponent } from "../../../src/component/workflow";
 import { setTools } from "../../../src/core/globalVars";
 import { MockTools, randomAppName } from "../../core/utils";
 import "../../../src/component/core";
@@ -30,6 +30,7 @@ import {
 } from "../../../src/plugins/solution/fx-solution/question";
 import { QuestionNames } from "../../../src/plugins/resource/bot/constants";
 import { AppServiceOptionItem } from "../../../src/plugins/resource/bot/question";
+import Container from "typedi";
 describe("Bot Feature", () => {
   const sandbox = createSandbox();
   const tools = new MockTools();
@@ -80,7 +81,8 @@ describe("Bot Feature", () => {
       "app-name": appName,
       [QuestionNames.BOT_HOST_TYPE_TRIGGER]: [AppServiceOptionItem.id],
     };
-    const addBotRes = await runActionByName(`${ComponentNames.TeamsBot}.add`, context, inputs);
+    const teamsBotComponent = Container.get("teams-bot") as any;
+    const addBotRes = await teamsBotComponent.add(context, inputs);
     if (addBotRes.isErr()) {
       console.log(addBotRes.error);
     }

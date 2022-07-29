@@ -37,7 +37,7 @@ describe("question for v3", () => {
       platform: Platform.CLI_HELP,
       projectPath: ".",
     };
-    const res = await getQuestionsForDeployV3(context, envInfo, inputs);
+    const res = await getQuestionsForDeployV3(context, inputs);
     assert.isTrue(res.isOk());
   });
   it("getQuestionsForDeployV3 - VS Code", async () => {
@@ -75,7 +75,7 @@ describe("question for v3", () => {
     envInfo.state.solution = {
       provisionSucceeded: true,
     };
-    const res = await getQuestionsForDeployV3(context, envInfo, inputs);
+    const res = await getQuestionsForDeployV3(context, inputs, envInfo);
     assert.isTrue(res.isOk());
   });
   it("getQuestionsForAddFeatureV3 - CLI_HELP", async () => {

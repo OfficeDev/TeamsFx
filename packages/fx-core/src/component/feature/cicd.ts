@@ -2,15 +2,11 @@
 // Licensed under the MIT license.
 
 import {
-  Action,
   ContextV3,
-  Effect,
   err,
-  FunctionAction,
   FxError,
   Inputs,
   InputsWithProjectPath,
-  MaybePromise,
   MultiSelectQuestion,
   ok,
   OptionItem,
@@ -42,38 +38,27 @@ import { CICDImpl } from "../../plugins/resource/cicd/plugin";
 import { isV3 } from "../../core/globalVars";
 import { isExistingTabApp } from "../../common/projectSettingsHelper";
 import { ComponentNames } from "../constants";
+import { hooks } from "@feathersjs/hooks/lib";
+import { ActionExecutionMW } from "../middleware/actionExecutionMW";
 @Service(ComponentNames.CICD)
 export class CICD {
   name = ComponentNames.CICD;
-  add(
+  @hooks([
+    ActionExecutionMW({
+      question: async (context: ContextV3, inputs: InputsWithProjectPath) => {
+        return await addCicdQuestion(context, inputs);
+      },
+    }),
+  ])
+  async add(
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ): MaybePromise<Result<Action | undefined, FxError>> {
-    return ok(new AddCICDAction());
-  }
-}
-
-export class AddCICDAction implements FunctionAction {
-  name = "cicd.add";
-  type: "function" = "function";
-  async question(
-    context: ContextV3,
-    inputs: InputsWithProjectPath
-  ): Promise<Result<QTreeNode | undefined, FxError>> {
-    return await addCicdQuestion(context, inputs);
-  }
-  plan(context: ContextV3, inputs: InputsWithProjectPath): Result<Effect[], FxError> {
-    return ok(["add cicd workflow files"]);
-  }
-  async execute(
-    context: ContextV3,
-    inputs: InputsWithProjectPath
-  ): Promise<Result<Effect[], FxError>> {
+  ): Promise<Result<undefined, FxError>> {
     const cicdImpl: CICDImpl = new CICDImpl();
     const envName = inputs.env || inputs[questionNames.Environment];
     const res = await cicdImpl.addCICDWorkflows(context, inputs, envName);
     if (res.isErr()) return err(res.error);
-    return ok([]);
+    return ok(undefined);
   }
 }
 

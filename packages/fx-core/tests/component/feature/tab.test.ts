@@ -18,13 +18,14 @@ import * as path from "path";
 import fs from "fs-extra";
 import { createSandbox } from "sinon";
 import * as utils from "../../../src/component/utils";
-import { getComponent, runActionByName } from "../../../src/component/workflow";
+import { getComponent } from "../../../src/component/workflow";
 import { setTools } from "../../../src/core/globalVars";
 import { MockTools, randomAppName } from "../../core/utils";
 import "../../../src/component/core";
 import { environmentManager } from "../../../src/core/environment";
 import { ComponentNames } from "../../../src/component/constants";
 import * as aadManifest from "../../../src/core/generateAadManifestTemplate";
+import Container from "typedi";
 describe("Tab Feature", () => {
   const sandbox = createSandbox();
   const tools = new MockTools();
@@ -75,7 +76,8 @@ describe("Tab Feature", () => {
       language: "typescript",
       "app-name": appName,
     };
-    const addTabRes = await runActionByName(`${ComponentNames.TeamsTab}.add`, context, inputs);
+    const component = Container.get("teams-tab") as any;
+    const addTabRes = await component.add(context, inputs);
     if (addTabRes.isErr()) {
       console.log(addTabRes.error);
     }
@@ -99,7 +101,8 @@ describe("Tab Feature", () => {
       language: "typescript",
       "app-name": appName,
     };
-    const addTabRes = await runActionByName(`${ComponentNames.TeamsTab}.add`, context, inputs);
+    const component = Container.get("teams-tab") as any;
+    const addTabRes = await component.add(context, inputs);
     if (addTabRes.isErr()) {
       console.log(addTabRes.error);
     }

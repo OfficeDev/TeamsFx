@@ -2,13 +2,11 @@
 // Licensed under the MIT license.
 
 import {
-  Action,
   ContextV3,
   Effect,
   err,
   FxError,
   InputsWithProjectPath,
-  MaybePromise,
   ok,
   Result,
   Stage,
@@ -31,90 +29,82 @@ import { getComponent } from "../workflow";
 export class SSO {
   name = "sso";
 
-  add(
+  async add(
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ): MaybePromise<Result<Action | undefined, FxError>> {
-    const action: Action = {
-      type: "function",
-      name: "sso.add",
-      execute: async (context, inputs) => {
-        const updates = getUpdateComponents(context, inputs);
-        const effects: Effect[] = [];
+  ): Promise<Result<undefined, FxError>> {
+    const updates = getUpdateComponents(context, inputs);
+    const effects: Effect[] = [];
 
-        // generate manifest
-        const aadApp = Container.get<AadApp>(ComponentNames.AadApp);
-        {
-          const res = await aadApp.generateManifest(context, inputs);
-          if (res.isErr()) return err(res.error);
-          effects.push("generate aad manifest");
-        }
+    // generate manifest
+    const aadApp = Container.get<AadApp>(ComponentNames.AadApp);
+    {
+      const res = await aadApp.generateManifest(context, inputs);
+      if (res.isErr()) return err(res.error);
+      effects.push("generate aad manifest");
+    }
 
-        // config sso
-        if (updates.aad) {
-          context.projectSetting.components.push({
-            name: ComponentNames.AadApp,
-            provision: true,
-            deploy: true,
-          });
-        }
-        if (updates.tab) {
-          const teamsTabComponent = getComponent(context.projectSetting, ComponentNames.TeamsTab);
-          teamsTabComponent!.sso = true;
-        }
-        if (updates.bot) {
-          const teamsBotComponent = getComponent(context.projectSetting, ComponentNames.TeamsBot);
-          teamsBotComponent!.sso = true;
-        }
-        effects.push("config sso");
+    // config sso
+    if (updates.aad) {
+      context.projectSetting.components.push({
+        name: ComponentNames.AadApp,
+        provision: true,
+        deploy: true,
+      });
+    }
+    if (updates.tab) {
+      const teamsTabComponent = getComponent(context.projectSetting, ComponentNames.TeamsTab);
+      teamsTabComponent!.sso = true;
+    }
+    if (updates.bot) {
+      const teamsBotComponent = getComponent(context.projectSetting, ComponentNames.TeamsBot);
+      teamsBotComponent!.sso = true;
+    }
+    effects.push("config sso");
 
-        // generate bicep
-        {
-          const res = await aadApp.generateBicep(context, inputs);
-          if (res.isErr()) return err(res.error);
-          const bicepRes = await bicepUtils.persistBiceps(
-            inputs.projectPath,
-            convertToAlphanumericOnly(context.projectSetting.appName),
-            res.value
-          );
-          if (bicepRes.isErr()) return bicepRes;
-          effects.push("generate aad bicep");
-        }
+    // generate bicep
+    {
+      const res = await aadApp.generateBicep(context, inputs);
+      if (res.isErr()) return err(res.error);
+      const bicepRes = await bicepUtils.persistBiceps(
+        inputs.projectPath,
+        convertToAlphanumericOnly(context.projectSetting.appName),
+        res.value
+      );
+      if (bicepRes.isErr()) return bicepRes;
+      effects.push("generate aad bicep");
+    }
 
-        // generate auth files
-        if (inputs.stage === Stage.addFeature) {
-          const res = await aadApp.generateAuthFiles(context, inputs, updates.tab!, updates.bot!);
-          if (res.isErr()) return err(res.error);
-          effects.push("generate auth files");
-        }
+    // generate auth files
+    if (inputs.stage === Stage.addFeature) {
+      const res = await aadApp.generateAuthFiles(context, inputs, updates.tab!, updates.bot!);
+      if (res.isErr()) return err(res.error);
+      effects.push("generate auth files");
+    }
 
-        // update app manifest
-        {
-          const capabilities: v3.ManifestCapability[] = [{ name: "WebApplicationInfo" }];
-          const appManifest = Container.get<AppManifest>(ComponentNames.AppManifest);
-          const res = await appManifest.addCapability(inputs, capabilities);
-          if (res.isErr()) return err(res.error);
-          effects.push("update app manifest");
-        }
+    // update app manifest
+    {
+      const capabilities: v3.ManifestCapability[] = [{ name: "WebApplicationInfo" }];
+      const appManifest = Container.get<AppManifest>(ComponentNames.AppManifest);
+      const res = await appManifest.addCapability(inputs, capabilities);
+      if (res.isErr()) return err(res.error);
+      effects.push("update app manifest");
+    }
 
-        // local debug settings
-        {
-          const res = await generateLocalDebugSettings(context, inputs);
-          if (res.isErr()) return err(res.error);
-          effects.push("generate local debug configs");
-        }
+    // local debug settings
+    {
+      const res = await generateLocalDebugSettings(context, inputs);
+      if (res.isErr()) return err(res.error);
+      effects.push("generate local debug configs");
+    }
 
-        // generate config bicep
-        {
-          const res = await generateConfigBiceps(context, inputs);
-          if (res.isErr()) return err(res.error);
-          effects.push("generate config biceps");
-        }
-
-        return ok(effects);
-      },
-    };
-    return ok(action);
+    // generate config bicep
+    {
+      const res = await generateConfigBiceps(context, inputs);
+      if (res.isErr()) return err(res.error);
+      effects.push("generate config biceps");
+    }
+    return ok(undefined);
   }
 }
 

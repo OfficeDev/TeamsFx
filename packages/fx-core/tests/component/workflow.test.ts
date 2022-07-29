@@ -22,7 +22,6 @@ import "../../src/component/feature/bot";
 import "../../src/component/feature/sql";
 import "../../src/component/resource/botService";
 import { createContextV3 } from "../../src/component/utils";
-import { runActionByName } from "../../src/component/workflow";
 import { MockTools, randomAppName } from "../core/utils";
 import * as provisionV3 from "../../src/plugins/solution/fx-solution/v3/provision";
 import { AppStudioClient } from "../../src/plugins/resource/appstudio/appStudio";
@@ -90,7 +89,8 @@ describe("Workflow test for v3", () => {
       language: "typescript",
     };
     sandbox.stub(templateAction, "scaffoldFromTemplates").resolves();
-    const res = await runActionByName("teams-bot.add", context, inputs);
+    const component = Container.get("teams-bot") as any;
+    const res = await component.add(context, inputs);
     if (res.isErr()) {
       console.log(res.error);
     }
@@ -117,7 +117,8 @@ describe("Workflow test for v3", () => {
       [SPFXQuestionNames.webpart_name]: "hello",
       [SPFXQuestionNames.framework_type]: "none",
     };
-    const res = await runActionByName("spfx-tab.add", context, inputs);
+    const component = Container.get("spfx-tab") as any;
+    const res = await component.add(context, inputs);
     if (res.isErr()) {
       console.log(res.error);
     }
@@ -130,7 +131,8 @@ describe("Workflow test for v3", () => {
       platform: Platform.VSCode,
       ["function-name"]: "getUserProfile",
     };
-    const res = await runActionByName("sql.add", context, inputs);
+    const component = Container.get("sql") as any;
+    const res = await component.add(context, inputs);
     if (res.isErr()) {
       console.log(res.error);
     }
@@ -141,7 +143,8 @@ describe("Workflow test for v3", () => {
       projectPath: projectPath,
       platform: Platform.VSCode,
     };
-    const res = await runActionByName("sso.add", context, inputs);
+    const component = Container.get("sso") as any;
+    const res = await component.add(context, inputs);
     if (res.isErr()) {
       console.log(res.error);
     }
@@ -154,7 +157,8 @@ describe("Workflow test for v3", () => {
       platform: Platform.VSCode,
       ["function-name"]: "getUserProfile",
     };
-    const res = await runActionByName("apim-feature.add", context, inputs);
+    const component = Container.get("apim-feature") as any;
+    const res = await component.add(context, inputs);
     if (res.isErr()) {
       console.log(res.error);
     }
@@ -197,8 +201,8 @@ describe("Workflow test for v3", () => {
       console.log(initRes.error);
     }
     assert.isTrue(initRes.isOk());
-
-    const addBotRes = await runActionByName("teams-bot.add", context, inputs);
+    const component = Container.get("teams-bot") as any;
+    const addBotRes = await component.add(context, inputs);
     if (addBotRes.isErr()) {
       console.log(addBotRes.error);
     }
@@ -233,7 +237,8 @@ describe("Workflow test for v3", () => {
         clientId: "00000000-0000-0000-0000-000000000000",
       },
     };
-    const provisionRes = await runActionByName("fx.provision", context, inputs);
+
+    const provisionRes = await fx.provision(context as ProvisionContextV3, inputs);
     if (provisionRes.isErr()) {
       console.log(provisionRes.error);
     }
@@ -274,8 +279,8 @@ describe("Workflow test for v3", () => {
       console.log(initRes.error);
     }
     assert.isTrue(initRes.isOk());
-
-    const addBotRes = await runActionByName("teams-bot.add", context, inputs);
+    const teamsBot = Container.get("teams-bot") as any;
+    const addBotRes = await teamsBot.add(context, inputs);
     if (addBotRes.isErr()) {
       console.log(addBotRes.error);
     }
@@ -304,7 +309,7 @@ describe("Workflow test for v3", () => {
         endpoint: "https://testwebApp.azurewebsites.net",
       },
     };
-    const provisionRes = await runActionByName("fx.provision", context, inputs);
+    const provisionRes = await fx.provision(context as ProvisionContextV3, inputs);
     if (provisionRes.isErr()) {
       console.log(provisionRes.error);
     }
@@ -372,7 +377,7 @@ describe("Workflow test for v3", () => {
     context.envInfo.config.bot = {
       siteEndpoint: "https://localtest:3978",
     };
-    const provisionRes = await runActionByName("fx.provision", context, inputs);
+    const provisionRes = await fx.provision(context as ProvisionContextV3, inputs);
     if (provisionRes.isErr()) {
       console.log(provisionRes.error);
     }
@@ -416,7 +421,8 @@ describe("Workflow test for v3", () => {
         endpoint: "https://testaccount.azurewebsites.net",
       },
     };
-    const addTabRes = await runActionByName("teams-tab.add", context, inputs);
+    const teamsTab = Container.get("teams-tab") as any;
+    const addTabRes = await teamsTab.add(context, inputs);
     if (addTabRes.isErr()) {
       console.log(addTabRes.error);
     }

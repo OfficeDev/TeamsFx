@@ -51,6 +51,7 @@ import {
   AzureResourceKeyVaultNewUI,
   AzureResourceSQLNewUI,
   AzureSolutionQuestionNames,
+  BotFeatureIds,
   BotNewUIOptionItem,
   CicdOptionItem,
   CommandAndResponseOptionItem,
@@ -59,6 +60,7 @@ import {
   MessageExtensionNewUIItem,
   NotificationOptionItem,
   SingleSignOnOptionItem,
+  TabFeatureIds,
   TabNewUIOptionItem,
   TabNonSsoItem,
 } from "../plugins/solution/fx-solution/question";
@@ -71,10 +73,11 @@ import { isCLIDotNetEnabled } from "../common/featureFlags";
 import { Runtime } from "../plugins/resource/bot/v2/enum";
 import { getPlatformRuntime } from "../plugins/resource/bot/v2/mapping";
 import { buildQuestionNode } from "./resource/azureSql/questions";
+import { functionNameQuestion } from "../plugins/resource/function/question";
+import { ApiConnectorImpl } from "../plugins/resource/apiconnector/plugin";
+import { addCicdQuestion } from "./feature/cicd";
 
 export async function getQuestionsForProvisionV3(
-  ctx: v2.Context,
-  envInfo: v3.EnvInfoV3,
   inputs: Inputs
 ): Promise<Result<QTreeNode | undefined, FxError>> {
   if (inputs.platform === Platform.CLI_HELP) {
@@ -85,8 +88,8 @@ export async function getQuestionsForProvisionV3(
 
 export async function getQuestionsForDeployV3(
   ctx: v2.Context,
-  envInfo: v3.EnvInfoV3,
-  inputs: Inputs
+  inputs: Inputs,
+  envInfo?: v3.EnvInfoV3
 ): Promise<Result<QTreeNode | undefined, FxError>> {
   //VS project has no selection interaction, and will deploy all selectable components by default.
   if (isVSProject(ctx.projectSetting)) {
@@ -111,7 +114,7 @@ export async function getQuestionsForDeployV3(
     selectableComponents = deployableComponents;
   } else {
     const hasAzureResource = hasAzureResourceV3(projectSetting);
-    const provisioned = checkWetherProvisionSucceeded(envInfo.state);
+    const provisioned = checkWetherProvisionSucceeded(envInfo!.state);
     if (hasAzureResource && !provisioned) {
       return err(
         new UserError({
@@ -323,14 +326,18 @@ export enum FeatureId {
   sso = "sso",
   ApiConnector = "api-connection",
   cicd = "cicd",
+  M365SearchApp = "M365SearchApp",
+  M365SsoLaunchPage = "M365SsoLaunchPage",
 }
 
 export const FeatureIdToComponent = {
   [FeatureId.Tab]: ComponentNames.TeamsTab,
   [FeatureId.TabNonSso]: ComponentNames.TeamsTab,
+  [FeatureId.M365SsoLaunchPage]: ComponentNames.TeamsTab,
   [FeatureId.Notification]: ComponentNames.TeamsBot,
   [FeatureId.CommandAndResponse]: ComponentNames.TeamsBot,
   [FeatureId.Bot]: ComponentNames.TeamsBot,
+  [FeatureId.M365SearchApp]: ComponentNames.TeamsBot,
   [FeatureId.MessagingExtension]: ComponentNames.TeamsBot,
   [FeatureId.function]: ComponentNames.TeamsApi,
   [FeatureId.apim]: ComponentNames.APIMFeature,
@@ -352,15 +359,21 @@ export async function getQuestionsForAddFeatureSubCommand(
   featureId: FeatureId,
   inputs: Inputs
 ): Promise<Result<QTreeNode | undefined, FxError>> {
-  const actionName = getActionNameByFeatureId(featureId);
-  if (actionName) {
-    const res = await getQuestionsV3(
-      actionName,
-      createContextV3(),
-      inputs as InputsWithProjectPath,
-      false
-    );
-    return res;
+  if (BotFeatureIds.includes(featureId)) {
+    return await getNotificationTriggerQuestionNode(inputs);
+  } else if (TabFeatureIds.includes(featureId)) {
+  } else if (featureId === AzureResourceSQLNewUI.id) {
+  } else if (featureId === AzureResourceFunctionNewUI.id) {
+    functionNameQuestion.validation = undefined;
+    return ok(new QTreeNode(functionNameQuestion));
+  } else if (featureId === AzureResourceApimNewUI.id) {
+  } else if (featureId === AzureResourceKeyVaultNewUI.id) {
+  } else if (featureId === CicdOptionItem.id) {
+    return await addCicdQuestion(createContextV3(), inputs as InputsWithProjectPath);
+  } else if (featureId === ApiConnectionOptionItem.id) {
+    const apiConnectorImpl = new ApiConnectorImpl();
+    return apiConnectorImpl.generateQuestion(createContextV3(), inputs);
+  } else if (featureId === SingleSignOnOptionItem.id) {
   }
   return ok(undefined);
 }

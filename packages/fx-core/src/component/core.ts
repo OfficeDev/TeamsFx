@@ -2,15 +2,12 @@
 // Licensed under the MIT license.
 
 import {
-  Action,
   CloudResource,
   ConfigFolderName,
   ContextV3,
   err,
-  FunctionAction,
   FxError,
   InputsWithProjectPath,
-  MaybePromise,
   ok,
   Platform,
   ProjectSettingsV3,
@@ -71,7 +68,6 @@ import { getResourceGroupInPortal } from "../common/tools";
 import { downloadSample } from "../core/downloadSample";
 import { InvalidInputError } from "../core/error";
 import { globalVars } from "../core/globalVars";
-import { getQuestionsForCreateProjectV2 } from "../core/middleware/questionModel";
 import arm, { updateResourceBaseName } from "../plugins/solution/fx-solution/arm";
 import {
   ApiConnectionOptionItem,
@@ -108,7 +104,9 @@ import {
   getQuestionsForDeployV3,
   getQuestionsForProvisionV3,
 } from "./questionV3";
-import { runActionByName } from "./workflow";
+import { hooks } from "@feathersjs/hooks/lib";
+import { ActionExecutionMW } from "./middleware/actionExecutionMW";
+import { getQuestionsForCreateProjectV2 } from "../core/middleware";
 @Service("fx")
 export class TeamsfxCore {
   name = "fx";
@@ -116,124 +114,117 @@ export class TeamsfxCore {
   /**
    * create project
    */
-  create(
+  @hooks([
+    ActionExecutionMW({
+      question: (context, inputs) => {
+        return getQuestionsForCreateProjectV2(inputs);
+      },
+    }),
+  ])
+  async create(
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ): MaybePromise<Result<Action | undefined, FxError>> {
-    const createAction: FunctionAction = {
-      name: "fx.create",
-      type: "function",
-      question: async (context, inputs) => {
-        return await getQuestionsForCreateProjectV2(inputs);
-      },
-      execute: async (context, inputs) => {
-        const folder = inputs[QuestionRootFolder.name] as string;
-        if (!folder) {
-          return err(InvalidInputError("folder is undefined"));
-        }
-        inputs.folder = folder;
-        const scratch = inputs[CoreQuestionNames.CreateFromScratch] as string;
-        let projectPath: string;
-        const automaticNpmInstall = "automaticNpmInstall";
-        if (scratch === ScratchOptionNo.id) {
-          // create from sample
-          const downloadRes = await downloadSample(inputs);
-          if (downloadRes.isErr()) {
-            return err(downloadRes.error);
-          }
-          projectPath = downloadRes.value;
-        } else {
-          // create from new
-          const appName = inputs[CoreQuestionNames.AppName] as string;
-          if (undefined === appName) return err(InvalidInputError(`App Name is empty`, inputs));
-          const validateResult = jsonschema.validate(appName, {
-            pattern: ProjectNamePattern,
-          });
-          if (validateResult.errors && validateResult.errors.length > 0) {
-            return err(InvalidInputError(`${validateResult.errors[0].message}`, inputs));
-          }
-          projectPath = path.join(folder, appName);
-          inputs.projectPath = projectPath;
-          const initRes = await this.init(context, inputs);
-          if (initRes.isErr()) return err(initRes.error);
-          const features = inputs.capabilities;
-          delete inputs.folder;
-          if (
-            features === M365SsoLaunchPageOptionItem.id ||
-            features === M365SearchAppOptionItem.id
-          ) {
-            context.projectSetting.isM365 = true;
-            inputs.isM365 = true;
-          }
-          if (BotFeatureIds.includes(features)) {
-            inputs[AzureSolutionQuestionNames.Features] = features;
-            const res = await runActionByName("teams-bot.add", context, inputs);
-            if (res.isErr()) return err(res.error);
-          }
-          if (TabFeatureIds.includes(features)) {
-            inputs[AzureSolutionQuestionNames.Features] = features;
-            const res = await runActionByName("teams-tab.add", context, inputs);
-            if (res.isErr()) return err(res.error);
-          }
-          if (features === TabSPFxItem.id) {
-            inputs[AzureSolutionQuestionNames.Features] = features;
-            const res = await runActionByName("spfx-tab.add", context, inputs);
-            if (res.isErr()) return err(res.error);
-          }
-        }
-        if (inputs.platform === Platform.VSCode) {
-          await globalStateUpdate(automaticNpmInstall, true);
-        }
-        context.projectPath = projectPath;
-        return ok(["create a new project with capability:" + inputs.capabilities]);
-      },
-    };
-
-    return ok(createAction);
+  ): Promise<Result<string, FxError>> {
+    const folder = inputs[QuestionRootFolder.name] as string;
+    if (!folder) {
+      return err(InvalidInputError("folder is undefined"));
+    }
+    inputs.folder = folder;
+    const scratch = inputs[CoreQuestionNames.CreateFromScratch] as string;
+    let projectPath: string;
+    const automaticNpmInstall = "automaticNpmInstall";
+    if (scratch === ScratchOptionNo.id) {
+      // create from sample
+      const downloadRes = await downloadSample(inputs);
+      if (downloadRes.isErr()) {
+        return err(downloadRes.error);
+      }
+      projectPath = downloadRes.value;
+    } else {
+      // create from new
+      const appName = inputs[CoreQuestionNames.AppName] as string;
+      if (undefined === appName) return err(InvalidInputError(`App Name is empty`, inputs));
+      const validateResult = jsonschema.validate(appName, {
+        pattern: ProjectNamePattern,
+      });
+      if (validateResult.errors && validateResult.errors.length > 0) {
+        return err(InvalidInputError(`${validateResult.errors[0].message}`, inputs));
+      }
+      projectPath = path.join(folder, appName);
+      inputs.projectPath = projectPath;
+      const initRes = await this.init(context, inputs);
+      if (initRes.isErr()) return err(initRes.error);
+      const features = inputs.capabilities;
+      delete inputs.folder;
+      if (features === M365SsoLaunchPageOptionItem.id || features === M365SearchAppOptionItem.id) {
+        context.projectSetting.isM365 = true;
+        inputs.isM365 = true;
+      }
+      if (BotFeatureIds.includes(features)) {
+        inputs[AzureSolutionQuestionNames.Features] = features;
+        const component = Container.get(ComponentNames.TeamsBot) as any;
+        const res = await component.add(context, inputs);
+        if (res.isErr()) return err(res.error);
+      }
+      if (TabFeatureIds.includes(features)) {
+        inputs[AzureSolutionQuestionNames.Features] = features;
+        const component = Container.get(ComponentNames.TeamsTab) as any;
+        const res = await component.add(context, inputs);
+        if (res.isErr()) return err(res.error);
+      }
+      if (features === TabSPFxItem.id) {
+        inputs[AzureSolutionQuestionNames.Features] = features;
+        const component = Container.get("spfx-tab") as any;
+        const res = await component.add(context, inputs);
+        if (res.isErr()) return err(res.error);
+      }
+    }
+    if (inputs.platform === Platform.VSCode) {
+      await globalStateUpdate(automaticNpmInstall, true);
+    }
+    context.projectPath = projectPath;
+    return ok(projectPath);
   }
   /**
    * add feature
    */
-  addFeature(
+  @hooks([
+    ActionExecutionMW({
+      question: (context, inputs) => {
+        return getQuestionsForAddFeatureV3(context, inputs);
+      },
+    }),
+  ])
+  async addFeature(
     context: ContextV3,
     inputs: InputsWithProjectPath
-  ): MaybePromise<Result<Action | undefined, FxError>> {
-    const action: FunctionAction = {
-      type: "function",
-      name: "fx.addFeature",
-      question: async (context: ContextV3, inputs: InputsWithProjectPath) => {
-        return await getQuestionsForAddFeatureV3(context, inputs);
-      },
-      execute: async (context, inputs) => {
-        const features = inputs[AzureSolutionQuestionNames.Features];
-        let actionName;
-        if (BotFeatureIds.includes(features)) {
-          actionName = "teams-bot.add";
-        } else if (TabFeatureIds.includes(features)) {
-          actionName = "teams-tab.add";
-        } else if (features === AzureResourceSQLNewUI.id) {
-          actionName = "sql.add";
-        } else if (features === AzureResourceFunctionNewUI.id) {
-          actionName = "teams-api.add";
-        } else if (features === AzureResourceApim.id) {
-          actionName = "apim-feature.add";
-        } else if (features === AzureResourceKeyVaultNewUI.id) {
-          actionName = "key-vault-feature.add";
-        } else if (features === CicdOptionItem.id) {
-          actionName = "cicd.add";
-        } else if (features === ApiConnectionOptionItem.id) {
-          actionName = "api-connector.add";
-        } else if (features === SingleSignOnOptionItem.id) {
-          actionName = "sso.add";
-        }
-        if (actionName) {
-          const res = await runActionByName(actionName, context, inputs);
-          if (res.isErr()) return err(res.error);
-        }
-        return ok([]);
-      },
-    };
-    return ok(action);
+  ): Promise<Result<undefined, FxError>> {
+    const features = inputs[AzureSolutionQuestionNames.Features];
+    let component;
+    if (BotFeatureIds.includes(features)) {
+      component = Container.get(ComponentNames.TeamsBot);
+    } else if (TabFeatureIds.includes(features)) {
+      component = Container.get(ComponentNames.TeamsTab);
+    } else if (features === AzureResourceSQLNewUI.id) {
+      component = Container.get("sql");
+    } else if (features === AzureResourceFunctionNewUI.id) {
+      component = Container.get(ComponentNames.TeamsApi);
+    } else if (features === AzureResourceApim.id) {
+      component = Container.get(ComponentNames.APIMFeature);
+    } else if (features === AzureResourceKeyVaultNewUI.id) {
+      component = Container.get("key-vault-feature");
+    } else if (features === CicdOptionItem.id) {
+      component = Container.get("cicd");
+    } else if (features === ApiConnectionOptionItem.id) {
+      component = Container.get("api-connector");
+    } else if (features === SingleSignOnOptionItem.id) {
+      component = Container.get("sso");
+    }
+    if (component) {
+      const res = await (component as any).add(context, inputs);
+      if (res.isErr()) return err(res.error);
+    }
+    return ok(undefined);
   }
   async init(
     context: ContextV3,
@@ -257,169 +248,159 @@ export class TeamsfxCore {
     }
     return ok(undefined);
   }
-  provision(
-    ctx: ContextV3,
-    inputs: InputsWithProjectPath
-  ): MaybePromise<Result<Action | undefined, FxError>> {
-    const action: FunctionAction = {
-      name: "fx.provision",
-      type: "function",
+  @hooks([
+    ActionExecutionMW({
       question: async (context: ContextV3, inputs: InputsWithProjectPath) => {
-        return await getQuestionsForProvisionV3(context, context.envInfo!, inputs);
+        return await getQuestionsForProvisionV3(inputs);
       },
-      execute: async (context, inputs) => {
-        const ctx = context as ProvisionContextV3;
-        ctx.envInfo.state.solution = ctx.envInfo.state.solution || {};
-        ctx.envInfo.state.solution.provisionSucceeded = false;
+    }),
+  ])
+  async provision(
+    ctx: ProvisionContextV3,
+    inputs: InputsWithProjectPath
+  ): Promise<Result<undefined, FxError>> {
+    ctx.envInfo.state.solution = ctx.envInfo.state.solution || {};
+    ctx.envInfo.state.solution.provisionSucceeded = false;
 
-        // 1. pre provision
-        {
-          const res = await preProvision(ctx, inputs);
-          if (res.isErr()) return err(res.error);
-        }
-        // 2. create a teams app
-        const appManifest = Container.get<AppManifest>(ComponentNames.AppManifest);
-        {
-          const res = await appManifest.provision(ctx, inputs);
-          if (res.isErr()) return err(res.error);
-        }
+    // 1. pre provision
+    {
+      const res = await preProvision(ctx, inputs);
+      if (res.isErr()) return err(res.error);
+    }
+    // 2. create a teams app
+    const appManifest = Container.get<AppManifest>(ComponentNames.AppManifest);
+    {
+      const res = await appManifest.provision(ctx, inputs);
+      if (res.isErr()) return err(res.error);
+    }
 
-        // 3. call resources provision api
-        const componentsToProvision = ctx.projectSetting.components.filter((r) => r.provision);
-        {
-          const thunks = [];
-          for (const componentConfig of componentsToProvision) {
-            const componentInstance = Container.get<CloudResource>(componentConfig.name);
-            if (componentInstance.provision) {
-              thunks.push({
-                pluginName: `${componentConfig.name}`,
-                taskName: "provision",
-                thunk: () => {
-                  ctx.envInfo.state[componentConfig.name] =
-                    ctx.envInfo.state[componentConfig.name] || {};
-                  return componentInstance.provision!(ctx, inputs);
-                },
-              });
-            }
-          }
-          const provisionResult = await executeConcurrently(thunks, ctx.logProvider);
-          if (provisionResult.kind !== "success") {
-            return err(provisionResult.error);
-          }
-          ctx.logProvider.info(
-            getLocalizedString("core.provision.ProvisionFinishNotice", PluginDisplayName.Solution)
-          );
+    // 3. call resources provision api
+    const componentsToProvision = ctx.projectSetting.components.filter((r) => r.provision);
+    {
+      const thunks = [];
+      for (const componentConfig of componentsToProvision) {
+        const componentInstance = Container.get<CloudResource>(componentConfig.name);
+        if (componentInstance.provision) {
+          thunks.push({
+            pluginName: `${componentConfig.name}`,
+            taskName: "provision",
+            thunk: () => {
+              ctx.envInfo.state[componentConfig.name] =
+                ctx.envInfo.state[componentConfig.name] || {};
+              return componentInstance.provision!(ctx, inputs);
+            },
+          });
         }
+      }
+      const provisionResult = await executeConcurrently(thunks, ctx.logProvider);
+      if (provisionResult.kind !== "success") {
+        return err(provisionResult.error);
+      }
+      ctx.logProvider.info(
+        getLocalizedString("core.provision.ProvisionFinishNotice", PluginDisplayName.Solution)
+      );
+    }
 
-        // 4
-        if (ctx.envInfo.envName === "local") {
-          //4.1 setup local env
-          const localEnvSetupResult = await setupLocalEnvironment(ctx, inputs, ctx.envInfo);
-          if (localEnvSetupResult.isErr()) {
-            return err(localEnvSetupResult.error);
-          }
-        } else {
-          //4.2 deploy arm templates for remote
-          ctx.logProvider.info(
-            getLocalizedString("core.deployArmTemplates.StartNotice", PluginDisplayName.Solution)
-          );
-          const armRes = await arm.deployArmTemplates(
-            ctx,
-            inputs,
-            ctx.envInfo,
-            ctx.tokenProvider.azureAccountProvider
-          );
-          if (armRes.isErr()) {
-            return err(armRes.error);
-          }
-          ctx.logProvider.info(
-            getLocalizedString("core.deployArmTemplates.SuccessNotice", PluginDisplayName.Solution)
-          );
-        }
+    // 4
+    if (ctx.envInfo.envName === "local") {
+      //4.1 setup local env
+      const localEnvSetupResult = await setupLocalEnvironment(ctx, inputs, ctx.envInfo);
+      if (localEnvSetupResult.isErr()) {
+        return err(localEnvSetupResult.error);
+      }
+    } else {
+      //4.2 deploy arm templates for remote
+      ctx.logProvider.info(
+        getLocalizedString("core.deployArmTemplates.StartNotice", PluginDisplayName.Solution)
+      );
+      const armRes = await arm.deployArmTemplates(
+        ctx,
+        inputs,
+        ctx.envInfo,
+        ctx.tokenProvider.azureAccountProvider
+      );
+      if (armRes.isErr()) {
+        return err(armRes.error);
+      }
+      ctx.logProvider.info(
+        getLocalizedString("core.deployArmTemplates.SuccessNotice", PluginDisplayName.Solution)
+      );
+    }
 
-        // 5.0 "aad-app.setApplicationInContext"
-        const aadApp = Container.get<AADApp>(ComponentNames.AadApp);
-        if (hasAAD(ctx.projectSetting)) {
-          const res = await aadApp.setApplicationInContext(ctx, inputs);
-          if (res.isErr()) return err(res.error);
+    // 5.0 "aad-app.setApplicationInContext"
+    const aadApp = Container.get<AADApp>(ComponentNames.AadApp);
+    if (hasAAD(ctx.projectSetting)) {
+      const res = await aadApp.setApplicationInContext(ctx, inputs);
+      if (res.isErr()) return err(res.error);
+    }
+    // 5. call resources configure api
+    {
+      const thunks = [];
+      for (const componentConfig of componentsToProvision) {
+        const componentInstance = Container.get<CloudResource>(componentConfig.name);
+        if (componentInstance.configure) {
+          thunks.push({
+            pluginName: `${componentConfig.name}`,
+            taskName: "configure",
+            thunk: () => {
+              ctx.envInfo.state[componentConfig.name] =
+                ctx.envInfo.state[componentConfig.name] || {};
+              return componentInstance.configure!(ctx, inputs);
+            },
+          });
         }
-        // 5. call resources configure api
-        {
-          const thunks = [];
-          for (const componentConfig of componentsToProvision) {
-            const componentInstance = Container.get<CloudResource>(componentConfig.name);
-            if (componentInstance.configure) {
-              thunks.push({
-                pluginName: `${componentConfig.name}`,
-                taskName: "configure",
-                thunk: () => {
-                  ctx.envInfo.state[componentConfig.name] =
-                    ctx.envInfo.state[componentConfig.name] || {};
-                  return componentInstance.configure!(ctx, inputs);
-                },
-              });
-            }
-          }
-          const configResult = await executeConcurrently(thunks, ctx.logProvider);
-          if (configResult.kind !== "success") {
-            return err(configResult.error);
-          }
-          ctx.logProvider.info(
-            getLocalizedString(
-              "core.provision.configurationFinishNotice",
-              PluginDisplayName.Solution
-            )
-          );
-        }
+      }
+      const configResult = await executeConcurrently(thunks, ctx.logProvider);
+      if (configResult.kind !== "success") {
+        return err(configResult.error);
+      }
+      ctx.logProvider.info(
+        getLocalizedString("core.provision.configurationFinishNotice", PluginDisplayName.Solution)
+      );
+    }
 
-        // 6.
-        if (ctx.envInfo.envName === "local") {
-          // 6.1 config local env
-          const localConfigResult = await configLocalEnvironment(ctx, inputs, ctx.envInfo);
-          if (localConfigResult.isErr()) {
-            return err(localConfigResult.error);
+    // 6.
+    if (ctx.envInfo.envName === "local") {
+      // 6.1 config local env
+      const localConfigResult = await configLocalEnvironment(ctx, inputs, ctx.envInfo);
+      if (localConfigResult.isErr()) {
+        return err(localConfigResult.error);
+      }
+    } else {
+      // 6.2 show message for remote azure provision
+      const url = getResourceGroupInPortal(
+        ctx.envInfo.state.solution.subscriptionId,
+        ctx.envInfo.state.solution.tenantId,
+        ctx.envInfo.state.solution.resourceGroupName
+      );
+      const msg = getLocalizedString("core.provision.successAzure");
+      if (url) {
+        const title = "View Provisioned Resources";
+        ctx.userInteraction.showMessage("info", msg, false, title).then((result: any) => {
+          const userSelected = result.isOk() ? result.value : undefined;
+          if (userSelected === title) {
+            ctx.userInteraction.openUrl(url);
           }
-        } else {
-          // 6.2 show message for remote azure provision
-          const url = getResourceGroupInPortal(
-            ctx.envInfo.state.solution.subscriptionId,
-            ctx.envInfo.state.solution.tenantId,
-            ctx.envInfo.state.solution.resourceGroupName
-          );
-          const msg = getLocalizedString("core.provision.successAzure");
-          if (url) {
-            const title = "View Provisioned Resources";
-            ctx.userInteraction.showMessage("info", msg, false, title).then((result: any) => {
-              const userSelected = result.isOk() ? result.value : undefined;
-              if (userSelected === title) {
-                ctx.userInteraction.openUrl(url);
-              }
-            });
-          } else {
-            ctx.userInteraction.showMessage("info", msg, false);
-          }
-        }
+        });
+      } else {
+        ctx.userInteraction.showMessage("info", msg, false);
+      }
+    }
 
-        // 7. update teams app
-        {
-          const res = await appManifest.configure(ctx, inputs);
-          if (res.isErr()) return err(res.error);
-        }
+    // 7. update teams app
+    {
+      const res = await appManifest.configure(ctx, inputs);
+      if (res.isErr()) return err(res.error);
+    }
 
-        // 8. show and set state
-        if (ctx.envInfo.envName !== "local") {
-          const msg = getLocalizedString(
-            "core.provision.successNotice",
-            ctx.projectSetting.appName
-          );
-          ctx.userInteraction.showMessage("info", msg, false);
-          ctx.logProvider.info(msg);
-        }
-        ctx.envInfo.state.solution.provisionSucceeded = true;
-        return ok([]);
-      },
-    };
-    return ok(action);
+    // 8. show and set state
+    if (ctx.envInfo.envName !== "local") {
+      const msg = getLocalizedString("core.provision.successNotice", ctx.projectSetting.appName);
+      ctx.userInteraction.showMessage("info", msg, false);
+      ctx.logProvider.info(msg);
+    }
+    ctx.envInfo.state.solution.provisionSucceeded = true;
+    return ok(undefined);
   }
 
   async build(
@@ -451,144 +432,142 @@ export class TeamsfxCore {
     return ok(undefined);
   }
 
-  deploy(context: ContextV3, inputs: InputsWithProjectPath): Result<Action | undefined, FxError> {
-    const action: FunctionAction = {
-      name: "fx.deploy",
-      type: "function",
+  @hooks([
+    ActionExecutionMW({
       question: async (context: ContextV3, inputs: InputsWithProjectPath) => {
-        return await getQuestionsForDeployV3(context, context.envInfo!, inputs);
+        return await getQuestionsForDeployV3(context, inputs, context.envInfo!);
       },
-      execute: async (context, inputs) => {
-        const ctx = context as ProvisionContextV3;
-        const projectSettings = ctx.projectSetting as ProjectSettingsV3;
-        const inputPlugins = inputs[AzureSolutionQuestionNames.PluginSelectionDeploy] || [];
-        const inputComponentNames = inputPlugins.map(pluginName2ComponentName) as string[];
-        const thunks = [];
-        let hasAzureResource = false;
-        // 1. collect resources to deploy
-        const isVS = isVSProject(projectSettings);
-        for (const component of projectSettings.components) {
-          if (
-            component.deploy &&
-            component.hosting !== undefined &&
-            (isVS || inputComponentNames.includes(component.name))
-          ) {
-            const componentInstance = Container.get<CloudResource>(component.hosting);
-            thunks.push({
-              pluginName: `${component.name}`,
-              taskName: "deploy",
-              thunk: () => {
-                const clonedInputs = cloneDeep(inputs);
-                clonedInputs.folder = component.folder;
-                clonedInputs.artifactFolder = component.artifactFolder;
-                clonedInputs.componentId = component.name;
-                return componentInstance.deploy!(ctx, clonedInputs);
-              },
-            });
-            if (AzureResources.includes(component.hosting)) {
-              hasAzureResource = true;
-            }
-          }
+    }),
+  ])
+  async deploy(
+    context: ProvisionContextV3,
+    inputs: InputsWithProjectPath
+  ): Promise<Result<undefined, FxError>> {
+    const projectSettings = context.projectSetting as ProjectSettingsV3;
+    const inputPlugins = inputs[AzureSolutionQuestionNames.PluginSelectionDeploy] || [];
+    const inputComponentNames = inputPlugins.map(pluginName2ComponentName) as string[];
+    const thunks = [];
+    let hasAzureResource = false;
+    // 1. collect resources to deploy
+    const isVS = isVSProject(projectSettings);
+    for (const component of projectSettings.components) {
+      if (
+        component.deploy &&
+        component.hosting !== undefined &&
+        (isVS || inputComponentNames.includes(component.name))
+      ) {
+        const componentInstance = Container.get<CloudResource>(component.hosting);
+        thunks.push({
+          pluginName: `${component.name}`,
+          taskName: "deploy",
+          thunk: () => {
+            const clonedInputs = cloneDeep(inputs);
+            clonedInputs.folder = component.folder;
+            clonedInputs.artifactFolder = component.artifactFolder;
+            clonedInputs.componentId = component.name;
+            return componentInstance.deploy!(context, clonedInputs);
+          },
+        });
+        if (AzureResources.includes(component.hosting)) {
+          hasAzureResource = true;
         }
-        if (inputComponentNames.includes(ComponentNames.AppManifest)) {
-          const appManifest = Container.get<AppManifest>(ComponentNames.AppManifest);
-          thunks.push({
-            pluginName: ComponentNames.AppManifest,
-            taskName: "deploy",
-            thunk: () => {
-              return appManifest.configure(ctx, inputs);
-            },
-          });
-        }
-        if (thunks.length === 0) {
-          return err(
-            new UserError(
-              "fx",
-              "NoResourcePluginSelected",
-              getDefaultString("core.NoPluginSelected"),
-              getLocalizedString("core.NoPluginSelected")
+      }
+    }
+    if (inputComponentNames.includes(ComponentNames.AppManifest)) {
+      const appManifest = Container.get<AppManifest>(ComponentNames.AppManifest);
+      thunks.push({
+        pluginName: ComponentNames.AppManifest,
+        taskName: "deploy",
+        thunk: () => {
+          return appManifest.configure(context, inputs);
+        },
+      });
+    }
+    if (thunks.length === 0) {
+      return err(
+        new UserError(
+          "fx",
+          "NoResourcePluginSelected",
+          getDefaultString("core.NoPluginSelected"),
+          getLocalizedString("core.NoPluginSelected")
+        )
+      );
+    }
+
+    context.logProvider.info(
+      getLocalizedString(
+        "core.deploy.selectedPluginsToDeployNotice",
+        PluginDisplayName.Solution,
+        JSON.stringify(thunks.map((p) => p.pluginName))
+      )
+    );
+
+    // 2. check azure account
+    if (hasAzureResource) {
+      const subscriptionResult = await checkDeployAzureSubscription(
+        context,
+        context.envInfo,
+        context.tokenProvider.azureAccountProvider
+      );
+      if (subscriptionResult.isErr()) {
+        return err(subscriptionResult.error);
+      }
+      const consent = await askForDeployConsent(
+        context,
+        context.tokenProvider.azureAccountProvider,
+        context.envInfo
+      );
+      if (consent.isErr()) {
+        return err(consent.error);
+      }
+    }
+
+    // 3. build
+    {
+      const res = await this.build(context, inputs);
+      if (res.isErr()) return err(res.error);
+    }
+
+    // 4. start deploy
+    context.logProvider.info(
+      getLocalizedString("core.deploy.startNotice", PluginDisplayName.Solution)
+    );
+    const result = await executeConcurrently(thunks, context.logProvider);
+
+    if (result.kind === "success") {
+      if (hasAzureResource) {
+        const botTroubleShootMsg = getBotTroubleShootMessage(hasBot(context.projectSetting));
+        const msg =
+          getLocalizedString("core.deploy.successNotice", context.projectSetting.appName) +
+          botTroubleShootMsg.textForLogging;
+        context.logProvider.info(msg);
+        if (botTroubleShootMsg.textForLogging) {
+          // Show a `Learn more` action button for bot trouble shooting.
+          context.userInteraction
+            .showMessage(
+              "info",
+              `${getLocalizedString("core.deploy.successNotice", context.projectSetting.appName)} ${
+                botTroubleShootMsg.textForMsgBox
+              }`,
+              false,
+              botTroubleShootMsg.textForActionButton
             )
-          );
-        }
-
-        ctx.logProvider.info(
-          getLocalizedString(
-            "core.deploy.selectedPluginsToDeployNotice",
-            PluginDisplayName.Solution,
-            JSON.stringify(thunks.map((p) => p.pluginName))
-          )
-        );
-
-        // 2. check azure account
-        if (hasAzureResource) {
-          const subscriptionResult = await checkDeployAzureSubscription(
-            ctx,
-            ctx.envInfo,
-            ctx.tokenProvider.azureAccountProvider
-          );
-          if (subscriptionResult.isErr()) {
-            return err(subscriptionResult.error);
-          }
-          const consent = await askForDeployConsent(
-            ctx,
-            ctx.tokenProvider.azureAccountProvider,
-            ctx.envInfo
-          );
-          if (consent.isErr()) {
-            return err(consent.error);
-          }
-        }
-
-        // 3. build
-        {
-          const res = await this.build(ctx, inputs);
-          if (res.isErr()) return err(res.error);
-        }
-
-        // 4. start deploy
-        ctx.logProvider.info(
-          getLocalizedString("core.deploy.startNotice", PluginDisplayName.Solution)
-        );
-        const result = await executeConcurrently(thunks, ctx.logProvider);
-
-        if (result.kind === "success") {
-          if (hasAzureResource) {
-            const botTroubleShootMsg = getBotTroubleShootMessage(hasBot(context.projectSetting));
-            const msg =
-              getLocalizedString("core.deploy.successNotice", context.projectSetting.appName) +
-              botTroubleShootMsg.textForLogging;
-            context.logProvider.info(msg);
-            if (botTroubleShootMsg.textForLogging) {
-              // Show a `Learn more` action button for bot trouble shooting.
-              context.userInteraction
-                .showMessage(
-                  "info",
-                  `${getLocalizedString(
-                    "core.deploy.successNotice",
-                    context.projectSetting.appName
-                  )} ${botTroubleShootMsg.textForMsgBox}`,
-                  false,
-                  botTroubleShootMsg.textForActionButton
-                )
-                .then((result) => {
-                  const userSelected = result.isOk() ? result.value : undefined;
-                  if (userSelected === botTroubleShootMsg.textForActionButton) {
-                    context.userInteraction.openUrl(botTroubleShootMsg.troubleShootLink);
-                  }
-                });
-            } else {
-              context.userInteraction.showMessage("info", msg, false);
-            }
-          }
-          return ok([]);
+            .then((result) => {
+              const userSelected = result.isOk() ? result.value : undefined;
+              if (userSelected === botTroubleShootMsg.textForActionButton) {
+                context.userInteraction.openUrl(botTroubleShootMsg.troubleShootLink);
+              }
+            });
         } else {
-          const msg = getLocalizedString("core.deploy.failNotice", ctx.projectSetting.appName);
-          ctx.logProvider.info(msg);
-          return err(result.error);
+          context.userInteraction.showMessage("info", msg, false);
         }
-      },
-    };
-    return ok(action);
+      }
+      return ok(undefined);
+    } else {
+      const msg = getLocalizedString("core.deploy.failNotice", context.projectSetting.appName);
+      context.logProvider.info(msg);
+      return err(result.error);
+    }
   }
 }
 

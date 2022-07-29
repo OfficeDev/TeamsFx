@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 import {
-  Action,
   ActionContext,
   CloudResource,
   ContextV3,
   err,
   FxError,
+  Inputs,
   InputsWithProjectPath,
-  IProgressHandler,
-  MaybePromise,
   ok,
   Platform,
   ProvisionContextV3,
@@ -161,140 +159,120 @@ export class AppManifest implements CloudResource {
       enableTelemetry: true,
       telemetryComponentName: "AppStudioPlugin",
       telemetryEventName: "publish",
+      question: async (context, inputs) => {
+        return await publishQuestion(inputs);
+      },
     }),
   ])
-  publish(
+  async publish(
     context: ProvisionContextV3,
-    inputs: InputsWithProjectPath
-  ): MaybePromise<Result<Action | undefined, FxError>> {
-    const action: Action = {
-      name: "app-manifest.publish",
-      type: "function",
-      enableTelemetry: true,
-      telemetryComponentName: "AppStudioPlugin",
-      telemetryEventName: "publish",
-      question: (context: ContextV3, inputs: InputsWithProjectPath) => {
-        if (inputs.platform === Platform.VSCode) {
-          const buildOrPublish = new QTreeNode({
-            name: Constants.BUILD_OR_PUBLISH_QUESTION,
-            type: "singleSelect",
-            staticOptions: [manuallySubmitOption, autoPublishOption],
-            title: getLocalizedString("plugins.appstudio.publishTip"),
-            default: autoPublishOption.id,
+    inputs: InputsWithProjectPath,
+    actionCtx?: ActionContext
+  ): Promise<Result<undefined, FxError>> {
+    const ctx = context as ProvisionContextV3;
+    if (
+      inputs.platform === Platform.VSCode &&
+      inputs[Constants.BUILD_OR_PUBLISH_QUESTION] === manuallySubmitOption.id
+    ) {
+      if (actionCtx?.telemetryProps)
+        actionCtx.telemetryProps[TelemetryPropertyKey.manual] = String(true);
+      try {
+        const appPackagePath = await buildTeamsAppPackage(
+          inputs.projectPath,
+          ctx.envInfo,
+          false,
+          actionCtx!.telemetryProps!
+        );
+        const msg = getLocalizedString(
+          "plugins.appstudio.adminApprovalTip",
+          ctx.projectSetting.appName,
+          appPackagePath
+        );
+        ctx.userInteraction
+          .showMessage("info", msg, false, "OK", Constants.READ_MORE)
+          .then((value) => {
+            if (value.isOk() && value.value === Constants.READ_MORE) {
+              ctx.userInteraction.openUrl(Constants.PUBLISH_GUIDE);
+            }
           });
-          return ok(buildOrPublish);
-        }
         return ok(undefined);
-      },
-      plan: (context: ContextV3, inputs: InputsWithProjectPath) => {
-        return ok([
-          {
-            type: "service",
-            name: "teams.microsoft.com",
-            remarks: "publish teams app",
-          },
-        ]);
-      },
-      execute: async (
-        context: ContextV3,
-        inputs: InputsWithProjectPath,
-        progress?: IProgressHandler,
-        telemetryProps?: Record<string, string>
-      ) => {
-        const ctx = context as ProvisionContextV3;
-        if (
-          inputs.platform === Platform.VSCode &&
-          inputs[Constants.BUILD_OR_PUBLISH_QUESTION] === manuallySubmitOption.id
-        ) {
-          if (telemetryProps) telemetryProps[TelemetryPropertyKey.manual] = String(true);
-          try {
-            const appPackagePath = await buildTeamsAppPackage(
-              inputs.projectPath,
-              ctx.envInfo,
-              false,
-              telemetryProps
-            );
-            const msg = getLocalizedString(
-              "plugins.appstudio.adminApprovalTip",
-              ctx.projectSetting.appName,
-              appPackagePath
-            );
-            ctx.userInteraction
-              .showMessage("info", msg, false, "OK", Constants.READ_MORE)
-              .then((value) => {
-                if (value.isOk() && value.value === Constants.READ_MORE) {
-                  ctx.userInteraction.openUrl(Constants.PUBLISH_GUIDE);
-                }
-              });
-            return ok(["build teams app package"]);
-          } catch (error: any) {
-            return err(
-              AppStudioResultFactory.UserError(
-                AppStudioError.TeamsPackageBuildError.name,
-                AppStudioError.TeamsPackageBuildError.message(error),
-                error.helpLink
-              )
-            );
+      } catch (error: any) {
+        return err(
+          AppStudioResultFactory.UserError(
+            AppStudioError.TeamsPackageBuildError.name,
+            AppStudioError.TeamsPackageBuildError.message(error),
+            error.helpLink
+          )
+        );
+      }
+    }
+    try {
+      const res = await publishTeamsApp(
+        ctx,
+        inputs,
+        ctx.envInfo,
+        ctx.tokenProvider.m365TokenProvider
+      );
+      if (res.isErr()) return err(res.error);
+      ctx.logProvider.info(`Publish success!`);
+      if (inputs.platform === Platform.CLI) {
+        const msg = getLocalizedString(
+          "plugins.appstudio.publishSucceedNotice.cli",
+          res.value.appName,
+          Constants.TEAMS_ADMIN_PORTAL,
+          Constants.TEAMS_MANAGE_APP_DOC
+        );
+        ctx.userInteraction.showMessage("info", msg, false);
+      } else {
+        const msg = getLocalizedString(
+          "plugins.appstudio.publishSucceedNotice",
+          res.value.appName,
+          Constants.TEAMS_MANAGE_APP_DOC
+        );
+        const adminPortal = getLocalizedString("plugins.appstudio.adminPortal");
+        ctx.userInteraction.showMessage("info", msg, false, adminPortal).then((value) => {
+          if (value.isOk() && value.value === adminPortal) {
+            ctx.userInteraction.openUrl(Constants.TEAMS_ADMIN_PORTAL);
           }
-        }
-        try {
-          const res = await publishTeamsApp(
-            ctx,
-            inputs,
-            ctx.envInfo,
-            ctx.tokenProvider.m365TokenProvider
-          );
-          if (res.isErr()) return err(res.error);
-          ctx.logProvider.info(`Publish success!`);
-          if (inputs.platform === Platform.CLI) {
-            const msg = getLocalizedString(
-              "plugins.appstudio.publishSucceedNotice.cli",
-              res.value.appName,
-              Constants.TEAMS_ADMIN_PORTAL,
-              Constants.TEAMS_MANAGE_APP_DOC
-            );
-            ctx.userInteraction.showMessage("info", msg, false);
-          } else {
-            const msg = getLocalizedString(
-              "plugins.appstudio.publishSucceedNotice",
-              res.value.appName,
-              Constants.TEAMS_MANAGE_APP_DOC
-            );
-            const adminPortal = getLocalizedString("plugins.appstudio.adminPortal");
-            ctx.userInteraction.showMessage("info", msg, false, adminPortal).then((value) => {
-              if (value.isOk() && value.value === adminPortal) {
-                ctx.userInteraction.openUrl(Constants.TEAMS_ADMIN_PORTAL);
-              }
-            });
-          }
-          if (telemetryProps) {
-            telemetryProps[TelemetryPropertyKey.updateExistingApp] = String(res.value.update);
-            telemetryProps[TelemetryPropertyKey.publishedAppId] = String(res.value.publishedAppId);
-          }
-        } catch (error: any) {
-          if (error instanceof SystemError || error instanceof UserError) {
-            throw error;
-          } else {
-            const publishFailed = new SystemError({
-              name: AppStudioError.TeamsAppPublishFailedError.name,
-              message: error.message,
-              source: Constants.PLUGIN_NAME,
-              error: error,
-            });
-            return err(publishFailed);
-          }
-        }
-        return ok([
-          {
-            type: "service",
-            name: "teams.microsoft.com",
-            remarks: "publish teams app",
-          },
-        ]);
-      },
-    };
-    return ok(action);
+        });
+      }
+      if (actionCtx?.telemetryProps) {
+        actionCtx.telemetryProps[TelemetryPropertyKey.updateExistingApp] = String(res.value.update);
+        actionCtx.telemetryProps[TelemetryPropertyKey.publishedAppId] = String(
+          res.value.publishedAppId
+        );
+      }
+    } catch (error: any) {
+      if (error instanceof SystemError || error instanceof UserError) {
+        throw error;
+      } else {
+        const publishFailed = new SystemError({
+          name: AppStudioError.TeamsAppPublishFailedError.name,
+          message: error.message,
+          source: Constants.PLUGIN_NAME,
+          error: error,
+        });
+        return err(publishFailed);
+      }
+    }
+    return ok(undefined);
   }
+}
+
+export async function publishQuestion(
+  inputs: Inputs
+): Promise<Result<QTreeNode | undefined, FxError>> {
+  if (inputs.platform === Platform.VSCode) {
+    const buildOrPublish = new QTreeNode({
+      name: Constants.BUILD_OR_PUBLISH_QUESTION,
+      type: "singleSelect",
+      staticOptions: [manuallySubmitOption, autoPublishOption],
+      title: getLocalizedString("plugins.appstudio.publishTip"),
+      default: autoPublishOption.id,
+    });
+    return ok(buildOrPublish);
+  }
+  return ok(undefined);
 }
 
 export async function addCapabilities(

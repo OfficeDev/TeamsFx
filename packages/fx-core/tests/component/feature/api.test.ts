@@ -18,7 +18,7 @@ import * as path from "path";
 import fs from "fs-extra";
 import { createSandbox } from "sinon";
 import * as utils from "../../../src/component/utils";
-import { getComponent, runActionByName } from "../../../src/component/workflow";
+import { getComponent } from "../../../src/component/workflow";
 import { setTools } from "../../../src/core/globalVars";
 import { MockTools, randomAppName } from "../../core/utils";
 import "../../../src/component/core";
@@ -26,6 +26,7 @@ import { environmentManager } from "../../../src/core/environment";
 import { ComponentNames } from "../../../src/component/constants";
 import { FunctionScaffold } from "../../../src/plugins/resource/function/ops/scaffold";
 import { bicepUtils } from "../../../src/component/utils";
+import { Container } from "typedi";
 describe("Api Feature", () => {
   const sandbox = createSandbox();
   const tools = new MockTools();
@@ -76,7 +77,8 @@ describe("Api Feature", () => {
       language: "typescript",
       "app-name": appName,
     };
-    const addApiRes = await runActionByName(`${ComponentNames.TeamsApi}.add`, context, inputs);
+    const component = Container.get(ComponentNames.TeamsApi) as any;
+    const addApiRes = await component.add(context, inputs);
     if (addApiRes.isErr()) {
       console.log(addApiRes.error);
     }
@@ -102,7 +104,8 @@ describe("Api Feature", () => {
       language: "typescript",
       "app-name": appName,
     };
-    const addApiRes = await runActionByName(`${ComponentNames.TeamsApi}.add`, context, inputs);
+    const component = Container.get(ComponentNames.TeamsApi) as any;
+    const addApiRes = await component.add(context, inputs);
     if (addApiRes.isErr()) {
       console.log(addApiRes.error);
     }

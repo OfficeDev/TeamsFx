@@ -18,6 +18,7 @@
   ],
   "private": "true",
   "scripts": {
+    "start": "node lib/index.js 7920",
     "copy-files": "copyfiles -u 1 src/**/*.html src/**/*.css src/**/*.sh src/**/*.ps1 lib/",
     "build": "rimraf lib && tsc -p ./ && npm run copy-files",
     "build:exe": "node buildExe.js",

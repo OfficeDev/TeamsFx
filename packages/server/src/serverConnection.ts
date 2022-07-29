@@ -53,6 +53,7 @@ export default class ServerConnection implements IServerConnection {
       this.customizeLocalFuncRequest.bind(this),
       this.customizeValidateFuncRequest.bind(this),
       this.customizeOnSelectionChangeFuncRequest.bind(this),
+      this.addSsoRequest.bind(this),
     ].forEach((fn) => {
       /// fn.name = `bound ${functionName}`
       connection.onRequest(`${ServerConnection.namespace}/${fn.name.split(" ")[1]}`, fn);
@@ -173,6 +174,27 @@ export default class ServerConnection implements IServerConnection {
     const func: Func = {
       namespace: "fx-solution-azure/fx-resource-appstudio",
       method: "updateManifest",
+      params: {
+        envName: environmentManager.getDefaultEnvName(),
+      },
+    };
+    const res = await Correlator.runWithId(
+      corrId,
+      (func, inputs) => this.core.executeUserTask(func, inputs),
+      func,
+      inputs
+    );
+    return standardizeResult(res);
+  }
+
+  public async addSsoRequest(
+    inputs: Inputs,
+    token: CancellationToken
+  ): Promise<Result<any, FxError>> {
+    const corrId = inputs.correlationId ? inputs.correlationId : "";
+    const func: Func = {
+      namespace: "fx-solution-azure",
+      method: "addSso",
       params: {
         envName: environmentManager.getDefaultEnvName(),
       },

@@ -315,6 +315,7 @@ export class FailedToCheckResourceGroupExistenceError extends UserError {
 export enum Language {
   JavaScript = "javascript",
   TypeScript = "typescript",
+  CSharp = "csharp",
 }
 
 export class AddSsoParameters {

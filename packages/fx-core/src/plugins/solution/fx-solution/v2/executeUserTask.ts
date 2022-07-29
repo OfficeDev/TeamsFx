@@ -1209,6 +1209,10 @@ export function validateAndParseLanguage(language: string): Result<string, FxErr
     return ok("js");
   }
 
+  if (language.toLocaleLowerCase() == Language.CSharp) {
+    return ok("csharp");
+  }
+
   const e = new SystemError(
     SolutionSource,
     SolutionError.InvalidInput,

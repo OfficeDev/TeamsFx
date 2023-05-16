@@ -103,6 +103,10 @@ To trigger these functions, there are multiple entry points:
 - Click the `...` next to any messages you received or sent.
 
   ![ComposeArea](./images/ThreeDotOnMessage.png)
+  
+## Known Issue
+> The known issues listed here are temporary, please be noted that we are proactivly working on fixing them. We will remove the issue once we fixed it.
+1. When debugging the Message Extention app, it can successfully launch the app but there is a high chance that the Message Extension cannot return anything to users' input in search bar. Refer to the [reported issue in our github repo](https://github.com/OfficeDev/TeamsFx/issues/7810). Here is a [workaournd solution.](https://github.com/OfficeDev/TeamsFx/issues/7608)
 
 ## Further reading
 

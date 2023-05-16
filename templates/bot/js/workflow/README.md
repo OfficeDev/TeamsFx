@@ -129,7 +129,7 @@ const responseCard = require("../adaptiveCards/doSomethingResponse.json");
 class DoSomethingActionHandler { 
     triggerVerb = "doSomething";
 
-    async handleActionInvoked(context, message) { 
+    async handleActionInvoked(context, actionData) { 
         const responseCardJson = AdaptiveCards.declare(responseCard).render(actionData);
         return InvokeResponseFactory.adaptiveCard(responseCardJson);
     } 

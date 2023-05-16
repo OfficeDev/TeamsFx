@@ -5,23 +5,6 @@ The Teams Toolkit helps developers create and deploy Teams apps with integrated 
 
 <img src="https://raw.githubusercontent.com/OfficeDev/TeamsFx/main/packages/vscode-extension/img/landingPage_GetStart.gif">
 
-
-## What are Teams app "Capabilities"?
-
-Teams apps are a combination of [capabilities](https://aka.ms/teamsfx-capabilities-overview) and [entry points](https://aka.ms/teamsfx-understand-usecase). For example, people can chat with your app's bot (capability) in a channel (entry point).
-
-### Tab
-
-<a href=https://docs.microsoft.com/en-us/microsoftteams/platform/tabs/what-are-tabs>Tabs</a> are Teams-aware webpages embedded in Microsoft Teams. They are simple HTML tags that point to domains declared in the app manifest and can be added as part of a channel inside a team, group chat, or personal app for an individual user.
-
-### Bot
-
-<a href=https://docs.microsoft.com/en-us/microsoftteams/platform/bots/what-are-bots>Bots</a> allow users to interact with your web service through text, interactive cards, and task modules.
-
-### Message Extension
-
-<a href=https://docs.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/what-are-messaging-extensions>Message extensions</a> allow users to interact with your web service through buttons and forms in the Microsoft Teams client.
-
 ## Getting started
 
 Open Teams Toolkit to create a new Teams app, start coding!
@@ -60,7 +43,7 @@ Use the Teams Toolkit for Visual Studio Code to set up your first app project. C
 - Ensure you've installed the Microsoft Teams Toolkit for Visual Studio Code
 - Select the Teams Toolkit icon in the Visual Studio Code sidebar.
 - Select `Create a new Teams app` button and at next prompt to also select `Create a new Teams app`.
-- Ensure that Tab is selected as the capability that you want to build in your app. Select OK.
+- Selected the [capability](https://aka.ms/teamsfx-capabilities-overview) that you want to build in your app. Select OK.
 - Select JavaScript as the programming language.
 - Choose a location where your new application will be created in a new folder.
 - Type a name for your project and hit Enter.

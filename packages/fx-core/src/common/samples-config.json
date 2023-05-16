@@ -48,16 +48,6 @@
             "suggested": false
         },
         {
-            "id": "todo-list-with-Azure-backend",
-            "title": "Todo List with backend on Azure",
-            "shortDescription": "Todo List app with Azure Function backend and Azure SQL database",
-            "fullDescription": "Todo List provides an easy way to manage to-do items in Teams Client. This app helps enabling task collaboration and management for your team. The frontend is a React app and the backend is hosted on Azure. You will need an Azure subscription to run the app.",
-            "tags": ["React", "Azure function", "Azure SQL", "JS", "CI/CD"],
-            "time": "30min to run",
-            "configuration": "Manual configurations required",
-            "suggested": false
-        },
-        {
             "id": "todo-list-SPFx",
             "title": "Todo List with SPFx",
             "shortDescription": "Todo List app hosting on SharePoint",
@@ -90,7 +80,7 @@
         {
             "id": "todo-list-with-Azure-backend-M365",
             "title": "Todo List (Works in Teams, Outlook and Office)",
-            "shortDescription": "Todo List app that runs across Microsoft 365 including Teams, Outlook and Office",
+            "shortDescription": "Todo List app that runs across Microsoft 365 including Teams, Outlook, and Office",
             "fullDescription": "Todo List app helps to manage personal to do items and also runs across Microsoft 365, including Teams, Outlook and Office. The frontend is a React app and the backend is an Azure Function. You can optionally deploy and host the app in Azure.",
             "tags": ["React", "Azure function", "JS", "Outlook", "Office"],
             "time": "30min to run",

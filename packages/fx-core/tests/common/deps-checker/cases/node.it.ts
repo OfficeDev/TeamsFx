@@ -2,11 +2,6 @@
 // Licensed under the MIT license.
 
 import * as chai from "chai";
-import * as nodeUtils from "../utils/node";
-import { TestLogger } from "../adapters/testLogger";
-import { TestTelemetry } from "../adapters/testTelemetry";
-import { DepsType } from "../../../../src/common/deps-checker/depsChecker";
-import { CheckerFactory } from "../../../../src/common/deps-checker/checkerFactory";
 import "mocha";
 import semver from "semver";
 import {
@@ -34,11 +29,11 @@ describe("NodeChecker E2E Test", async () => {
 
   [
     {
-      nodeChecker: new ProjectNodeChecker(new TestLogger(), new TestTelemetry()),
+      nodeChecker: new ProjectNodeChecker(),
       type: "projectNodeChecker",
     },
     {
-      nodeChecker: new LtsNodeChecker(new TestLogger(), new TestTelemetry()),
+      nodeChecker: new LtsNodeChecker(),
       type: "ltsNodeChecker",
     },
   ].forEach((data) => {
@@ -99,7 +94,7 @@ describe("NodeChecker E2E Test", async () => {
     if (!nodeVersion || semver.satisfies(nodeVersion.version, ltsNodeRange)) {
       this.skip();
     }
-    const nodeChecker = new ProjectNodeChecker(new TestLogger(), new TestTelemetry());
+    const nodeChecker = new ProjectNodeChecker();
     const res = await nodeChecker.resolve({ projectPath: baseFolder! });
 
     chai.assert.isTrue(res.isInstalled);

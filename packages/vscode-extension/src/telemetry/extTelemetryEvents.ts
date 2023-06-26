@@ -277,6 +277,7 @@ export enum TelemetryProperty {
   DebugNgrokLog = "debug-ngrok-log",
   DebugConfigName = "debug-config-name",
   DebugDevTunnelNum = "debug-dev-tunnel-num",
+  DebugNodeVersion = "debug-node-version",
   Internal = "internal",
   InternalAlias = "internal-alias",
   OSArch = "os-arch",

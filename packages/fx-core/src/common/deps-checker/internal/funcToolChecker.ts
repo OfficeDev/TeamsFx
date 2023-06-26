@@ -15,8 +15,6 @@ import { v3DefaultHelpLink, v3NodeNotFoundHelpLink } from "../constant/helpLink"
 import { Messages } from "../constant/message";
 import { DependencyStatus, DepsChecker, DepsType, FuncInstallOptions } from "../depsChecker";
 import { DepsCheckerError, LinuxNotSupportedError, NodeNotFoundError } from "../depsError";
-import { DepsLogger } from "../depsLogger";
-import { DepsTelemetry } from "../depsTelemetry";
 import { cpUtils } from "../util/cpUtils";
 import { createSymlink, rename, unlinkSymlink } from "../util/fileHelper";
 import { isLinux, isWindows } from "../util/system";
@@ -44,7 +42,7 @@ const timeout = 5 * 60 * 1000;
 
 export class FuncToolChecker implements DepsChecker {
   private telemetryProperties: { [key: string]: string };
-  constructor(logger?: DepsLogger, telemetry?: DepsTelemetry) {
+  constructor() {
     this.telemetryProperties = {};
   }
 

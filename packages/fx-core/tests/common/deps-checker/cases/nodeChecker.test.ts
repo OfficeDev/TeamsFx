@@ -7,7 +7,7 @@ import {
   NodeChecker,
   ProjectNodeChecker,
 } from "../../../../src/common/deps-checker/internal/nodeChecker";
-import { DepsType, EmptyLogger, EmptyTelemetry } from "../../../../src/common/deps-checker";
+import { DepsType } from "../../../../src/common/deps-checker";
 
 chai.use(chaiAsPromised);
 
@@ -22,7 +22,7 @@ describe("NodeChecker", () => {
     });
 
     it("No node engine property specified", async () => {
-      const nodeChecker = new ProjectNodeChecker(new EmptyLogger(), new EmptyTelemetry());
+      const nodeChecker = new ProjectNodeChecker();
 
       sandbox
         .stub(NodeChecker, "getInstalledNodeVersion")
@@ -44,7 +44,7 @@ describe("NodeChecker", () => {
     });
 
     it("Lower node version", async () => {
-      const nodeChecker = new ProjectNodeChecker(new EmptyLogger(), new EmptyTelemetry());
+      const nodeChecker = new ProjectNodeChecker();
 
       sandbox
         .stub(NodeChecker, "getInstalledNodeVersion")
@@ -64,7 +64,7 @@ describe("NodeChecker", () => {
     });
 
     it("Higher node version", async () => {
-      const nodeChecker = new ProjectNodeChecker(new EmptyLogger(), new EmptyTelemetry());
+      const nodeChecker = new ProjectNodeChecker();
 
       sandbox
         .stub(NodeChecker, "getInstalledNodeVersion")
@@ -84,7 +84,7 @@ describe("NodeChecker", () => {
     });
 
     it("Supported node version", async () => {
-      const nodeChecker = new ProjectNodeChecker(new EmptyLogger(), new EmptyTelemetry());
+      const nodeChecker = new ProjectNodeChecker();
 
       sandbox
         .stub(NodeChecker, "getInstalledNodeVersion")

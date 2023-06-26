@@ -29,8 +29,8 @@ import * as projectSettingsHelper from "@microsoft/teamsfx-core/build/common/pro
 import {
   AppDefinition,
   AppStudioClient,
+  CheckerFactory,
   CollaborationState,
-  DepsManager,
   DepsType,
   FxCore,
   UnhandledError,
@@ -1055,47 +1055,65 @@ describe("handlers", () => {
       sinon.restore();
     });
     it("dotnet is installed", async () => {
-      sinon.stub(DepsManager.prototype, "getStatus").resolves([
-        {
-          name: ".NET Core SDK",
-          type: DepsType.Dotnet,
-          isInstalled: true,
-          command: "",
-          details: {
-            isLinuxSupported: false,
-            installVersion: "",
-            supportedVersions: [],
-            binFolders: ["dotnet-bin-folder/dotnet"],
-          },
+      sinon.stub(CheckerFactory, "createChecker").returns({
+        resolve: async () => {
+          throw new Error("Not implemented");
         },
-      ]);
+        getInstallationInfo: async () => {
+          return {
+            name: ".NET Core SDK",
+            type: DepsType.Dotnet,
+            isInstalled: true,
+            command: "",
+            details: {
+              isLinuxSupported: false,
+              installVersion: "",
+              supportedVersions: [],
+              binFolders: ["dotnet-bin-folder/dotnet"],
+            },
+          };
+        },
+      });
 
       const dotnetPath = await handlers.getDotnetPathHandler();
       chai.assert.equal(dotnetPath, `${path.delimiter}dotnet-bin-folder${path.delimiter}`);
     });
 
     it("dotnet is not installed", async () => {
-      sinon.stub(DepsManager.prototype, "getStatus").resolves([
-        {
-          name: ".NET Core SDK",
-          type: DepsType.Dotnet,
-          isInstalled: false,
-          command: "",
-          details: {
-            isLinuxSupported: false,
-            installVersion: "",
-            supportedVersions: [],
-            binFolders: undefined,
-          },
+      sinon.stub(CheckerFactory, "createChecker").returns({
+        resolve: async () => {
+          throw new Error("Not implemented");
         },
-      ]);
+        getInstallationInfo: async () => {
+          return {
+            name: ".NET Core SDK",
+            type: DepsType.Dotnet,
+            isInstalled: false,
+            command: "",
+            details: {
+              isLinuxSupported: false,
+              installVersion: "",
+              supportedVersions: [],
+              binFolders: undefined,
+            },
+          };
+        },
+      });
 
       const dotnetPath = await handlers.getDotnetPathHandler();
       chai.assert.equal(dotnetPath, `${path.delimiter}`);
     });
 
     it("failed to get dotnet path", async () => {
-      sinon.stub(DepsManager.prototype, "getStatus").rejects(new Error("failed to get status"));
+      sinon.stub(CheckerFactory, "createChecker").returns({
+        resolve: async () => {
+          throw new Error("Not implemented");
+        },
+        getInstallationInfo: async () => {
+          throw new Error("failed to get status");
+        },
+      });
+
       const dotnetPath = await handlers.getDotnetPathHandler();
       chai.assert.equal(dotnetPath, `${path.delimiter}`);
     });

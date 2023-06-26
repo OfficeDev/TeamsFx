@@ -10,12 +10,9 @@ import { ConfigFolderName } from "@microsoft/teamsfx-api";
 import { performance } from "perf_hooks";
 import { dotnetFailToInstallHelpLink, dotnetExplanationHelpLink } from "../constant/helpLink";
 import { DepsCheckerError, LinuxNotSupportedError } from "../depsError";
-import { runWithProgressIndicator } from "../util/progressIndicator";
 import { cpUtils } from "../util/cpUtils";
 import { isLinux, isWindows, isArm64, isMacOS } from "../util/system";
-import { DepsCheckerEvent, TelemtryMessages } from "../constant/telemetry";
-import { DepsLogger } from "../depsLogger";
-import { DepsTelemetry } from "../depsTelemetry";
+import { TelemetryProperties } from "../constant/telemetry";
 import { DepsChecker, DependencyStatus, DepsType } from "../depsChecker";
 import { Messages } from "../constant/message";
 import { getResourceFolder } from "../../../folder";
@@ -39,13 +36,10 @@ export class DotnetChecker implements DepsChecker {
   private static encoding = "utf-8";
   private static timeout = 5 * 60 * 1000; // same as vscode-dotnet-runtime
   private static maxBuffer = 500 * 1024;
+  private telemetryProperties: { [key: string]: string };
 
-  private readonly _logger: DepsLogger;
-  private readonly _telemetry: DepsTelemetry;
-
-  constructor(logger: DepsLogger, telemetry: DepsTelemetry) {
-    this._logger = logger;
-    this._telemetry = telemetry;
+  constructor() {
+    this.telemetryProperties = {};
   }
 
   public async getDepsInfo(
@@ -65,32 +59,18 @@ export class DotnetChecker implements DepsChecker {
         binFolders: execPath ? [execPath] : undefined,
       },
       error: error,
+      telemetryProperties: this.telemetryProperties,
     };
   }
 
   public async getInstallationInfo(): Promise<DependencyStatus> {
-    const configPath = DotnetChecker.getDotnetConfigPath();
-    await this._logger.debug(`[start] read dotnet path from '${configPath}'`);
     const dotnetPath = await this.getDotnetExecPathFromConfig();
-    await this._logger.debug(
-      `[end] read dotnet path from '${configPath}', dotnetPath = '${dotnetPath}'`
-    );
 
-    await this._logger.debug(`[start] check dotnet version`);
     if (dotnetPath !== null && (await this.isDotnetInstalledCorrectly())) {
-      // filter out global sdk
-      if (dotnetPath.includes(`.${ConfigFolderName}`)) {
-        this._telemetry.sendEvent(DepsCheckerEvent.dotnetInstallCompleted);
-      }
       return await this.getDepsInfo(true);
     }
-    await this._logger.debug(`[end] check dotnet version`);
 
     if ((await this.tryAcquireGlobalDotnetSdk()) && (await this.validate())) {
-      this._telemetry.sendEvent(DepsCheckerEvent.dotnetAlreadyInstalled);
-      await this._logger.info(
-        `${Messages.useGlobalDotnet()} '${await this.getDotnetExecPathFromConfig()}'`
-      );
       return await this.getDepsInfo(true);
     }
 
@@ -106,8 +86,6 @@ export class DotnetChecker implements DepsChecker {
       }
       return installationInfo;
     } catch (error) {
-      await this._logger.printDetailLog();
-      await this._logger.error(`${error.message}, error = '${error}'`);
       if (error instanceof DepsCheckerError) {
         return await this.getDepsInfo(false, error);
       }
@@ -115,8 +93,6 @@ export class DotnetChecker implements DepsChecker {
         false,
         new DepsCheckerError(error.message, dotnetFailToInstallHelpLink)
       );
-    } finally {
-      this._logger.cleanup();
     }
   }
 
@@ -128,39 +104,18 @@ export class DotnetChecker implements DepsChecker {
       );
     }
 
-    await this._logger.debug(`[start] cleanup bin/dotnet and config`);
     await DotnetChecker.cleanup();
-    await this._logger.debug(`[end] cleanup bin/dotnet and config`);
 
     const installDir = DotnetChecker.getDefaultInstallPath();
-    await this._logger.debug(`[start] install dotnet ${installVersion}`);
-    await this._logger.debug(
-      Messages.dotnetNotFound()
-        .replace("@NameVersion", installedNameWithVersion)
-        .replace("@HelpLink", dotnetExplanationHelpLink)
-    );
-    await this._logger.info(
-      Messages.downloadDotnet()
-        .replace("@NameVersion", installedNameWithVersion)
-        .replace("@InstallDir", installDir)
-    );
 
-    // TODO add progress log
-    await runWithProgressIndicator(async () => {
-      await this.handleInstall(installVersion, installDir);
-    }, this._logger);
+    await this.handleInstall(installVersion, installDir);
 
-    await this._logger.debug(`[end] install dotnet ${installVersion}`);
-
-    await this._logger.debug(`[start] validate dotnet version`);
     if (!(await this.validate())) {
-      this._telemetry.sendEvent(DepsCheckerEvent.dotnetInstallError);
       throw new DepsCheckerError(
         getLocalizedString("error.common.InstallSoftwareError", installedNameWithVersion),
         dotnetFailToInstallHelpLink
       );
     }
-    this._telemetry.sendEvent(DepsCheckerEvent.dotnetInstallCompleted);
   }
 
   public async command(): Promise<string> {
@@ -192,12 +147,7 @@ export class DotnetChecker implements DepsChecker {
       if (typeof config.dotnetExecutablePath === "string") {
         return config.dotnetExecutablePath;
       }
-      await this._logger.debug(
-        `invalid dotnet config file format, config: '${JSON.stringify(config)}' `
-      );
-    } catch (error) {
-      await this._logger.debug(`get dotnet path failed, error: '${error}'`);
-    }
+    } catch {}
     return null;
   }
 
@@ -210,20 +160,10 @@ export class DotnetChecker implements DepsChecker {
       // NOTE: we don't need to handle directory creation since dotnet-install script will handle it.
       await this.runDotnetInstallScript(version, installDir);
 
-      await this._logger.debug(`[start] write dotnet path to config`);
       const dotnetExecPath = DotnetChecker.getDotnetExecPathFromDotnetInstallationDir(installDir);
       await DotnetChecker.persistDotnetExecPath(dotnetExecPath);
-      await this._logger.debug(`[end] write dotnet path to config`);
-      await this._logger.info(
-        Messages.finishInstallDotnet().replace("@NameVersion", installedNameWithVersion)
-      );
-    } catch (error) {
-      await this._logger.error(
-        `${getLocalizedString(
-          "error.common.InstallSoftwareError",
-          installedNameWithVersion
-        )}, error = '${error}'`
-      );
+    } catch (error: any) {
+      this.telemetryProperties[TelemetryProperties.dotnetInstallError] = error.message;
     }
   }
 
@@ -267,11 +207,6 @@ export class DotnetChecker implements DepsChecker {
     try {
       fs.chmodSync(this.getDotnetInstallScriptPath(), "755");
       const { stdout, stderr } = await execFile(command[0], command.slice(1), options);
-      await this._logger.debug(
-        `Finished running dotnet-install script, command = '${command.join(
-          " "
-        )}', options = '${JSON.stringify(options)}', stdout = '${stdout}', stderr = '${stderr}'`
-      );
 
       const timecost = Number(((performance.now() - start) / 1000).toFixed(2));
 
@@ -281,16 +216,10 @@ export class DotnetChecker implements DepsChecker {
           installedNameWithVersion
         )} ${Messages.dotnetInstallStderr()} stdout = '${stdout}', stderr = '${stderr}', timecost = '${timecost}s'`;
 
-        this._telemetry.sendSystemErrorEvent(
-          DepsCheckerEvent.dotnetInstallScriptError,
-          TelemtryMessages.failedToExecDotnetScript,
-          errorMessage
-        );
-        await this._logger.error(errorMessage);
-      } else {
-        this._telemetry.sendEvent(DepsCheckerEvent.dotnetInstallScriptCompleted, {}, timecost);
+        this.telemetryProperties[TelemetryProperties.dotnetInstallScriptError] = errorMessage;
       }
-    } catch (error) {
+    } catch (error: any) {
+      // swallow the exception since later validate will find out the errors anyway
       const timecost = Number(((performance.now() - start) / 1000).toFixed(2));
       const errorMessage =
         `${getLocalizedString(
@@ -303,13 +232,7 @@ export class DotnetChecker implements DepsChecker {
           error.stderr
         }', timecost = '${timecost}s'`;
 
-      this._telemetry.sendSystemErrorEvent(
-        DepsCheckerEvent.dotnetInstallScriptError,
-        TelemtryMessages.failedToExecDotnetScript,
-        errorMessage
-      );
-      // swallow the exception since later validate will find out the errors anyway
-      await this._logger.error(errorMessage);
+      this.telemetryProperties[TelemetryProperties.dotnetInstallScriptError] = errorMessage;
     }
   }
 
@@ -323,12 +246,7 @@ export class DotnetChecker implements DepsChecker {
       return this.isDotnetVersionsInstalled(installedVersions);
     } catch (error) {
       const errorMessage = `validate private install failed, error = '${error}'`;
-      this._telemetry.sendSystemErrorEvent(
-        DepsCheckerEvent.dotnetValidationError,
-        TelemtryMessages.failedToValidateDotnet,
-        errorMessage
-      );
-      await this._logger.debug(errorMessage);
+      this.telemetryProperties[TelemetryProperties.dotnetValidationError] = errorMessage;
       return false;
     }
   }
@@ -337,10 +255,8 @@ export class DotnetChecker implements DepsChecker {
     try {
       const validVersions = DotnetChecker.arrayIntersection(installedVersions, supportedVersions);
       return validVersions.length > 0;
-    } catch (error) {
-      await this._logger.error(
-        `failed to check .NET, installedVersions = '${installedVersions}', supportedVersions = '${supportedVersions}', error = '${error}'`
-      );
+    } catch (error: any) {
+      this.telemetryProperties[TelemetryProperties.dotnetValidationError] = error.message;
       return false;
     }
   }
@@ -370,7 +286,7 @@ export class DotnetChecker implements DepsChecker {
       // shell = false to prevent shell escape issues in dotnetExecPath
       const dotnetListSdksOutput = await cpUtils.executeCommand(
         undefined,
-        this._logger,
+        undefined,
         { shell: false },
         dotnetExecPath,
         "--list-sdks"
@@ -396,12 +312,7 @@ export class DotnetChecker implements DepsChecker {
       });
     } catch (error) {
       const errorMessage = `Failed to search dotnet sdk by dotnetPath = '${dotnetExecPath}', error = '${error}'`;
-      await this._logger.debug(errorMessage);
-      this._telemetry.sendSystemErrorEvent(
-        DepsCheckerEvent.dotnetSearchDotnetSdks,
-        TelemtryMessages.failedToSearchDotnetSdks,
-        errorMessage
-      );
+      this.telemetryProperties[TelemetryProperties.dotnetSearchDotnetSdksError] = errorMessage;
     }
     return sdks;
   }
@@ -470,7 +381,6 @@ export class DotnetChecker implements DepsChecker {
     const isInstallationValid =
       (await this.isDotnetInstalledCorrectly()) && (await this.validateWithHelloWorld());
     if (!isInstallationValid) {
-      this._telemetry.sendEvent(DepsCheckerEvent.dotnetValidationError);
       await DotnetChecker.cleanup();
     }
     return isInstallationValid;
@@ -488,7 +398,7 @@ export class DotnetChecker implements DepsChecker {
 
       await cpUtils.executeCommand(
         undefined,
-        this._logger,
+        undefined,
         { shell: false },
         dotnetPath,
         "new",
@@ -499,7 +409,7 @@ export class DotnetChecker implements DepsChecker {
       );
       await cpUtils.executeCommand(
         undefined,
-        this._logger,
+        undefined,
         { shell: false },
         dotnetPath,
         "run",
@@ -508,15 +418,8 @@ export class DotnetChecker implements DepsChecker {
         "--force"
       );
       return true;
-    } catch (error) {
-      this._telemetry.sendSystemErrorEvent(
-        DepsCheckerEvent.dotnetValidationError,
-        TelemtryMessages.failedToValidateDotnet,
-        error
-      );
-      await this._logger.debug(
-        `Failed to run hello world, dotnetPath = ${dotnetPath}, error = ${error}`
-      );
+    } catch (error: any) {
+      this.telemetryProperties[TelemetryProperties.dotnetValidationError] = error.message;
     } finally {
       await fs.remove(samplePath);
     }
@@ -539,7 +442,6 @@ export class DotnetChecker implements DepsChecker {
       await DotnetChecker.persistDotnetExecPath(dotnetExecPath);
       return true;
     } catch (error) {
-      await this._logger.debug(`Failed to acquire global dotnet sdk, error = '${error}'`);
       return false;
     }
   }

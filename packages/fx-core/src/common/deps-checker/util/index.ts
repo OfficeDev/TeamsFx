@@ -4,4 +4,3 @@
 
 export * from "./cpUtils";
 export * from "./system";
-export * from "./progressIndicator";

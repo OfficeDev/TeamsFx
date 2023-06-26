@@ -12,8 +12,6 @@ import AdmZip from "adm-zip";
 import { ConfigFolderName } from "@microsoft/teamsfx-api";
 import { Messages, vxTestAppInstallHelpLink } from "../constant";
 import { DepsCheckerError, VxTestAppCheckError } from "../depsError";
-import { DepsLogger } from "../depsLogger";
-import { DepsTelemetry } from "../depsTelemetry";
 import { DepsChecker, DependencyStatus, DepsType, BaseInstallOptions } from "../depsChecker";
 import { isMacOS, isWindows } from "../util";
 import { createSymlink } from "../util/fileHelper";
@@ -92,14 +90,6 @@ async function unzip(zipFilePath: string, destinationPath: string): Promise<void
 }
 
 export class VxTestAppChecker implements DepsChecker {
-  private readonly _logger: DepsLogger;
-  private readonly _telemetry: DepsTelemetry;
-
-  constructor(logger: DepsLogger, telemetry: DepsTelemetry) {
-    this._logger = logger;
-    this._telemetry = telemetry;
-  }
-
   public async resolve(installOptions?: BaseInstallOptions): Promise<DependencyStatus> {
     if (!this.isValidInstallOptions(installOptions)) {
       return VxTestAppChecker.newDependencyStatusForInstallError(

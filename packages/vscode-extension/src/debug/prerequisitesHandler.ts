@@ -19,7 +19,6 @@ import {
   AppStudioScopes,
   DependencyStatus,
   DepsCheckerError,
-  DepsManager,
   DepsType,
   LocalEnvManager,
   NodeNotFoundError,
@@ -29,11 +28,11 @@ import {
   V3NodeNotSupportedError,
   assembleError,
   getSideloadingStatus,
+  CheckerFactory,
 } from "@microsoft/teamsfx-core";
 import * as os from "os";
 import * as util from "util";
 import * as vscode from "vscode";
-
 import { signedOut } from "../commonlib/common/constant";
 import VsCodeLogInstance from "../commonlib/log";
 import M365TokenInstance from "../commonlib/m365Login";
@@ -53,8 +52,6 @@ import {
   v3PrerequisiteCheckTaskDisplayMessages,
 } from "./constants";
 import { doctorConstant } from "./depsChecker/doctorConstant";
-import { vscodeLogger } from "./depsChecker/vscodeLogger";
-import { vscodeTelemetry } from "./depsChecker/vscodeTelemetry";
 import { localTelemetryReporter } from "./localTelemetryReporter";
 import { ProgressHelper } from "./progressHelper";
 import { allRunningTeamsfxTasks, terminateAllRunningTeamsfxTasks } from "./teamsfxTaskHandler";
@@ -268,8 +265,6 @@ async function _checkAndInstall(
   let progressHelper: ProgressHelper | undefined;
   const checkResults: CheckResult[] = [];
   try {
-    const enabledCheckers = parseCheckers(orderedCheckers);
-
     const localEnvManager = new LocalEnvManager(
       VsCodeLogInstance,
       ExtTelemetry.reporter,
@@ -280,10 +275,7 @@ async function _checkAndInstall(
     VsCodeLogInstance.info(displayMessages.title);
     VsCodeLogInstance.outputChannel.appendLine("");
 
-    // Get deps
-    const depsManager = new DepsManager(vscodeLogger, vscodeTelemetry);
-
-    const step = new Step(enabledCheckers.length);
+    const step = new Step(orderedCheckers.length);
 
     VsCodeLogInstance.outputChannel.appendLine(displayMessages.checkNumber(step.totalSteps));
     progressHelper = new ProgressHelper(
@@ -291,10 +283,10 @@ async function _checkAndInstall(
     );
 
     await progressHelper.start(
-      enabledCheckers.map((v) => {
+      orderedCheckers.map((v) => {
         return {
-          key: v.checker,
-          detail: ProgressMessage[v.checker],
+          key: v.info.checker,
+          detail: ProgressMessage[v.info.checker],
         };
       })
     );
@@ -304,7 +296,6 @@ async function _checkAndInstall(
       const orderedCheckerInfo = orderedChecker.info as PrerequisiteCheckerInfo;
       const checkResult = await getCheckPromise(
         orderedCheckerInfo,
-        depsManager,
         localEnvManager,
         step,
         additionalTelemetryProperties
@@ -325,7 +316,6 @@ async function _checkAndInstall(
 
 function getCheckPromise(
   checkerInfo: PrerequisiteCheckerInfo,
-  depsManager: DepsManager,
   localEnvManager: LocalEnvManager,
   step: Step,
   additionalTelemetryProperties: { [key: string]: string }
@@ -333,12 +323,7 @@ function getCheckPromise(
   switch (checkerInfo.checker) {
     case DepsType.LtsNode:
     case DepsType.ProjectNode:
-      return checkNode(
-        checkerInfo.checker,
-        depsManager,
-        step.getPrefix(),
-        additionalTelemetryProperties
-      );
+      return checkNode(checkerInfo.checker, step.getPrefix(), additionalTelemetryProperties);
     case Checker.M365Account:
       return checkM365Account(step.getPrefix(), true, additionalTelemetryProperties);
     case Checker.Ports:
@@ -349,14 +334,6 @@ function getCheckPromise(
         additionalTelemetryProperties
       );
   }
-}
-
-function parseCheckers(orderedCheckers: PrerequisiteOrderedChecker[]): PrerequisiteCheckerInfo[] {
-  const parsedCheckers: PrerequisiteCheckerInfo[] = [];
-  for (const orderedChecker of orderedCheckers) {
-    parsedCheckers.push(orderedChecker.info);
-  }
-  return parsedCheckers;
 }
 
 async function ensureM365Account(
@@ -492,19 +469,20 @@ function checkM365Account(
 
 async function checkNode(
   nodeDep: DepsType.LtsNode | DepsType.ProjectNode,
-  depsManager: DepsManager,
   prefix: string,
   additionalTelemetryProperties: { [key: string]: string }
 ): Promise<CheckResult> {
   return await runWithCheckResultTelemetryProperties(
     TelemetryEvent.DebugPrereqsCheckNode,
     additionalTelemetryProperties,
-    async () => {
+    async (ctx: TelemetryContext) => {
       try {
         VsCodeLogInstance.outputChannel.appendLine(`${prefix} ${ProgressMessage[nodeDep]} ...`);
-        const nodeStatus = await depsManager.ensureDependency(nodeDep, true, {
+        const nodeChecker = CheckerFactory.createChecker(nodeDep);
+        const nodeStatus = await nodeChecker.resolve({
           projectPath: globalVariables.workspaceUri?.fsPath,
         });
+        ctx.properties[TelemetryProperty.DebugNodeVersion] = `${nodeStatus.details.installVersion}`;
         return {
           checker: nodeStatus.name,
           result: nodeStatus.isInstalled

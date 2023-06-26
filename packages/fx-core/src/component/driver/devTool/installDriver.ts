@@ -8,7 +8,7 @@ import * as path from "path";
 import semver from "semver";
 import { Service } from "typedi";
 import { FxError, Result } from "@microsoft/teamsfx-api";
-import { DependencyStatus, EmptyLogger, EmptyTelemetry } from "../../../common/deps-checker";
+import { DependencyStatus } from "../../../common/deps-checker";
 import {
   LocalCertificate,
   LocalCertificateManager,
@@ -193,7 +193,7 @@ export class ToolsInstallDriverImpl {
 
   async resolveDotnet(outputEnvVarNames?: Map<string, string>): Promise<Map<string, string>> {
     const res = new Map<string, string>();
-    const dotnetChecker = new DotnetChecker(new EmptyLogger(), new EmptyTelemetry());
+    const dotnetChecker = new DotnetChecker();
     const dotnetStatus = await dotnetChecker.resolve();
 
     this.setDepsCheckTelemetry(TelemetryProperties.dotnetStatus, dotnetStatus);

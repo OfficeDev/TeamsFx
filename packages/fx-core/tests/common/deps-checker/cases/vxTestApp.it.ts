@@ -10,8 +10,6 @@ import "mocha";
 import * as sinon from "sinon";
 import * as chai from "chai";
 import mockFs from "mock-fs";
-import { TestLogger } from "../adapters/testLogger";
-import { TestTelemetry } from "../adapters/testTelemetry";
 import { DepsType } from "../../../../src/common/deps-checker/depsChecker";
 import { CheckerFactory } from "../../../../src/common/deps-checker/checkerFactory";
 import { VxTestAppChecker } from "../../../../src/common/deps-checker/internal/vxTestAppChecker";
@@ -44,7 +42,7 @@ describe("VxTestAppChecker E2E Test", async () => {
         vxTestAppExecutableName
       )]: "",
     });
-    const checker = new VxTestAppChecker(new TestLogger(), new TestTelemetry());
+    const checker = new VxTestAppChecker();
     const info = await checker.getInstallationInfo({
       projectPath: fakeProjectPath,
       version: "1.0.4",
@@ -59,11 +57,7 @@ describe("VxTestAppChecker E2E Test", async () => {
       return;
     }
 
-    const checker = CheckerFactory.createChecker(
-      DepsType.VxTestApp,
-      new TestLogger(),
-      new TestTelemetry()
-    );
+    const checker = CheckerFactory.createChecker(DepsType.VxTestApp);
 
     let tmpDir;
     try {

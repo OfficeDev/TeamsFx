@@ -11,7 +11,6 @@ import {
   v3NodeNotSupportedHelpLink,
 } from "../constant/helpLink";
 import { Messages } from "../constant/message";
-import { DepsCheckerEvent } from "../constant/telemetry";
 import { DependencyStatus, DepsChecker, DepsType, BaseInstallOptions } from "../depsChecker";
 import {
   DepsCheckerError,
@@ -19,8 +18,6 @@ import {
   NodeNotLtsError,
   V3NodeNotSupportedError,
 } from "../depsError";
-import { DepsLogger } from "../depsLogger";
-import { DepsTelemetry } from "../depsTelemetry";
 import { cpUtils } from "../util/cpUtils";
 
 const NodeName = "Node.js";
@@ -37,7 +34,6 @@ class NodeVersion {
 
 export abstract class NodeChecker implements DepsChecker {
   protected abstract readonly _nodeNotFoundHelpLink: string;
-  protected abstract readonly _nodeNotSupportedEvent: DepsCheckerEvent;
   protected abstract readonly _type: DepsType;
   protected abstract getSupportedVersions(projectPath?: string): Promise<string[]>;
   protected abstract isVersionSupported(supportedVersions: string[], version: NodeVersion): boolean;
@@ -48,42 +44,18 @@ export abstract class NodeChecker implements DepsChecker {
   protected abstract readonly _minErrorVersion: number;
   protected abstract readonly _maxErrorVersion: number;
 
-  private readonly _telemetry: DepsTelemetry;
-  private readonly _logger: DepsLogger;
-
-  constructor(logger: DepsLogger, telemetry: DepsTelemetry) {
-    this._logger = logger;
-    this._telemetry = telemetry;
-  }
-
   public async getInstallationInfo(installOptions?: BaseInstallOptions): Promise<DependencyStatus> {
     let supportedVersions: string[] = [];
     try {
       supportedVersions = await this.getSupportedVersions(installOptions?.projectPath);
 
-      this._logger.debug(
-        `NodeChecker checking for supported versions: '${JSON.stringify(supportedVersions)}'`
-      );
-
       const currentVersion = await NodeChecker.getInstalledNodeVersion();
       if (currentVersion === null) {
-        this._telemetry.sendUserErrorEvent(
-          DepsCheckerEvent.nodeNotFound,
-          "Node.js can't be found."
-        );
         const error = new NodeNotFoundError(Messages.NodeNotFound(), this._nodeNotFoundHelpLink);
         return await this.getDepsInfo(false, supportedVersions, undefined, error);
       }
-      this._telemetry.sendEvent(DepsCheckerEvent.nodeVersion, {
-        "global-version": `${currentVersion.version}`,
-        "global-major-version": `${currentVersion.majorVersion}`,
-      });
 
       if (!this.isVersionSupported(supportedVersions, currentVersion)) {
-        this._telemetry.sendUserErrorEvent(
-          this._nodeNotSupportedEvent,
-          `Node.js ${currentVersion.version} is not supported.`
-        );
         return await this.getDepsInfo(
           !NodeChecker.isVersionError(this._minErrorVersion, this._maxErrorVersion, currentVersion),
           supportedVersions,
@@ -103,15 +75,7 @@ export abstract class NodeChecker implements DepsChecker {
   }
 
   public async resolve(installOptions?: BaseInstallOptions): Promise<DependencyStatus> {
-    const installationInfo = await this.getInstallationInfo(installOptions);
-    if (installationInfo.error) {
-      await this._logger.printDetailLog();
-      await this._logger.error(
-        `${installationInfo.error.message}, error = '${installationInfo.error}'`
-      );
-    }
-    this._logger.cleanup();
-    return installationInfo;
+    return await this.getInstallationInfo(installOptions);
   }
 
   public async install(): Promise<void> {
@@ -189,7 +153,6 @@ function getNodeVersion(output: string): NodeVersion | null {
 
 export class LtsNodeChecker extends NodeChecker {
   protected readonly _nodeNotFoundHelpLink = v3NodeNotFoundHelpLink;
-  protected readonly _nodeNotSupportedEvent = DepsCheckerEvent.nodeNotLts;
   protected readonly _type = DepsType.LtsNode;
   protected readonly _minErrorVersion = Number.MIN_SAFE_INTEGER;
   protected readonly _maxErrorVersion = Number.MAX_SAFE_INTEGER;
@@ -215,7 +178,6 @@ export class LtsNodeChecker extends NodeChecker {
 
 export class ProjectNodeChecker extends NodeChecker {
   protected readonly _nodeNotFoundHelpLink = v3NodeNotFoundHelpLink;
-  protected readonly _nodeNotSupportedEvent = DepsCheckerEvent.nodeNotSupportedForProject;
   protected readonly _type = DepsType.ProjectNode;
   protected readonly _minErrorVersion = Number.MIN_SAFE_INTEGER;
   protected readonly _maxErrorVersion = Number.MAX_SAFE_INTEGER;

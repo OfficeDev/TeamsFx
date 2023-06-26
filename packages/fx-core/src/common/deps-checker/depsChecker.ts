@@ -23,15 +23,6 @@ export type DependencyStatus = {
   error?: DepsCheckerError;
 };
 
-export interface DepsInfo {
-  name: string;
-  isLinuxSupported: boolean;
-  installVersion?: string;
-  supportedVersions: string[];
-  binFolders?: string[];
-  details: Map<string, string>;
-}
-
 export enum DepsType {
   LtsNode = "lts-node",
   ProjectNode = "project-node",

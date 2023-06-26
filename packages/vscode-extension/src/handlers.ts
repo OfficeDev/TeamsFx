@@ -45,10 +45,10 @@ import {
   AppStudioClient,
   AppStudioScopes,
   AuthSvcScopes,
+  CheckerFactory,
   ConcurrentError,
   CoreQuestionNames,
   Correlator,
-  DepsManager,
   DepsType,
   FxCore,
   Hub,
@@ -82,8 +82,6 @@ import {
 import { PanelType } from "./controls/PanelType";
 import { WebviewPanel } from "./controls/webviewPanel";
 import * as commonUtils from "./debug/commonUtils";
-import { vscodeLogger } from "./debug/depsChecker/vscodeLogger";
-import { vscodeTelemetry } from "./debug/depsChecker/vscodeTelemetry";
 import { openHubWebClient } from "./debug/launch";
 import * as localPrerequisites from "./debug/prerequisitesHandler";
 import { selectAndDebug } from "./debug/runIconHandler";
@@ -1056,8 +1054,8 @@ export async function getPathDelimiterHandler(): Promise<string> {
  */
 export async function getDotnetPathHandler(): Promise<string> {
   try {
-    const depsManager = new DepsManager(vscodeLogger, vscodeTelemetry);
-    const dotnetStatus = (await depsManager.getStatus([DepsType.Dotnet]))?.[0];
+    const depsChecker = CheckerFactory.createChecker(DepsType.Dotnet);
+    const dotnetStatus = await depsChecker.getInstallationInfo();
     if (dotnetStatus?.isInstalled && dotnetStatus?.details?.binFolders !== undefined) {
       return `${path.delimiter}${dotnetStatus.details.binFolders
         .map((f: string) => path.dirname(f))

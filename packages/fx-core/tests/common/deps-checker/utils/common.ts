@@ -3,17 +3,16 @@ import * as fs from "fs-extra";
 
 import { cpUtils } from "../../../../src/common/deps-checker/util/cpUtils";
 import { isWindows } from "../../../../src/common/deps-checker/util/system";
-import { logger } from "../adapters/testLogger";
 import * as tmp from "tmp";
 
 export async function commandExistsInPath(command: string): Promise<boolean> {
   try {
     if (isWindows()) {
-      await cpUtils.executeCommand(undefined, logger, { shell: "cmd.exe" }, "where", command);
+      await cpUtils.executeCommand(undefined, undefined, { shell: "cmd.exe" }, "where", command);
     } else {
       await cpUtils.executeCommand(
         undefined,
-        logger,
+        undefined,
         { shell: "/bin/bash" },
         "type",
         "-P",
@@ -33,7 +32,7 @@ export function assertPathEqual(actual: string, expected: string) {
 export async function getExecutionPolicyForCurrentUser(): Promise<string> {
   const policy = await cpUtils.executeCommand(
     undefined,
-    logger,
+    undefined,
     undefined,
     "powershell.exe",
     "-Command",
@@ -47,7 +46,7 @@ export async function getExecutionPolicyForCurrentUser(): Promise<string> {
 export async function setExecutionPolicyForCurrentUser(policy: string): Promise<void> {
   await cpUtils.executeCommand(
     undefined,
-    logger,
+    undefined,
     undefined,
     "powershell.exe",
     "-Command",

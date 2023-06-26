@@ -9,7 +9,6 @@ import * as tmp from "tmp";
 import { ConfigFolderName } from "@microsoft/teamsfx-api";
 import { cpUtils } from "../../../../src/common/deps-checker/util/cpUtils";
 import { isWindows } from "../../../../src/common/deps-checker/util/system";
-import { logger } from "../adapters/testLogger";
 import { createTmpDir } from "./common";
 import {
   DotnetChecker,
@@ -63,7 +62,7 @@ export async function hasAnyDotnetVersions(
   try {
     const output = await cpUtils.executeCommand(
       undefined,
-      logger,
+      undefined,
       undefined,
       dotnetExecPath,
       "--list-sdks"

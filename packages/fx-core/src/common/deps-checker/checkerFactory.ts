@@ -2,8 +2,6 @@
 // Licensed under the MIT license.
 
 import { DotnetChecker } from "./internal/dotnetChecker";
-import { DepsLogger } from "./depsLogger";
-import { DepsTelemetry } from "./depsTelemetry";
 import { DepsChecker } from "./depsChecker";
 import { ProjectNodeChecker, LtsNodeChecker } from "./internal/nodeChecker";
 import { FuncToolChecker } from "./internal/funcToolChecker";
@@ -11,22 +9,18 @@ import { DepsType } from "./depsChecker";
 import { VxTestAppChecker } from "./internal/vxTestAppChecker";
 
 export class CheckerFactory {
-  public static createChecker(
-    type: DepsType,
-    logger: DepsLogger,
-    telemetry: DepsTelemetry
-  ): DepsChecker {
+  public static createChecker(type: DepsType): DepsChecker {
     switch (type) {
       case DepsType.ProjectNode:
-        return new ProjectNodeChecker(logger, telemetry);
+        return new ProjectNodeChecker();
       case DepsType.LtsNode:
-        return new LtsNodeChecker(logger, telemetry);
+        return new LtsNodeChecker();
       case DepsType.Dotnet:
-        return new DotnetChecker(logger, telemetry);
+        return new DotnetChecker();
       case DepsType.FuncCoreTools:
-        return new FuncToolChecker(logger, telemetry);
+        return new FuncToolChecker();
       case DepsType.VxTestApp:
-        return new VxTestAppChecker(logger, telemetry);
+        return new VxTestAppChecker();
       default:
         throw Error("dependency type is undefined");
     }

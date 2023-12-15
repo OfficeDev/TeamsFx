@@ -1,23 +1,21 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-
 /**
  * @author Xiaofu Huang <xiaofhua@microsoft.com>
  */
+import { performance } from "perf_hooks";
 import * as util from "util";
-import * as vscode from "vscode";
 import { v4 as uuidv4 } from "uuid";
-import { FxError, Result, UserError, Void } from "@microsoft/teamsfx-api";
-import { assembleError } from "@microsoft/teamsfx-core";
+import * as vscode from "vscode";
+import { FxError, Result, SystemError, UserError, Void } from "@microsoft/teamsfx-api";
+import { assembleError, Correlator } from "@microsoft/teamsfx-core";
+import { ExtensionErrors, ExtensionSource } from "../../error";
 import * as globalVariables from "../../globalVariables";
 import { showError } from "../../handlers";
-import { ExtensionErrors, ExtensionSource } from "../../error";
-import { getDefaultString, localize } from "../../utils/localizeUtils";
-import { sendDebugAllEvent } from "../localTelemetryReporter";
-import * as commonUtils from "../commonUtils";
 import { TelemetryProperty } from "../../telemetry/extTelemetryEvents";
-import { performance } from "perf_hooks";
-import { Correlator } from "@microsoft/teamsfx-core";
+import { getDefaultString, localize } from "../../utils/localizeUtils";
+import * as commonUtils from "../commonUtils";
+import { sendDebugAllEvent } from "../localTelemetryReporter";
 
 const ControlCodes = {
   CtrlC: "\u0003",
@@ -65,9 +63,11 @@ export abstract class BaseTaskTerminal implements vscode.Pseudoterminal {
 
   protected async stop(error?: any, outputError = true): Promise<void> {
     if (error) {
+      const fxError: UserError | SystemError = assembleError(error);
+
       // TODO: add color
-      this.writeEmitter.fire(`${error?.message as string}\r\n`);
-      const fxError = assembleError(error);
+      this.writeEmitter.fire(`${fxError.message}\r\n`);
+
       if (outputError) {
         showError(fxError).catch(() => {
           // ignore

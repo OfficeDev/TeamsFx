@@ -309,4 +309,5 @@ export interface IServerFxError {
   helpLink?: string;
   issueLink?: string;
   displayMessage?: string;
+  recommendedOperation?: string;
 }

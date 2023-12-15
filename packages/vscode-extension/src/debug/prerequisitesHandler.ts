@@ -52,6 +52,7 @@ import { Step } from "./commonUtils";
 import {
   DisplayMessages,
   prerequisiteCheckForGetStartedDisplayMessages,
+  RecommendedOperations,
   v3PrerequisiteCheckTaskDisplayMessages,
 } from "./constants";
 import { doctorConstant } from "./depsChecker/doctorConstant";
@@ -758,7 +759,12 @@ async function handleCheckResults(
         displayMessage: displayMessage,
         helpLink: displayMessages.errorHelpLink,
       };
-      throw new UserError(errorOptions);
+      const userError = new UserError(errorOptions);
+      // Recommend to open test tool if M365 account check failed
+      if (failures.find((f) => f.checker === Checker.M365Account)) {
+        userError.recommendedOperation = RecommendedOperations.DebugInTestTool;
+      }
+      throw userError;
     }
   }
 }

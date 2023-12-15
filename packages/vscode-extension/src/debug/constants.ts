@@ -90,6 +90,15 @@ function stepPrefix(stepNumber: number) {
   return stepNumber > 1 ? `(Total: ${stepNumber} Steps)` : `(Total: ${stepNumber} Step)`;
 }
 
+export const openTestToolMessage = () =>
+  util.format(localize("teamstoolkit.localDebug.useTestTool"), "'Debug in Test Tool'");
+
+export const openTestToolDisplayMessage = () =>
+  util.format(
+    localize("teamstoolkit.localDebug.useTestTool"),
+    "[Debug in Test Tool](command:fx-extension.debugInTestToolFromMessage)"
+  );
+
 export const prerequisiteCheckForGetStartedDisplayMessages: DisplayMessages = {
   taskName: "Get Started Prerequisites Check",
   title: "Get Started Prerequisites Check",
@@ -240,3 +249,7 @@ export const launchingTeamsClientDisplayMessages = Object.freeze({
 });
 
 export const DebugSessionExists = "Debug session exists";
+
+export const RecommendedOperations = Object.freeze({
+  DebugInTestTool: "debug-in-test-tool",
+});

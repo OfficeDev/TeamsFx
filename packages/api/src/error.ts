@@ -18,6 +18,12 @@ export interface FxError extends Error {
   userData?: any;
 
   categories?: string[];
+
+  /**
+   * recommended operation for user to fix the error
+   * e.g. "debug-in-test-tool"
+   */
+  recommendedOperation?: string;
 }
 export interface ErrorOptionBase {
   source?: string;
@@ -66,6 +72,12 @@ export class UserError extends Error implements FxError {
   displayMessage?: string;
 
   categories?: string[];
+
+  /**
+   * recommended operation for user to fix the error
+   * e.g. "debug-in-test-tool"
+   */
+  recommendedOperation?: string;
 
   constructor(opt: UserErrorOptions);
   constructor(source: string, name: string, message: string, displayMessage?: string);
@@ -146,6 +158,12 @@ export class SystemError extends Error implements FxError {
   displayMessage?: string;
 
   categories?: string[];
+
+  /**
+   * recommended operation for user to fix the error
+   * e.g. "debug-in-test-tool"
+   */
+  recommendedOperation?: string;
 
   constructor(opt: SystemErrorOptions);
   constructor(source: string, name: string, message: string, displayMessage?: string);

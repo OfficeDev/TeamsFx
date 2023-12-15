@@ -3,7 +3,13 @@
 
 import { Stage, UserError } from "@microsoft/teamsfx-api";
 
-import { LocalEnvManager, envUtil, metadataUtil, pathUtils } from "@microsoft/teamsfx-core";
+import {
+  LocalEnvManager,
+  MetadataV3,
+  envUtil,
+  metadataUtil,
+  pathUtils,
+} from "@microsoft/teamsfx-core";
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as uuid from "uuid";
@@ -157,4 +163,13 @@ export async function triggerV3Migration(): Promise<void> {
   }
   // reload window to terminate debugging
   await VS_CODE_UI.reload();
+}
+
+// Only work in ts/js project
+export function isTestToolEnabledProject(workspacePath: string): boolean {
+  const testToolYmlPath = path.join(workspacePath, MetadataV3.testToolConfigFile);
+  if (fs.pathExistsSync(testToolYmlPath)) {
+    return true;
+  }
+  return false;
 }

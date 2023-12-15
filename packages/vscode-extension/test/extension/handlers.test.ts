@@ -50,6 +50,7 @@ import { DeveloperPortalHomeLink, GlobalKey } from "../../src/constants";
 import { PanelType } from "../../src/controls/PanelType";
 import { WebviewPanel } from "../../src/controls/webviewPanel";
 import * as debugCommonUtils from "../../src/debug/commonUtils";
+import * as debugConstants from "../../src/debug/constants";
 import * as launch from "../../src/debug/launch";
 import { ExtensionErrors } from "../../src/error";
 import { TreatmentVariableValue } from "../../src/exp/treatmentVariables";
@@ -725,6 +726,30 @@ describe("handlers", () => {
       sinon.assert.calledOnce(provisionResources);
     });
 
+    it("provisionResources - local", async () => {
+      const mockCore = new MockCore();
+      const mockCoreStub = sinon
+        .stub(mockCore, "provisionResources")
+        .resolves(err(new UserError("test", "test", "test")));
+      sinon.stub(handlers, "core").value(mockCore);
+      sinon.stub(ExtTelemetry, "sendTelemetryEvent");
+      sinon.stub(ExtTelemetry, "sendTelemetryErrorEvent");
+
+      const res = await handlers.runCommand(Stage.provision, {
+        platform: Platform.VSCode,
+        env: "local",
+      } as Inputs);
+      chai.assert.isTrue(res.isErr());
+      if (res.isErr()) {
+        chai.assert.equal(
+          res.error.recommendedOperation,
+          debugConstants.RecommendedOperations.DebugInTestTool
+        );
+      }
+      sinon.restore();
+      sinon.assert.calledOnce(mockCoreStub);
+    });
+
     it("deployArtifacts", async () => {
       sinon.stub(handlers, "core").value(new MockCore());
       sinon.stub(ExtTelemetry, "sendTelemetryEvent");
@@ -735,6 +760,24 @@ describe("handlers", () => {
 
       sinon.restore();
       sinon.assert.calledOnce(deployArtifacts);
+    });
+
+    it("deployArtifacts - local", async () => {
+      const mockCore = new MockCore();
+      const mockCoreStub = sinon
+        .stub(mockCore, "deployArtifacts")
+        .resolves(err(new UserError("test", "test", "test")));
+      sinon.stub(handlers, "core").value(mockCore);
+      sinon.stub(ExtTelemetry, "sendTelemetryEvent");
+      sinon.stub(ExtTelemetry, "sendTelemetryErrorEvent");
+
+      await handlers.runCommand(Stage.deploy, {
+        platform: Platform.VSCode,
+        env: "local",
+      } as Inputs);
+
+      sinon.restore();
+      sinon.assert.calledOnce(mockCoreStub);
     });
 
     it("deployAadManifest", async () => {
@@ -1386,6 +1429,59 @@ describe("handlers", () => {
 
     chai.assert.isTrue(sendTelemetryEventStub.called);
     chai.assert.isTrue(executeCommandStub.called);
+  });
+
+  [
+    {
+      type: "user error",
+      buildError: () => {
+        const error = new UserError(
+          "test source",
+          "test name",
+          "test message",
+          "test displayMessage"
+        );
+        error.helpLink = "test helpLink";
+        error.recommendedOperation = debugConstants.RecommendedOperations.DebugInTestTool;
+
+        return error;
+      },
+      buttonNum: 2,
+    },
+    {
+      type: "system error",
+      buildError: () => {
+        const error = new SystemError(
+          "test source",
+          "test name",
+          "test message",
+          "test displayMessage"
+        );
+        error.recommendedOperation = debugConstants.RecommendedOperations.DebugInTestTool;
+        return error;
+      },
+      buttonNum: 3,
+    },
+  ].forEach(({ type, buildError, buttonNum }) => {
+    it(`showError - ${type} - recommend test tool`, async () => {
+      sandbox.stub(localizeUtils, "localize").returns("");
+      const showErrorMessageStub = sandbox
+        .stub<any, any>(vscode.window, "showErrorMessage")
+        .callsFake((title: string, button: any) => {
+          return Promise.resolve(button);
+        });
+      sandbox.stub(debugCommonUtils, "isTestToolEnabledProject").returns(true);
+      sandbox.stub(globalVariables, "workspaceUri").value(vscode.Uri.file("path"));
+      const sendTelemetryEventStub = sandbox.stub(ExtTelemetry, "sendTelemetryEvent");
+      sandbox.stub(vscode.commands, "executeCommand");
+      const error = buildError();
+      await handlers.showError(error);
+
+      chai.assert.isTrue(
+        sendTelemetryEventStub.calledWith(extTelemetryEvents.TelemetryEvent.MessageDebugInTestTool)
+      );
+      chai.assert.equal(showErrorMessageStub.firstCall.args.length, buttonNum + 1);
+    });
   });
 
   describe("getDotnetPathHandler", async () => {
@@ -2642,10 +2738,23 @@ describe("autoOpenProjectHandler", () => {
     sinon.stub(ExtTelemetry, "sendTelemetryEvent");
     const executeCommandStub = sinon.stub(vscode.commands, "executeCommand");
 
-    await handlers.treeViewDebugInTestToolHandler();
+    await handlers.debugInTestToolHandler("treeview");
 
     chai.assert.isTrue(
-      executeCommandStub.calledOnceWith("workbench.action.quickOpen", "debug in Test Tool")
+      executeCommandStub.calledOnceWith("workbench.action.quickOpen", "debug Debug in Test Tool")
+    );
+    sinon.restore();
+  });
+
+  it("messageDebugInTestToolHandler", async () => {
+    sinon.stub(handlers, "core").value(new MockCore());
+    sinon.stub(ExtTelemetry, "sendTelemetryEvent");
+    const executeCommandStub = sinon.stub(vscode.commands, "executeCommand");
+
+    await handlers.debugInTestToolHandler("message");
+
+    chai.assert.isTrue(
+      executeCommandStub.calledOnceWith("workbench.action.quickOpen", "debug Debug in Test Tool")
     );
     sinon.restore();
   });

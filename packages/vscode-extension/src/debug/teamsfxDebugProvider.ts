@@ -190,7 +190,7 @@ export class TeamsfxDebugProvider implements vscode.DebugConfigurationProvider {
       }
       debugConfiguration.teamsfxResolved = true;
     } catch (error: any) {
-      await showError(error);
+      void showError(error);
       terminateAllRunningTeamsfxTasks();
       await vscode.debug.stopDebugging();
       // not for undefined

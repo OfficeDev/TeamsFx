@@ -133,6 +133,11 @@ import {
 } from "./utils/commonUtils";
 import { getDefaultString, loadedLocale, localize } from "./utils/localizeUtils";
 import { ExtensionSurvey } from "./utils/survey";
+import {
+  openTestToolDisplayMessage,
+  openTestToolMessage,
+  RecommendedOperations,
+} from "./debug/constants";
 
 export let core: FxCore;
 export let tools: Tools;
@@ -434,9 +439,15 @@ export async function treeViewLocalDebugHandler(args?: any[]): Promise<Result<nu
   return ok(null);
 }
 
-export async function treeViewDebugInTestToolHandler(args?: any[]): Promise<Result<null, FxError>> {
-  ExtTelemetry.sendTelemetryEvent(TelemetryEvent.TreeViewDebugInTestTool);
-  await vscode.commands.executeCommand("workbench.action.quickOpen", "debug in Test Tool");
+export async function debugInTestToolHandler(
+  source: "treeview" | "message"
+): Promise<Result<null, FxError>> {
+  if (source === "treeview") {
+    ExtTelemetry.sendTelemetryEvent(TelemetryEvent.TreeViewDebugInTestTool);
+  } else {
+    ExtTelemetry.sendTelemetryEvent(TelemetryEvent.MessageDebugInTestTool);
+  }
+  await vscode.commands.executeCommand("workbench.action.quickOpen", "debug Debug in Test Tool");
 
   return ok(null);
 }
@@ -717,10 +728,16 @@ export async function runCommand(
       }
       case Stage.provision: {
         result = await core.provisionResources(inputs);
+        if (inputs.env === "local" && result.isErr()) {
+          result.error.recommendedOperation = RecommendedOperations.DebugInTestTool;
+        }
         break;
       }
       case Stage.deploy: {
         result = await core.deployArtifacts(inputs);
+        if (inputs.env === "local" && result.isErr()) {
+          result.error.recommendedOperation = RecommendedOperations.DebugInTestTool;
+        }
         break;
       }
       case Stage.deployAad: {
@@ -1761,8 +1778,23 @@ export function cmdHdlDisposeTreeView() {
 }
 
 export async function showError(e: UserError | SystemError) {
-  const notificationMessage = e.displayMessage ?? e.message;
+  let notificationMessage = e.displayMessage ?? e.message;
   const errorCode = `${e.source}.${e.name}`;
+  const runTestTool = {
+    title: localize("teamstoolkit.handlers.debugInTestTool"),
+    run: () => debugInTestToolHandler("message"),
+  };
+  const recommendTestTool =
+    e.recommendedOperation === RecommendedOperations.DebugInTestTool &&
+    globalVariables.workspaceUri?.fsPath &&
+    commonUtils.isTestToolEnabledProject(globalVariables.workspaceUri.fsPath);
+
+  if (recommendTestTool) {
+    const recommendTestToolMessage = openTestToolMessage();
+    const recommendTestToolDisplayMessage = openTestToolDisplayMessage();
+    e.message += ` ${recommendTestToolMessage}`;
+    notificationMessage += ` ${recommendTestToolDisplayMessage}`;
+  }
   if (isUserCancelError(e)) {
     return;
   } else if ("helpLink" in e && e.helpLink && typeof e.helpLink != "undefined") {
@@ -1781,7 +1813,11 @@ export async function showError(e: UserError | SystemError) {
     VsCodeLogInstance.error(`code:${errorCode}, message: ${e.message}\n Help link: ${e.helpLink}`);
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     VsCodeLogInstance.debug(`Call stack: ${e.stack || e.innerError?.stack || ""}`);
-    const button = await window.showErrorMessage(`[${errorCode}]: ${notificationMessage}`, help);
+    const buttons = recommendTestTool ? [runTestTool, help] : [help];
+    const button = await window.showErrorMessage(
+      `[${errorCode}]: ${notificationMessage}`,
+      ...buttons
+    );
     if (button) button.run();
   } else if (e instanceof SystemError) {
     const sysError = e;
@@ -1811,15 +1847,23 @@ export async function showError(e: UserError | SystemError) {
     VsCodeLogInstance.error(`code:${errorCode}, message: ${e.message}`);
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     VsCodeLogInstance.debug(`Call stack: ${e.stack || e.innerError?.stack || ""}`);
+    const buttons = recommendTestTool
+      ? [runTestTool, issue, similarIssues]
+      : [issue, similarIssues];
     const button = await window.showErrorMessage(
       `[${errorCode}]: ${notificationMessage}`,
-      issue,
-      similarIssues
+      ...buttons
     );
     if (button) button.run();
   } else {
-    if (!(e instanceof ConcurrentError))
-      await window.showErrorMessage(`[${errorCode}]: ${notificationMessage}`);
+    if (!(e instanceof ConcurrentError)) {
+      const buttons = recommendTestTool ? [runTestTool] : [];
+      const button = await window.showErrorMessage(
+        `[${errorCode}]: ${notificationMessage}`,
+        ...buttons
+      );
+      if (button) button.run();
+    }
   }
 }
 

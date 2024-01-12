@@ -237,6 +237,8 @@ export class ErrorMessages {
 export class APP_STUDIO_API_NAMES {
   public static readonly CREATE_APP = "create-app";
   public static readonly GET_APP = "get-app";
+  public static readonly LIST_APPS = "list-app";
+  public static readonly DELETE_APP = "delete-app";
   public static readonly PUBLISH_APP = "publish-app";
   public static readonly GET_PUBLISHED_APP = "get-published-app";
   public static readonly UPDATE_PUBLISHED_APP = "update-published-app";

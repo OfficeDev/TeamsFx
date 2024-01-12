@@ -25,6 +25,8 @@ import { teamsappPublishCommand } from "./teamsapp/publish";
 import { teamsappUpdateCommand } from "./teamsapp/update";
 import { teamsappValidateCommand } from "./teamsapp/validate";
 import { upgradeCommand } from "./upgrade";
+import { teamsappListCommand } from "./teamsapp/listApps";
+import { teamsappDeleteCommand } from "./teamsapp/delete";
 
 export const helpCommand: CLICommand = {
   name: "help",
@@ -58,6 +60,8 @@ export const rootCommand: CLICommand = {
     teamsappPackageCommand,
     teamsappPublishCommand,
     teamsappDoctorCommand,
+    teamsappListCommand,
+    teamsappDeleteCommand,
     entraAppCommand,
     m365SideloadingCommand,
     m365UnacquireCommand,

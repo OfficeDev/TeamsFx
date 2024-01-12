@@ -77,7 +77,7 @@ export class M365Login extends BasicLogin implements M365TokenProvider {
       if (M365Login.codeFlowInstance.account) {
         const regionTokenRes = await M365Login.codeFlowInstance.getTokenByScopes(AuthSvcScopes);
         if (regionTokenRes.isOk()) {
-          setRegion(regionTokenRes.value);
+          await setRegion(regionTokenRes.value);
         }
       } else {
         needLogin = true;
@@ -87,7 +87,7 @@ export class M365Login extends BasicLogin implements M365TokenProvider {
     if (needLogin == true && M365Login.codeFlowInstance.account) {
       const regionTokenRes = await M365Login.codeFlowInstance.getTokenByScopes(AuthSvcScopes);
       if (regionTokenRes.isOk()) {
-        setRegion(regionTokenRes.value);
+        await setRegion(regionTokenRes.value);
       }
     }
 

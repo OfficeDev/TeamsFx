@@ -125,6 +125,10 @@ import {
 import { CoreTelemetryComponentName, CoreTelemetryEvent, CoreTelemetryProperty } from "./telemetry";
 import { CoreHookContext, PreProvisionResForVS, VersionCheckRes } from "./types";
 import "../component/feature/sso";
+import { AppStudioScopes } from "../component/driver/teamsApp/constants";
+import { AppStudioClient } from "../component/driver/teamsApp/clients/appStudioClient";
+import { AppDefinition } from "../component/driver/teamsApp/interfaces/appdefinitions/appDefinition";
+import { TelemetryUtils } from "../component/driver/teamsApp/utils/telemetry";
 
 export type CoreCallbackFunc = (name: string, err?: FxError, data?: any) => void | Promise<void>;
 
@@ -489,6 +493,49 @@ export class FxCore {
   async publishTeamsAppCLIV3(inputs: TeamsAppInputs): Promise<Result<undefined, FxError>> {
     const res = await teamsappMgr.publishTeamsApp(inputs);
     return res;
+  }
+
+  /******
+   * CLI v3 commands
+   */
+  @hooks([
+    ErrorContextMW({ component: "FxCore", stage: "listTeamsApps", reset: true }),
+    ErrorHandlerMW,
+  ])
+  async listTeamsApps(inputs: Inputs): Promise<Result<AppDefinition[], FxError>> {
+    const appStudioTokenRes = await TOOLS.tokenProvider.m365TokenProvider.getAccessToken({
+      scopes: AppStudioScopes,
+    });
+    if (appStudioTokenRes.isErr()) {
+      return err(appStudioTokenRes.error);
+    }
+    const appStudioToken = appStudioTokenRes.value;
+    TelemetryUtils.init(createDriverContext(inputs));
+    const apps = await AppStudioClient.listApps(appStudioToken, TOOLS.logProvider);
+    return ok(apps);
+  }
+
+  /******
+   * CLI v3 commands
+   */
+  @hooks([
+    ErrorContextMW({ component: "FxCore", stage: "deleteTeamsApps", reset: true }),
+    ErrorHandlerMW,
+  ])
+  async deleteTeamsApps(inputs: Inputs): Promise<Result<undefined, FxError>> {
+    const appStudioTokenRes = await TOOLS.tokenProvider.m365TokenProvider.getAccessToken({
+      scopes: AppStudioScopes,
+    });
+    if (appStudioTokenRes.isErr()) {
+      return err(appStudioTokenRes.error);
+    }
+    const appStudioToken = appStudioTokenRes.value;
+    TelemetryUtils.init(createDriverContext(inputs));
+    for (const appId of inputs.teamsAppIds as string[]) {
+      await AppStudioClient.deleteApp(appId, appStudioToken, TOOLS.logProvider);
+      TOOLS.logProvider?.info(`Delete Teams app ${appId} succeeded.`);
+    }
+    return ok(undefined);
   }
 
   /**

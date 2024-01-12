@@ -12,7 +12,12 @@ import { AppUser } from "../../../driver/teamsApp/interfaces/appdefinitions/appU
 import { AppStudioError } from ".././errors";
 import { IPublishingAppDenition } from "../interfaces/appdefinitions/IPublishingAppDefinition";
 import { AppStudioResultFactory } from ".././results";
-import { Constants, ErrorMessages, APP_STUDIO_API_NAMES } from ".././constants";
+import {
+  Constants,
+  ErrorMessages,
+  APP_STUDIO_API_NAMES,
+  getAppStudioEndpoint,
+} from ".././constants";
 import { RetryHandler } from "../utils/utils";
 import {
   TelemetryEventName,
@@ -20,7 +25,6 @@ import {
   TelemetryPropertyKey,
   TelemetryPropertyValue,
 } from "../utils/telemetry";
-import { getAppStudioEndpoint } from ".././constants";
 import { HelpLinks } from "../../../../common/constants";
 import { getLocalizedString } from "../../../../common/localizeUtils";
 import {
@@ -200,6 +204,71 @@ export namespace AppStudioClient {
     }
   }
 
+  export async function listApps(
+    appStudioToken: string,
+    logProvider: LogProvider
+  ): Promise<AppDefinition[]> {
+    setErrorContext({ source: "Teams" });
+    sendStartEvent(APP_STUDIO_API_NAMES.LIST_APPS);
+    let requester: AxiosInstance;
+    try {
+      let response;
+      if (region) {
+        requester = createRequesterWithToken(appStudioToken, region);
+        logProvider.debug(`Sent API Request: GET ${region}/api/appdefinitions`);
+        response = await RetryHandler.Retry(() => requester.get(`/api/appdefinitions`));
+      } else {
+        throw new Error("Failed to get region");
+      }
+      if (response && response.data) {
+        const apps = <AppDefinition[]>response.data;
+        if (apps) {
+          sendSuccessEvent(APP_STUDIO_API_NAMES.LIST_APPS);
+          return apps;
+        } else {
+          logProvider?.error("Cannot get the app definitions");
+        }
+      }
+    } catch (e) {
+      const error = wrapException(e, APP_STUDIO_API_NAMES.LIST_APPS);
+      throw error;
+    }
+    throw new Error("Cannot get the app definitions");
+  }
+  export async function deleteApp(
+    teamsAppId: string,
+    appStudioToken: string,
+    logProvider: LogProvider
+  ): Promise<boolean> {
+    setErrorContext({ source: "Teams" });
+    sendStartEvent(APP_STUDIO_API_NAMES.DELETE_APP);
+    let requester: AxiosInstance;
+    try {
+      let response;
+      if (region) {
+        requester = createRequesterWithToken(appStudioToken, region);
+        logProvider.debug(`Sent API Request: DELETE ${region}/api/appdefinitions/${teamsAppId}`);
+        response = await RetryHandler.Retry(() =>
+          requester.delete(`/api/appdefinitions/${teamsAppId}`)
+        );
+      } else {
+        throw new Error("Failed to get region");
+      }
+      if (response && response.data) {
+        const success = <boolean>response.data;
+        if (success) {
+          sendSuccessEvent(APP_STUDIO_API_NAMES.DELETE_APP);
+          return success;
+        } else {
+          logProvider?.error("Cannot get the app definitions");
+        }
+      }
+    } catch (e) {
+      const error = wrapException(e, APP_STUDIO_API_NAMES.DELETE_APP);
+      throw error;
+    }
+    throw new Error("Cannot delete the app: " + teamsAppId);
+  }
   export async function getApp(
     teamsAppId: string,
     appStudioToken: string,

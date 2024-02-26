@@ -26,4 +26,8 @@ export interface ManifestCommonProperties {
    * Whether it's SPFx Teams app
    */
   isSPFx: boolean;
+  /**
+   * Whether it's an API plugin
+   */
+  isApiPlugin: boolean;
 }

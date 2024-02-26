@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { hooks } from "@feathersjs/hooks/lib";
-import { Colors, FxError, Result, err, ok } from "@microsoft/teamsfx-api";
+import { Colors, FxError, PluginManifest, Result, err, ok } from "@microsoft/teamsfx-api";
 import AdmZip from "adm-zip";
 import fs from "fs-extra";
 import * as path from "path";
@@ -12,6 +12,7 @@ import { ErrorContextMW } from "../../../core/globalVars";
 import {
   FileNotFoundError,
   InvalidActionInputError,
+  JSONSyntaxError,
   MissingEnvironmentVariablesError,
 } from "../../../error/common";
 import { DriverContext } from "../interface/commonArgs";
@@ -164,7 +165,7 @@ export class CreateAppPackageDriver implements StepDriver {
       }
     }
 
-    // M365 Copilot plugin, API specification and Adaptive card templates
+    // API ME, API specification and Adaptive card templates
     if (
       manifest.composeExtensions &&
       manifest.composeExtensions.length > 0 &&
@@ -175,18 +176,12 @@ export class CreateAppPackageDriver implements StepDriver {
         appDirectory,
         manifest.composeExtensions[0].apiSpecificationFile
       );
-      if (!(await fs.pathExists(apiSpecificationFile))) {
-        return err(
-          new FileNotFoundError(
-            actionName,
-            apiSpecificationFile,
-            "https://aka.ms/teamsfx-actions/teamsapp-zipAppPackage"
-          )
-        );
-      }
-      const relativePath = path.relative(appDirectory, apiSpecificationFile);
-      if (relativePath.startsWith("..")) {
-        return err(new InvalidFileOutsideOfTheDirectotryError(apiSpecificationFile));
+      const checkExistenceRes = await this.validateReferencedFile(
+        apiSpecificationFile,
+        appDirectory
+      );
+      if (checkExistenceRes.isErr()) {
+        return err(checkExistenceRes.error);
       }
       const expandedEnvVarResult = await CreateAppPackageDriver.expandOpenAPIEnvVars(
         apiSpecificationFile,
@@ -211,23 +206,42 @@ export class CreateAppPackageDriver implements StepDriver {
               appDirectory,
               command.apiResponseRenderingTemplateFile
             );
-            if (!(await fs.pathExists(adaptiveCardFile))) {
-              return err(
-                new FileNotFoundError(
-                  actionName,
-                  adaptiveCardFile,
-                  "https://aka.ms/teamsfx-actions/teamsapp-zipAppPackage"
-                )
-              );
-            }
-            const relativePath = path.relative(appDirectory, adaptiveCardFile);
-            if (relativePath.startsWith("..")) {
-              return err(new InvalidFileOutsideOfTheDirectotryError(adaptiveCardFile));
+            const checkExistenceRes = await this.validateReferencedFile(
+              adaptiveCardFile,
+              appDirectory
+            );
+            if (checkExistenceRes.isErr()) {
+              return err(checkExistenceRes.error);
             }
             const dir = path.dirname(command.apiResponseRenderingTemplateFile);
-            zip.addLocalFile(adaptiveCardFile, dir === "." ? "" : dir);
+            this.addFileInZip(zip, dir, adaptiveCardFile);
           }
         }
+      }
+    }
+
+    // API plugin
+    if (
+      manifest.apiPlugins &&
+      manifest.apiPlugins.length > 0 &&
+      manifest.apiPlugins[0].pluginFile
+    ) {
+      const pluginFile = path.resolve(appDirectory, manifest.apiPlugins[0].pluginFile);
+      const checkExistenceRes = await this.validateReferencedFile(pluginFile, appDirectory);
+      if (checkExistenceRes.isErr()) {
+        return err(checkExistenceRes.error);
+      }
+      const dir = path.dirname(manifest.apiPlugins[0].pluginFile);
+      this.addFileInZip(zip, dir, pluginFile);
+
+      // Add API spec and templates
+      const addResponseTemplateRes = await this.addPluginRelatedFiles(
+        zip,
+        pluginFile,
+        appDirectory
+      );
+      if (addResponseTemplateRes.isErr()) {
+        return err(addResponseTemplateRes.error);
       }
     }
 
@@ -290,5 +304,81 @@ export class CreateAppPackageDriver implements StepDriver {
     } else {
       return ok(undefined);
     }
+  }
+
+  private async validateReferencedFile(
+    file: string,
+    directory: string
+  ): Promise<Result<undefined, FxError>> {
+    if (!(await fs.pathExists(file))) {
+      return err(
+        new FileNotFoundError(
+          actionName,
+          file,
+          "https://aka.ms/teamsfx-actions/teamsapp-zipAppPackage"
+        )
+      );
+    }
+
+    const relativePath = path.relative(directory, file);
+    if (relativePath.startsWith("..")) {
+      return err(new InvalidFileOutsideOfTheDirectotryError(file));
+    }
+
+    return ok(undefined);
+  }
+
+  private async addPluginRelatedFiles(
+    zip: AdmZip,
+    pluginFile: string,
+    appDirectory: string
+  ): Promise<Result<undefined, FxError>> {
+    let pluginContent;
+    try {
+      pluginContent = (await fs.readJSON(pluginFile)) as PluginManifest;
+    } catch (e) {
+      return err(new JSONSyntaxError(pluginFile, e, actionName));
+    }
+    const runtimes = pluginContent.runtimes;
+    if (runtimes && runtimes.length > 0) {
+      for (const runtime of runtimes) {
+        if (runtime.type === "openapi" && runtime.spec?.url) {
+          const specFile = path.resolve(path.dirname(pluginFile), runtime.spec.url);
+          // add openapi spec
+          const checkExistenceRes = await this.validateReferencedFile(specFile, appDirectory);
+          if (checkExistenceRes.isErr()) {
+            return err(checkExistenceRes.error);
+          }
+
+          const dir = path.relative(appDirectory, path.dirname(specFile));
+          this.addFileInZip(zip, dir, specFile);
+        }
+      }
+    }
+
+    const functions = pluginContent.functions;
+    if (functions && functions.length > 0) {
+      for (const func of functions) {
+        const templates = func.capabilities?.rendering_templates;
+        if (templates) {
+          for (const key of Object.keys(templates)) {
+            const template = templates[key];
+            const templateFile = path.resolve(path.dirname(pluginFile), template.template_url);
+            const checkExistenceRes = await this.validateReferencedFile(templateFile, appDirectory);
+            if (checkExistenceRes.isErr()) {
+              return err(checkExistenceRes.error);
+            }
+            const dir = path.relative(appDirectory, path.dirname(templateFile));
+            this.addFileInZip(zip, dir, templateFile);
+          }
+        }
+      }
+    }
+
+    return ok(undefined);
+  }
+
+  private addFileInZip(zip: AdmZip, dir: string, filePath: string) {
+    zip.addLocalFile(filePath, dir === "." ? "" : dir);
   }
 }

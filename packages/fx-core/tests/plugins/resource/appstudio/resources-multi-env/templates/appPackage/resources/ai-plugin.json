@@ -1,0 +1,26 @@
+{
+    "schema_version": "v2",
+    "name_for_human": "Plugin",
+    "description_for_model": "Plugin",
+    "runtimes": 
+    [
+        { 
+          "type": "openapi", 
+          "auth": { "type": "none" },
+          "spec": { "url": "./openai.yml" }
+        }
+    ],
+    "functions": 
+    [
+      { "capabilities": 
+        {
+            "rendering_templates": {
+                "operationId1": {
+                    "template_url": "./repairs.json"
+                }
+            }
+        }
+      
+    }
+    ]
+}

@@ -32,5 +32,5 @@ new NpmSearchTestCase(
   "v-ivanchen@microsoft.com",
   "local",
   [LocalDebugTaskLabel.StartLocalTunnel, LocalDebugTaskLabel.StartBotApp],
-  { npmName: "axios", debug: "cli" }
+  { npmName: "axios", debug: "ttk" }
 ).test();

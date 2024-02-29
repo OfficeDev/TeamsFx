@@ -1486,47 +1486,25 @@ export async function validateBot(
 }
 
 export async function validateNpm(page: Page, options?: { npmName?: string }) {
+  const searchPack = options?.npmName || "axios";
+  console.log("start to verify npm search");
+  await page.waitForTimeout(Timeout.shortTimeLoading);
+  const frameElementHandle = await page.waitForSelector(
+    "iframe.embedded-page-content"
+  );
+  const frame = await frameElementHandle?.contentFrame();
   try {
-    const searchPack = options?.npmName || "axios";
-    console.log("start to verify npm search");
+    console.log("start to validate npm");
+    await frame?.waitForSelector('input[aria-label="Your search query"]');
+
+    //check
+    await frame?.fill('input[aria-label="Your search query"]', "");
+    await page.waitForTimeout(Timeout.shortTimeWait);
+    await frame?.fill('input[aria-label="Your search query"]', searchPack);
+    console.log("Check if npm list showed");
+    await frame?.waitForSelector('ul[datatid="app-picker-list"]');
+    console.log("verify npm search successfully!!!");
     await page.waitForTimeout(Timeout.shortTimeLoading);
-    const frameElementHandle = await page.waitForSelector(
-      "iframe.embedded-page-content"
-    );
-    const frame = await frameElementHandle?.contentFrame();
-    try {
-      console.log("dismiss message");
-      await frame?.waitForSelector("div.ui-box");
-      await page
-        .click('button:has-text("Dismiss")', {
-          timeout: Timeout.playwrightDefaultTimeout,
-        })
-        .catch(() => {});
-    } catch (error) {
-      console.log("no message to dismiss");
-    }
-    console.log("search npm ", searchPack);
-    const input = await frame?.waitForSelector("div.ui-box input.ui-box");
-    await input?.type(searchPack);
-    try {
-      const targetItem = await frame?.waitForSelector(
-        `span:has-text("${searchPack}")`
-      );
-      await targetItem?.click();
-      await frame?.waitForSelector(`card span:has-text("${searchPack}")`);
-      await frame?.click('button[name="send"]');
-      console.log("verify npm search successfully!!!");
-      await page.waitForTimeout(Timeout.shortTimeLoading);
-    } catch (error) {
-      await frame?.waitForSelector(
-        'div.ui-box span:has-text("Unable to reach app. Please try again.")'
-      );
-      await page.screenshot({
-        path: getPlaywrightScreenshotPath("verify_error"),
-        fullPage: true,
-      });
-      assert.fail("Unable to reach app. Please try again.");
-    }
   } catch (error) {
     await page.screenshot({
       path: getPlaywrightScreenshotPath("error"),

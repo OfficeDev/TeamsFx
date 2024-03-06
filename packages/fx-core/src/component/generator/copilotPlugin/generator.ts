@@ -21,6 +21,7 @@ import {
   Warning,
   ApiOperation,
   ApiKeyAuthInfo,
+  SystemError,
 } from "@microsoft/teamsfx-api";
 import { Generator } from "../generator";
 import path from "path";
@@ -36,6 +37,7 @@ import {
   specParserGenerateResultTelemetryEvent,
   specParserGenerateResultWarningsTelemetryProperty,
   isYamlSpecFile,
+  updateForCustomApi,
 } from "./helper";
 import { getLocalizedString } from "../../../common/localizeUtils";
 import { manifestUtils } from "../../driver/teamsApp/utils/ManifestUtils";
@@ -58,6 +60,7 @@ const fromApiSpecTemplateName = "copilot-plugin-existing-api";
 const fromApiSpecWithApiKeyTemplateName = "copilot-plugin-existing-api-api-key";
 const fromOpenAIPlugincomponentName = "copilot-plugin-from-oai-plugin";
 const fromOpenAIPluginTemplateName = "copilot-plugin-from-oai-plugin";
+const forCustomApi = "custom-copilot-for-custom-api";
 const apiSpecFolderName = "apiSpecificationFile";
 const apiSpecYamlFileName = "openapi.yaml";
 const apiSpecJsonFileName = "openapi.json";
@@ -66,6 +69,8 @@ const invalidApiSpecErrorName = "invalid-api-spec";
 const copilotPluginExistingApiSpecUrlTelemetryEvent = "copilot-plugin-existing-api-spec-url";
 
 const apiPluginFromApiSpecTemplateName = "api-plugin-existing-api";
+
+const failedToUpdateCustomApiTemplateErrorName = "failed-to-update-custom-api-template";
 
 const enum telemetryProperties {
   templateName = "template-name",
@@ -148,6 +153,22 @@ export class CopilotPluginGenerator {
       fromOpenAIPlugincomponentName,
       false
     );
+  }
+
+  @hooks([
+    ActionExecutionMW({
+      enableTelemetry: true,
+      telemetryComponentName: fromOpenAIPlugincomponentName,
+      telemetryEventName: TelemetryEvents.Generate,
+      errorSource: fromOpenAIPlugincomponentName,
+    }),
+  ])
+  public static async generateForCustomApi(
+    context: Context,
+    inputs: Inputs,
+    destinationPath: string
+  ): Promise<Result<CopilotPluginGeneratorResult, FxError>> {
+    return await this.generate(context, inputs, destinationPath, forCustomApi, forCustomApi, false);
   }
 
   private static async generate(
@@ -314,6 +335,21 @@ export class CopilotPluginGenerator {
           manifestPath
         );
         if (updateManifestRes.isErr()) return err(updateManifestRes.error);
+      }
+
+      if (componentName == forCustomApi) {
+        const specs = await specParser.getFilteredSpecs(filters);
+        const spec = specs[1];
+        try {
+          await updateForCustomApi(spec, language, destinationPath);
+        } catch (error: any) {
+          throw new SystemError(
+            componentName,
+            failedToUpdateCustomApiTemplateErrorName,
+            error.message,
+            error.message
+          );
+        }
       }
 
       // log warnings

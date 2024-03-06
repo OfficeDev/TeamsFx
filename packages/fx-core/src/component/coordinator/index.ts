@@ -178,7 +178,7 @@ const Feature2TemplateName: any = {
   }`]: TemplateNames.CustomCopilotRagAzureAISearch,
   [`${CapabilityOptions.customCopilotRag().id}:undefined:${
     CustomCopilotRagOptions.customApi().id
-  }`]: TemplateNames.CustomCopilotRagCustomApi,
+  }`]: TemplateNames.CustomCopilotBasic,
   [`${CapabilityOptions.customCopilotRag().id}:undefined:${
     CustomCopilotRagOptions.microsoft365().id
   }`]: TemplateNames.CustomCopilotRagMicrosoft365,
@@ -308,6 +308,15 @@ class Coordinator {
           inputs,
           projectPath
         );
+        if (res.isErr()) {
+          return err(res.error);
+        } else {
+          warnings = res.value.warnings;
+        }
+      } else if (
+        inputs[QuestionNames.CustomCopilotRag] === CustomCopilotRagOptions.customApi().id
+      ) {
+        const res = await CopilotPluginGenerator.generateForCustomApi(context, inputs, projectPath);
         if (res.isErr()) {
           return err(res.error);
         } else {

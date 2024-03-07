@@ -270,28 +270,30 @@ export class SpecParser {
       }
       await fs.outputFile(outputSpecPath, resultStr);
 
-      for (const url in newSpec.paths) {
-        for (const method in newSpec.paths[url]) {
-          // paths object may contain description/summary, so we need to check if it is a operation object
-          if (method === ConstantString.PostMethod || method === ConstantString.GetMethod) {
-            const operation = (newSpec.paths[url] as any)[method] as OpenAPIV3.OperationObject;
-            try {
-              const [card, jsonPath] = AdaptiveCardGenerator.generateAdaptiveCard(operation);
-              const fileName = path.join(adaptiveCardFolder, `${operation.operationId!}.json`);
-              const wrappedCard = wrapAdaptiveCard(card, jsonPath);
-              await fs.outputJSON(fileName, wrappedCard, { spaces: 2 });
-              const dataFileName = path.join(
-                adaptiveCardFolder,
-                `${operation.operationId!}.data.json`
-              );
-              await fs.outputJSON(dataFileName, {}, { spaces: 2 });
-            } catch (err) {
-              result.allSuccess = false;
-              result.warnings.push({
-                type: WarningType.GenerateCardFailed,
-                content: (err as Error).toString(),
-                data: operation.operationId!,
-              });
+      if (isMe === undefined || isMe === true) {
+        for (const url in newSpec.paths) {
+          for (const method in newSpec.paths[url]) {
+            // paths object may contain description/summary, so we need to check if it is a operation object
+            if (method === ConstantString.PostMethod || method === ConstantString.GetMethod) {
+              const operation = (newSpec.paths[url] as any)[method] as OpenAPIV3.OperationObject;
+              try {
+                const [card, jsonPath] = AdaptiveCardGenerator.generateAdaptiveCard(operation);
+                const fileName = path.join(adaptiveCardFolder, `${operation.operationId!}.json`);
+                const wrappedCard = wrapAdaptiveCard(card, jsonPath);
+                await fs.outputJSON(fileName, wrappedCard, { spaces: 2 });
+                const dataFileName = path.join(
+                  adaptiveCardFolder,
+                  `${operation.operationId!}.data.json`
+                );
+                await fs.outputJSON(dataFileName, {}, { spaces: 2 });
+              } catch (err) {
+                result.allSuccess = false;
+                result.warnings.push({
+                  type: WarningType.GenerateCardFailed,
+                  content: (err as Error).toString(),
+                  data: operation.operationId!,
+                });
+              }
             }
           }
         }

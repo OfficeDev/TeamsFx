@@ -313,15 +313,6 @@ class Coordinator {
         } else {
           warnings = res.value.warnings;
         }
-      } else if (
-        inputs[QuestionNames.CustomCopilotRag] === CustomCopilotRagOptions.customApi().id
-      ) {
-        const res = await CopilotPluginGenerator.generateForCustomApi(context, inputs, projectPath);
-        if (res.isErr()) {
-          return err(res.error);
-        } else {
-          warnings = res.value.warnings;
-        }
       } else {
         if (
           capability === CapabilityOptions.m365SsoLaunchPage().id ||
@@ -394,6 +385,18 @@ class Coordinator {
             }
           );
           const res = await Generator.generateTemplate(context, projectPath, templateName, langKey);
+          if (inputs[QuestionNames.CustomCopilotRag] === CustomCopilotRagOptions.customApi().id) {
+            const res = await CopilotPluginGenerator.generateForCustomApi(
+              context,
+              inputs,
+              projectPath
+            );
+            if (res.isErr()) {
+              return err(res.error);
+            } else {
+              warnings = res.value.warnings;
+            }
+          }
           if (res.isErr()) return err(res.error);
         } else {
           return err(new MissingRequiredInputError(QuestionNames.Capabilities, "coordinator"));

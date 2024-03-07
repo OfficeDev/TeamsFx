@@ -750,112 +750,110 @@ const codeTemplates = {
   javascript: {
     replaceCode: "module.exports = app;",
     templateCode: `
-      const { generateAdaptiveCard } = require("./utility.js");
-      const yaml = require("js-yaml");
-      const { OpenAPIClientAxios } = require("openapi-client-axios");
-      const fs = require("fs-extra");
-      
-      // Define a prompt function for getting the current status of the lights
-      planner.prompts.addFunction("getAction", async (context, memory) => {
-        const specFilePath = path.join(__dirname, "../prompts/chat/actions.json");
-        const specFileContent = fs.readFileSync(specFilePath);
-        return specFileContent.toString();
-      });
-      const specPath = path.join(__dirname, "../../appPackage/apiSpecificationFile/openapi.json");
-      const specContent = yaml.load(fs.readFileSync(specPath, "utf8"));
-      const api = new OpenAPIClientAxios({ definition: specContent });
-      api.init();
+const generateAdaptiveCard = require("./utility.js");
+const yaml = require("js-yaml");
+const { OpenAPIClientAxios } = require("openapi-client-axios");
+const fs = require("fs-extra");
+
+// Define a prompt function for getting the current status of the lights
+planner.prompts.addFunction("getAction", async (context, memory) => {
+  const specFilePath = path.join(__dirname, "../prompts/chat/actions.json");
+  const specFileContent = fs.readFileSync(specFilePath);
+  return specFileContent.toString();
+});
+const specPath = path.join(__dirname, "../../appPackage/apiSpecificationFile/{{OPENAPI_SPEC_PATH}}");
+const specContent = yaml.load(fs.readFileSync(specPath, "utf8"));
+const api = new OpenAPIClientAxios({ definition: specContent });
+api.init();
     `,
     actionCode: `
-      app.ai.action("{{operationId}}", async (context, state, parameter) => {
-        const client = await api.getClient();
-        const path = await client.paths["{{pathUrl}}"];
-        if (path && path.{{method}}) {
-          const result = await path.{{method}}(parameter.path, parameter.body, {
-            params: parameter.query,
-          });
-          const card = generateAdaptiveCard("./adaptiveCards/{{operationId}}.json", result);
-          await context.sendActivity({ attachments: [card] });
-        } else {
-          await context.sendActivity("no result");
-        }
-        return "result";
-      });
+app.ai.action("{{operationId}}", async (context, state, parameter) => {
+  const client = await api.getClient();
+  const path = client.paths["{{pathUrl}}"];
+  if (path && path.{{method}}) {
+    const result = await path.{{method}}(parameter.path, parameter.body, {
+      params: parameter.query,
+    });
+    const card = generateAdaptiveCard("../adaptiveCards/{{operationId}}.json", result);
+    await context.sendActivity({ attachments: [card] });
+  } else {
+    await context.sendActivity("no result");
+  }
+  return "result";
+});
     `,
-    utilityCode: `
-      const { CardFactory } = require("botbuilder");
-      const ACData = require("adaptivecards-templating");
-      
-      export function generateAdaptiveCard(templatePath, result) {
-          if (!result || !result.data) {
-            throw new Error("Get empty result from api call.");
-          }
-          const adaptiveCardTemplate = require(templatePath);
-          const template = new ACData.Template(adaptiveCardTemplate);
-          const cardContent = template.expand({
-            $root: result.data,
-          });
-          const card = CardFactory.adaptiveCard(cardContent);
-          return card;
-      }
-      module.exports = generateAdaptiveCard;
+    utilityCode: `const { CardFactory } = require("botbuilder");
+const ACData = require("adaptivecards-templating");
+
+function generateAdaptiveCard(templatePath, result) {
+    if (!result || !result.data) {
+      throw new Error("Get empty result from api call.");
+    }
+    const adaptiveCardTemplate = require(templatePath);
+    const template = new ACData.Template(adaptiveCardTemplate);
+    const cardContent = template.expand({
+      $root: result.data,
+    });
+    const card = CardFactory.adaptiveCard(cardContent);
+    return card;
+}
+module.exports = generateAdaptiveCard;
     `,
   },
   typescript: {
     replaceCode: "export default app;",
     templateCode: `
-      import { generateAdaptiveCard } from "./utility";
-      import { TurnContext, ConversationState } from "botbuilder";
-      import { TurnState, Memory } from "@microsoft/teams-ai";
-      import yaml from "js-yaml";
-      import { OpenAPIClientAxios, Document } from "openapi-client-axios";
-      const fs = require("fs-extra");
-      type ApplicationTurnState = TurnState<ConversationState>;
-      
-      // Define a prompt function for getting the current status of the lights
-      planner.prompts.addFunction("getAction", async (context: TurnContext, memory: Memory) => {
-        const specFilePath = path.join(__dirname, "../prompts/chat/actions.json");
-        const specFileContent = fs.readFileSync(specFilePath);
-        return specFileContent.toString();
-      });
-      
-      const specPath = path.join(__dirname, "../../appPackage/apiSpecificationFile/openapi.json");
-      const specContent = yaml.load(fs.readFileSync(specPath, "utf8")) as Document;
-      const api = new OpenAPIClientAxios({ definition: specContent });
-      api.init();
+import { generateAdaptiveCard } from "./utility";
+import { TurnContext, ConversationState } from "botbuilder";
+import { TurnState, Memory } from "@microsoft/teams-ai";
+import yaml from "js-yaml";
+import { OpenAPIClientAxios, Document } from "openapi-client-axios";
+const fs = require("fs-extra");
+type ApplicationTurnState = TurnState<ConversationState>;
+
+// Define a prompt function for getting the current status of the lights
+planner.prompts.addFunction("getAction", async (context: TurnContext, memory: Memory) => {
+  const specFilePath = path.join(__dirname, "../prompts/chat/actions.json");
+  const specFileContent = fs.readFileSync(specFilePath);
+  return specFileContent.toString();
+});
+
+const specPath = path.join(__dirname, "../../appPackage/apiSpecificationFile/{{OPENAPI_SPEC_PATH}}");
+const specContent = yaml.load(fs.readFileSync(specPath, "utf8")) as Document;
+const api = new OpenAPIClientAxios({ definition: specContent });
+api.init();
     `,
     actionCode: `
-      app.ai.action("{{operationId}}", async (context: TurnContext, state: ApplicationTurnState, parameter: any) => {
-        const client = await api.getClient();
-        const path = await client.paths["{{pathUrl}}"];
-        if (path && path.{{method}}) {
-          const result = await path.{{method}}(parameter.path, parameter.body, {
-            params: parameter.query,
-          });
-          const card = generateAdaptiveCard("./adaptiveCards/{{operationId}}.json", result);
-          await context.sendActivity({ attachments: [card] });
-        } else {
-          await context.sendActivity("no result");
-        }
-        return "result";
-      });
+app.ai.action("{{operationId}}", async (context: TurnContext, state: ApplicationTurnState, parameter: any) => {
+  const client = await api.getClient();
+  const path = client.paths["{{pathUrl}}"];
+  if (path && path.{{method}}) {
+    const result = await path.{{method}}(parameter.path, parameter.body, {
+      params: parameter.query,
+    });
+    const card = generateAdaptiveCard("../adaptiveCards/{{operationId}}.json", result);
+    await context.sendActivity({ attachments: [card] });
+  } else {
+    await context.sendActivity("no result");
+  }
+  return "result";
+});
     `,
-    utilityCode: `
-      import { CardFactory } from "botbuilder";
-      const ACData = require("adaptivecards-templating");
-      
-      export function generateAdaptiveCard(templatePath: string, result: any) {
-        if (!result || !result.data) {
-          throw new Error("Get empty result from api call.");
-        }
-        const adaptiveCardTemplate = require(templatePath);
-        const template = new ACData.Template(adaptiveCardTemplate);
-        const cardContent = template.expand({
-          $root: result.data,
-        });
-        const card = CardFactory.adaptiveCard(cardContent);
-        return card;
-      }
+    utilityCode: `import { CardFactory } from "botbuilder";
+const ACData = require("adaptivecards-templating");
+
+export function generateAdaptiveCard(templatePath: string, result: any) {
+  if (!result || !result.data) {
+    throw new Error("Get empty result from api call.");
+  }
+  const adaptiveCardTemplate = require(templatePath);
+  const template = new ACData.Template(adaptiveCardTemplate);
+  const cardContent = template.expand({
+    $root: result.data,
+  });
+  const card = CardFactory.adaptiveCard(cardContent);
+  return card;
+}
     `,
   },
 };
@@ -863,7 +861,8 @@ const codeTemplates = {
 async function updateCodeForCustomApi(
   specItems: SpecObject[],
   language: string,
-  destinationPath: string
+  destinationPath: string,
+  openapiSpecFileName: string
 ): Promise<void> {
   if (language == ProgrammingLanguage.JS || ProgrammingLanguage.TS) {
     const codeTemplate =
@@ -875,14 +874,15 @@ async function updateCodeForCustomApi(
       const code = codeTemplate.actionCode
         .replace(/{{operationId}}/g, item.item.operationId!)
         .replace("{{pathUrl}}", item.pathUrl)
-        .replace(/{{method}}/, item.method);
+        .replace(/{{method}}/g, item.method);
       actionsCode.push(code);
     }
 
     // Update index
-    const indexCode = `${codeTemplate.templateCode}\n${actionsCode
-      .map((value) => value)
-      .join("\n")}\n${codeTemplate.replaceCode}`;
+    const indexCode = `${codeTemplate.templateCode.replace(
+      "{{OPENAPI_SPEC_PATH}}",
+      openapiSpecFileName
+    )}\n${actionsCode.map((value) => value).join("\n")}\n${codeTemplate.replaceCode}`;
     const indexFilePath = path.join(
       appFolderPath,
       language === ProgrammingLanguage.JS ? "app.js" : "app.ts"
@@ -917,7 +917,8 @@ async function updateDependency(language: string, destinationPath: string): Prom
 export async function updateForCustomApi(
   spec: OpenAPIV3.Document,
   language: string,
-  destinationPath: string
+  destinationPath: string,
+  openapiSpecFileName: string
 ): Promise<void> {
   const chatFolder = path.join(destinationPath, "src", "prompts", "chat");
   await fs.ensureDir(chatFolder);
@@ -937,7 +938,7 @@ export async function updateForCustomApi(
   await updateAdaptiveCardForCustomApi(specItems, language, destinationPath);
 
   // 5. update code
-  await updateCodeForCustomApi(specItems, language, destinationPath);
+  await updateCodeForCustomApi(specItems, language, destinationPath, openapiSpecFileName);
 
   // 6. update dependency
   await updateDependency(language, destinationPath);

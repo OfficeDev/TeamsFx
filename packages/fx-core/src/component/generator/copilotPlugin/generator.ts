@@ -230,19 +230,24 @@ export class CopilotPluginGenerator {
       }
       const filters = inputs[QuestionNames.ApiOperation] as string[];
 
-      // download template
-      const templateRes = await Generator.generateTemplate(
-        context,
-        destinationPath,
-        templateName,
-        language === ProgrammingLanguage.CSharp ? ProgrammingLanguage.CSharp : undefined
-      );
-      if (templateRes.isErr()) return err(templateRes.error);
+      if (templateName != forCustomApi) {
+        // download template
+        const templateRes = await Generator.generateTemplate(
+          context,
+          destinationPath,
+          templateName,
+          language === ProgrammingLanguage.CSharp ? ProgrammingLanguage.CSharp : undefined
+        );
+        if (templateRes.isErr()) return err(templateRes.error);
 
-      context.telemetryReporter.sendTelemetryEvent(copilotPluginExistingApiSpecUrlTelemetryEvent, {
-        [telemetryProperties.isRemoteUrlTelemetryProperty]: isValidHttpUrl(url).toString(),
-        [telemetryProperties.generateType]: type,
-      });
+        context.telemetryReporter.sendTelemetryEvent(
+          copilotPluginExistingApiSpecUrlTelemetryEvent,
+          {
+            [telemetryProperties.isRemoteUrlTelemetryProperty]: isValidHttpUrl(url).toString(),
+            [telemetryProperties.generateType]: type,
+          }
+        );
+      }
 
       // validate API spec
       const allowAPIKeyAuth = isApiKeyEnabled();
@@ -300,7 +305,9 @@ export class CopilotPluginGenerator {
         manifestPath,
         filters,
         openapiSpecPath,
-        adaptiveCardFolder
+        adaptiveCardFolder,
+        undefined,
+        templateName != forCustomApi
       );
 
       context.telemetryReporter.sendTelemetryEvent(specParserGenerateResultTelemetryEvent, {
@@ -341,7 +348,7 @@ export class CopilotPluginGenerator {
         const specs = await specParser.getFilteredSpecs(filters);
         const spec = specs[1];
         try {
-          await updateForCustomApi(spec, language, destinationPath);
+          await updateForCustomApi(spec, language, destinationPath, openapiSpecFileName);
         } catch (error: any) {
           throw new SystemError(
             componentName,

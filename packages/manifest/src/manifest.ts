@@ -105,7 +105,7 @@ export interface IStaticTab {
   /**
    * Specifies whether the tab offers an experience in the context of a channel in a team, or an experience scoped to an individual user alone. These options are non-exclusive. Currently static tabs are only supported in the 'personal' scope.
    */
-  scopes: ("team" | "personal")[];
+  scopes: ("team" | "personal" | "groupChat")[];
   /**
    * The set of contextItem scopes that a tab belong to
    */

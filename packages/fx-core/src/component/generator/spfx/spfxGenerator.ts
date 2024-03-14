@@ -748,14 +748,14 @@ export class SPFxGenerator {
             name: webpartName,
             contentUrl: util.format(ManifestTemplate.REMOTE_CONTENT_URL, componentId),
             websiteUrl: ManifestTemplate.WEBSITE_URL,
-            scopes: ["personal"],
+            scopes: ["personal", "team", "groupChat"],
           };
           const localStaticSnippet: IStaticTab = {
             entityId: componentId,
             name: webpartName,
             contentUrl: util.format(ManifestTemplate.LOCAL_CONTENT_URL, componentId),
             websiteUrl: ManifestTemplate.WEBSITE_URL,
-            scopes: ["personal"],
+            scopes: ["personal", "team", "groupChat"],
           };
           localManifest.staticTabs?.push(localStaticSnippet);
           remoteManifest.staticTabs?.push(remoteStaticSnippet);
@@ -785,7 +785,6 @@ export class SPFxGenerator {
         existingManifest.id = remoteManifest.id;
         existingManifest.icons = remoteManifest.icons;
         existingManifest.staticTabs = remoteManifest.staticTabs;
-        existingManifest.configurableTabs = remoteManifest.configurableTabs;
 
         remoteManifest = existingManifest;
       }

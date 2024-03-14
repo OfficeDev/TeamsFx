@@ -5,7 +5,6 @@ import { HashRouter as Router, Navigate, Route, Routes } from "react-router-dom"
 import Privacy from "./Privacy";
 import TermsOfUse from "./TermsOfUse";
 import Tab from "./Tab";
-import TabConfig from "./TabConfig";
 import { useTeams } from "@microsoft/teamsfx-react";
 
 /**
@@ -29,7 +28,6 @@ export default function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/termsofuse" element={<TermsOfUse />} />
           <Route path="/tab" element={<Tab />} />
-          <Route path="/config" element={<TabConfig />} />
           <Route path="*" element={<Navigate to={"/tab"} />}></Route>
         </Routes>
       </Router>

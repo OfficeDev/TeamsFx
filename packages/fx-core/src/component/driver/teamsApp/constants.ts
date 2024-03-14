@@ -14,10 +14,10 @@ const BOT_STATE_KEY = ComponentNames.TeamsBot;
 export const STATIC_TABS_TPL_V3: IStaticTab[] = [
   {
     entityId: "index",
-    name: "Personal Tab",
+    name: "My Tab",
     contentUrl: `{{{state.${TAB_STATE_KEY}.endpoint}}}{{{state.${TAB_STATE_KEY}.indexPath}}}/tab`,
     websiteUrl: `{{{state.${TAB_STATE_KEY}.endpoint}}}{{{state.${TAB_STATE_KEY}.indexPath}}}/tab`,
-    scopes: ["personal"],
+    scopes: ["personal", "team", "groupChat"],
   },
   {
     entityId: "index",
@@ -322,10 +322,10 @@ export const CONFIGURABLE_TABS_TPL_EXISTING_APP: IConfigurableTab[] = [
 export const STATIC_TABS_TPL_EXISTING_APP: IStaticTab[] = [
   {
     entityId: "index",
-    name: "Personal Tab",
+    name: "My Tab",
     contentUrl: "{{config.manifest.tabContentUrl}}",
     websiteUrl: "{{config.manifest.tabWebsiteUrl}}",
-    scopes: ["personal"],
+    scopes: ["personal", "team", "groupChat"],
   },
 ];
 

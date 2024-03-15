@@ -2682,7 +2682,7 @@ export async function validateTodoListSpfx(page: Page) {
       // task check
       console.log("check task");
       const task = await spfxFrame?.waitForSelector(
-        "div.item input[value='Hello World']"
+        "div.item .name:has-text('ttktest')"
       );
       console.log(await task?.inputValue());
       expect(task).to.not.be.undefined;

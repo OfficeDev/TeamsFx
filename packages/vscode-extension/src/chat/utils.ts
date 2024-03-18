@@ -21,7 +21,7 @@ export async function verbatimCopilotInteraction(
 ) {
   const chatRequest = await lm.sendChatRequest(model, messages, {}, token);
   for await (const fragment of chatRequest.stream) {
-    response.markdown(fragment);
+    response.markdown(fragment); 
   }
 }
 

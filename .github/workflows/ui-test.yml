@@ -373,6 +373,14 @@ jobs:
           ref: main
           path: ./packages/tests/resource
 
+      - name: Download samples chef bot
+        if: contains(matrix.test-case, 'chef-bot')
+        uses: actions/checkout@v3
+        with:
+          repository: microsoft/teams-ai
+          ref: js-1.1.1
+          path: ./packages/tests/resource
+
       - name: Get VSCode & chromedriver
         working-directory: packages/tests
         run: |

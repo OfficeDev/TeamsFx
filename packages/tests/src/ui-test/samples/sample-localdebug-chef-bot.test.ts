@@ -25,13 +25,11 @@ class ChefBotTestCase extends CaseFactory {
   ): Promise<void> {
     const envFile = path.resolve(
       sampledebugContext.projectPath,
-      "env",
-      `.env.${env}`
+      ".env",
     );
-    let OPENAI_API_KEY = fs.readFileSync(envFile, "utf-8");
-    OPENAI_API_KEY += "\nSECRET_OPENAI_API_KEY=yourapikey";
-    fs.writeFileSync(envFile, OPENAI_API_KEY);
-    console.log(`add OPENAI_API_KEY ${OPENAI_API_KEY} to .env.${env} file`);
+    // create .env file
+    fs.writeFileSync(envFile, "OPENAI_API_KEY=yourapikey");
+    console.log(`add OPENAI_API_KEY=yourapikey to .env file`);
   }
   override async onValidate(page: Page): Promise<void> {
     console.log("Moked api key. Only verify happy path...");

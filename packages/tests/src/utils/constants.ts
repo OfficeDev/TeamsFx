@@ -80,7 +80,7 @@ export enum TemplateProjectFolder {
   OutlookTab = "hello-world-teams-tab-and-outlook-add-in",
   AssistDashboard = "developer-assist-dashboard",
   DiceRoller = "live-share-dice-roller",
-  ChefBot = "teams-chef-bot",
+  ChefBot = "04.ai.a.teamsChefBot",
   GraphConnectorBot = "graph-connector-bot",
   SpfxProductivity = "spfx-productivity-dashboard",
   RetailDashboard = "react-retail-dashboard",

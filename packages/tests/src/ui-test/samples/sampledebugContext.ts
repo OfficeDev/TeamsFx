@@ -141,11 +141,14 @@ export class SampledebugContext extends TestContext {
 
   public async openResourceFolder(): Promise<void> {
     console.log("start to open project: ", this.sampleName);
+    // chef bot path is: js/samples
     // two repos have different sample path
     const oldPath = path.resolve(
       this.testRootFolder == "./resource/samples"
         ? "./resource/samples"
-        : "./resource",
+          : "js/samples"
+          ? "js/samples"
+            : "./resource",
       this.originSample
     );
     // move old sample to project path

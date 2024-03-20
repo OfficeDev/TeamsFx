@@ -58,5 +58,6 @@ new ChefBotTestCase(
   {
     debug: "cli",
     testRootFolder: "./resource/js/samples", // fix yarn error
+    botFlag: true,
   }
 ).test();

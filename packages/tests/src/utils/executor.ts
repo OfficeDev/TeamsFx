@@ -468,6 +468,8 @@ export class Executor {
       envContent = fs.readFileSync(envFile, "utf-8");
     } catch (error) {
       console.log("read file error", error);
+      console.log("create .env.local file");
+      fs.writeFileSync(envFile, ''); 
     }
     const domainRegex = /Connect via browser: https:\/\/(\S+)/;
     const endpointRegex = /Connect via browser: (\S+)/;

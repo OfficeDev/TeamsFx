@@ -16,7 +16,6 @@ import { SampledebugContext } from "./sampledebugContext";
 import { validateWelcomeAndReplyBot } from "../../utils/playwrightOperation";
 import * as path from "path";
 import * as fs from "fs";
-import * as os from "os";
 
 class ChefBotTestCase extends CaseFactory {
   public override async onAfterCreate(
@@ -57,7 +56,7 @@ new ChefBotTestCase(
   [LocalDebugTaskLabel.StartLocalTunnel, LocalDebugTaskLabel.StartBotApp],
   {
     debug: "cli",
-    testRootFolder: "./resource/js/samples", // fix yarn error
+    testRootFolder: "./resource/js/samples",
     botFlag: true,
   }
 ).test();

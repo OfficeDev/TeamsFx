@@ -12,8 +12,6 @@ import { SampledebugContext } from "./sampledebugContext";
 import { validateWelcomeAndReplyBot } from "../../utils/playwrightOperation";
 import * as path from "path";
 import * as fs from "fs";
-import * as os from "os";
-
 class ChefBotTestCase extends CaseFactory {
   public override async onAfterCreate(
     sampledebugContext: SampledebugContext,
@@ -43,5 +41,5 @@ new ChefBotTestCase(
   "v-ivanchen@microsoft.com",
   "dev",
   [],
-  { testRootFolder: path.resolve(os.homedir(), "resourse") } // fix yarn error
+  { testRootFolder: "./resource/js/samples" }
 ).test();

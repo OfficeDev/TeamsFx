@@ -1016,7 +1016,7 @@ describe("apiKeyQuestion", async () => {
     const result = (validation as FuncValidation<string>).validFunc("abc");
     assert.equal(
       result,
-      "Client secret is invalid. The length of secret should be >= 10 and <= 128"
+      "Enter a valid client secret between >= 10 and <= 128 characters in length"
     );
   });
 });

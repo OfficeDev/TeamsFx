@@ -146,8 +146,8 @@ export class SampledebugContext extends TestContext {
     const oldPath = path.resolve(
       this.testRootFolder == "./resource/samples"
         ? "./resource/samples"
-          : "js/samples"
-          ? "js/samples"
+          : this.testRootFolder == "./resource/js/samples"
+          ? "./resource/js/samples"
             : "./resource",
       this.originSample
     );

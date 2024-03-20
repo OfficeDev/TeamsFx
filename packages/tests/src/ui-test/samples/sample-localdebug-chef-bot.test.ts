@@ -54,9 +54,5 @@ new ChefBotTestCase(
   "v-ivanchen@microsoft.com",
   "local",
   [LocalDebugTaskLabel.StartLocalTunnel, LocalDebugTaskLabel.StartBotApp],
-  {
-    debug: "cli",
-    testRootFolder: "./resource/js/samples",
-    botFlag: true,
-  }
+  { testRootFolder: "./resource/js/samples" }
 ).test();

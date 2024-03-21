@@ -303,6 +303,12 @@ function registerActivateCommands(context: vscode.ExtensionContext) {
     Correlator.run(handlers.selectAndDebugHandler, args)
   );
   context.subscriptions.push(runIconCmd);
+
+  // Register invoke teams agent command
+  const invokeTeamsAgent = vscode.commands.registerCommand("fx-extension.invokeChat", (...args) =>
+    Correlator.run(handlers.invokeTeamsAgent, args)
+  );
+  context.subscriptions.push(invokeTeamsAgent);
 }
 
 /**

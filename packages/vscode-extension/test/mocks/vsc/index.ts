@@ -370,3 +370,17 @@ export enum TaskRevealKind {
   Silent = 2,
   Never = 3,
 }
+
+export class LanguageModelChatSystemMessage {
+  public content: string;
+
+  public range: vscode.Range | undefined;
+
+  constructor(content: string) {
+    if (!content) {
+      throw new Error("Illegal argument, content must be defined");
+    }
+
+    this.content = content;
+  }
+}

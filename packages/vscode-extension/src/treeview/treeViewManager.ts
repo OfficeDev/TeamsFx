@@ -220,6 +220,13 @@ class TreeViewManager {
         undefined,
         { name: "debug-alt", custom: false }
       ),
+      new TreeViewCommand(
+        "Get help from Github Copilot",
+        "Chat with Github Copilot to find out what you can do for your current status",
+        "fx-extension.invokeChat",
+        undefined,
+        { name: "comment-discussion", custom: false }
+      ),
     ];
   }
 

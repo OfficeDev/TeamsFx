@@ -10,6 +10,11 @@
     margin-left: 24px;
   }
 
+  #head {
+    display: flex;
+    justify-content: space-between;
+  }
+
   #featured-sample-title {
     width: 100%;
     height: 43px;

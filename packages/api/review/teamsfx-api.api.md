@@ -261,6 +261,8 @@ export interface CreateProjectResult {
     // (undocumented)
     projectPath: string;
     // (undocumented)
+    shouldInvokeTeamsAgent?: boolean;
+    // (undocumented)
     warnings?: Warning[];
 }
 

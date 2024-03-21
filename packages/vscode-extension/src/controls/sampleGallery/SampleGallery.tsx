@@ -6,7 +6,7 @@ import "./SampleGallery.scss";
 import Fuse from "fuse.js";
 import * as React from "react";
 
-import { Icon } from "@fluentui/react";
+import { Icon, Link } from "@fluentui/react";
 
 import { GlobalKey } from "../../constants";
 import {
@@ -63,7 +63,15 @@ export default class SampleGallery extends React.Component<unknown, SampleGaller
           <h1>Samples</h1>
           <h3>
             Explore our sample gallery filled with solutions that work seamlessly with Teams
-            Toolkit.
+            Toolkit. You can also{" "}
+            <Link
+              onClick={() => {
+                this.onInvokeTeamsAgent();
+              }}
+            >
+              start with Github Copilot
+            </Link>
+            .
           </h3>
         </div>
       </div>
@@ -349,6 +357,12 @@ export default class SampleGallery extends React.Component<unknown, SampleGaller
       data: {
         version: sample.minimumToolkitVersion,
       },
+    });
+  };
+
+  private onInvokeTeamsAgent = () => {
+    vscode.postMessage({
+      command: Commands.InvokeTeamsAgent,
     });
   };
 }

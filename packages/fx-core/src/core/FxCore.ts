@@ -108,7 +108,7 @@ import {
 } from "../error/common";
 import { NoNeedUpgradeError } from "../error/upgrade";
 import { YamlFieldMissingError } from "../error/yml";
-import { ValidateTeamsAppInputs } from "../question";
+import { ProjectTypeOptions, ValidateTeamsAppInputs } from "../question";
 import { SPFxVersionOptionIds, ScratchOptions, createProjectCliHelpNode } from "../question/create";
 import {
   HubTypes,
@@ -159,6 +159,9 @@ export class FxCore {
   ])
   async createProject(inputs: Inputs): Promise<Result<CreateProjectResult, FxError>> {
     const context = createContextV3();
+    if (inputs[QuestionNames.ProjectType] === ProjectTypeOptions.startWithGithubCopilot().id) {
+      return ok({ projectPath: "", shouldInvokeTeamsAgent: true });
+    }
     inputs[QuestionNames.Scratch] = ScratchOptions.yes().id;
     if (inputs.teamsAppFromTdp) {
       // should never happen as we do same check on Developer Portal.

@@ -257,6 +257,8 @@ export enum TelemetryEvent {
 
   FindSimilarIssues = "find-similar-issues",
 
+  InvokeTeamsAgent = "invoke-teams-agent",
+
   // Copilot Chat
   CopilotChatStart = "copilot-chat-start",
   CopilotChat = "copilot-chat",
@@ -397,6 +399,7 @@ export enum TelemetryTriggerFrom {
   SampleGallery = "SampleGallery",
   SampleDetailPage = "SampleDetailPage",
   CopilotChat = "CopilotChat",
+  CreateAppQuestionFlow = "CreateAppQuestionFlow",
   Other = "Other",
   Auto = "Auto",
   Unknow = "Unknow",

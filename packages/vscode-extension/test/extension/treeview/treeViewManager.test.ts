@@ -34,7 +34,7 @@ describe("TreeViewManager", () => {
 
     const developmentTreeview = treeViewManager.getTreeView("teamsfx-development");
     chai.assert.isDefined(developmentTreeview);
-    chai.assert.equal((developmentTreeview as any).commands.length, 4);
+    chai.assert.equal((developmentTreeview as any).commands.length, 5);
   });
 
   it("setRunningCommand", () => {
@@ -61,11 +61,11 @@ describe("TreeViewManager", () => {
     ) as CommandsTreeViewProvider;
 
     const commands = developmentTreeviewProvider.getCommands();
-    chai.assert.equal(commands.length, 4);
+    chai.assert.equal(commands.length, 5);
 
     sandbox.stub(globalVariables, "isSPFxProject").value(true);
     treeViewManager.updateTreeViewsOnSPFxChanged();
 
-    chai.assert.equal(commands.length, 5);
+    chai.assert.equal(commands.length, 6);
   });
 });

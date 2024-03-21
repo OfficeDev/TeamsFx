@@ -91,6 +91,7 @@ export class ProjectTypeOptions {
         "core.TabOption.label"
       )}`,
       detail: getLocalizedString("core.createProjectQuestion.projectType.tab.detail"),
+      groupName: "Create",
     };
   }
 
@@ -101,6 +102,7 @@ export class ProjectTypeOptions {
         "core.createProjectQuestion.projectType.bot.label"
       )}`,
       detail: getLocalizedString("core.createProjectQuestion.projectType.bot.detail"),
+      groupName: "Create",
     };
   }
 
@@ -115,6 +117,7 @@ export class ProjectTypeOptions {
             "core.createProjectQuestion.projectType.messageExtension.copilotEnabled.detail"
           )
         : getLocalizedString("core.createProjectQuestion.projectType.messageExtension.detail"),
+      groupName: "Create",
     };
   }
 
@@ -125,6 +128,7 @@ export class ProjectTypeOptions {
         "core.createProjectQuestion.projectType.outlookAddin.label"
       )}`,
       detail: getLocalizedString("core.createProjectQuestion.projectType.outlookAddin.detail"),
+      groupName: "Create",
     };
   }
 
@@ -135,6 +139,7 @@ export class ProjectTypeOptions {
         "core.createProjectQuestion.officeXMLAddin.mainEntry.title"
       )}`,
       detail: getLocalizedString("core.createProjectQuestion.officeXMLAddin.mainEntry.detail"),
+      groupName: "Create",
     };
   }
 
@@ -163,6 +168,7 @@ export class ProjectTypeOptions {
         platform === Platform.VSCode ? "$(teamsfx-copilot-plugin) " : ""
       }${getLocalizedString("core.createProjectQuestion.projectType.copilotPlugin.label")}`,
       detail: getLocalizedString("core.createProjectQuestion.projectType.copilotPlugin.detail"),
+      groupName: "Create",
     };
   }
 
@@ -173,6 +179,16 @@ export class ProjectTypeOptions {
         platform === Platform.VSCode ? "$(teamsfx-custom-copilot) " : ""
       }${getLocalizedString("core.createProjectQuestion.projectType.customCopilot.label")}`,
       detail: getLocalizedString("core.createProjectQuestion.projectType.customCopilot.detail"),
+      groupName: "Create",
+    };
+  }
+
+  static startWithGithubCopilot(): OptionItem {
+    return {
+      id: "start-with-github-copilot",
+      label: `$(comment-discussion) Don't know how to start? Use Github Copilot Chat`,
+      detail: `Chat with Github Copilot to get step by step instructions for Teams app development`,
+      groupName: "Copilot",
     };
   }
 }
@@ -218,6 +234,10 @@ function projectTypeQuestion(): SingleSelectQuestion {
             ? ProjectTypeOptions.officeAddin(inputs.platform)
             : ProjectTypeOptions.outlookAddin(inputs.platform)
         );
+      }
+
+      if (inputs.platform === Platform.VSCode && !inputs.teamsAppFromTdp) {
+        staticOptions.push(ProjectTypeOptions.startWithGithubCopilot());
       }
       return staticOptions;
     },
@@ -2505,6 +2525,9 @@ export function capabilitySubTree(): IQTreeNode {
         data: appNameQuestion(),
       },
     ],
+    condition: (inputs: Inputs) => {
+      return inputs[QuestionNames.ProjectType] !== ProjectTypeOptions.startWithGithubCopilot().id;
+    },
   };
   return node;
 }

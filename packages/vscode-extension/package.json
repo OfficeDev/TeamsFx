@@ -867,6 +867,11 @@
         "command": "fx-extension.openOfficeDevHelpFeedbackLink",
         "title": "%teamstoolkit.commands.feedbackLink.title%",
         "icon": "$(info)"
+      },
+      {
+        "command": "fx-extension.invokeChat",
+        "title": "%teamstoolkit.commandsTreeViewProvider.invokeChat%",
+        "category": "Teams"
       }
     ],
     "taskDefinitions": [
@@ -1510,7 +1515,6 @@
     "vscode-tas-client": "^0.1.75"
   },
   "extensionDependencies": [
-    "github.copilot-chat",
     "redhat.vscode-yaml"
   ],
   "gitHead": "7d60c0765c0ea8c023a26c10d1c93001c597afbb",

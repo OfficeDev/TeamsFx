@@ -180,7 +180,7 @@ devDependencies:
     version: 1.1.13
   karma:
     specifier: ^6.3.8
-    version: 6.3.8
+    version: 6.3.16
   karma-chrome-launcher:
     specifier: ^3.1.0
     version: 3.1.0
@@ -195,13 +195,13 @@ devDependencies:
     version: 0.1.1
   karma-junit-reporter:
     specifier: ^2.0.1
-    version: 2.0.1(karma@6.3.8)
+    version: 2.0.1(karma@6.3.16)
   karma-mocha:
     specifier: ^2.0.1
     version: 2.0.1
   karma-mocha-reporter:
     specifier: ^2.2.5
-    version: 2.2.5(karma@6.3.8)
+    version: 2.2.5(karma@6.3.16)
   karma-sourcemap-loader:
     specifier: ^0.3.8
     version: 0.3.8
@@ -1167,7 +1167,7 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
     dependencies:
-      debug: 4.3.2
+      debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2410,7 +2410,7 @@ packages:
     engines: {node: '>= 10.17.0'}
     hasBin: true
     dependencies:
-      debug: 4.3.2
+      debug: 4.3.4
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -2705,7 +2705,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
     dev: true
@@ -2893,7 +2893,7 @@ packages:
     engines: {node: '>= 6'}
     dependencies:
       agent-base: 6.0.2
-      debug: 4.3.2
+      debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -3427,24 +3427,24 @@ packages:
     resolution: {integrity: sha512-3FAuA0B1lS4DXNyOpD1Y+BjteVmnfX0WXUpsZ19aYykTk/GPz0kqnjzdApDiEe4sapreVeVSme2qTALnbHJb/A==}
     dev: true
 
-  /karma-junit-reporter@2.0.1(karma@6.3.8):
+  /karma-junit-reporter@2.0.1(karma@6.3.16):
     resolution: {integrity: sha512-VtcGfE0JE4OE1wn0LK8xxDKaTP7slN8DO3I+4xg6gAi1IoAHAXOJ1V9G/y45Xg6sxdxPOR3THCFtDlAfBo9Afw==}
     engines: {node: '>= 8'}
     peerDependencies:
       karma: '>=0.9'
     dependencies:
-      karma: 6.3.8
+      karma: 6.3.16
       path-is-absolute: 1.0.1
       xmlbuilder: 12.0.0
     dev: true
 
-  /karma-mocha-reporter@2.2.5(karma@6.3.8):
+  /karma-mocha-reporter@2.2.5(karma@6.3.16):
     resolution: {integrity: sha512-Hr6nhkIp0GIJJrvzY8JFeHpQZNseuIakGac4bpw8K1+5F0tLb6l7uvXRa8mt2Z+NVwYgCct4QAfp2R2QP6o00w==}
     peerDependencies:
       karma: '>=0.13'
     dependencies:
       chalk: 2.4.2
-      karma: 6.3.8
+      karma: 6.3.16
       log-symbols: 2.2.0
       strip-ansi: 4.0.0
     dev: true
@@ -3473,8 +3473,8 @@ packages:
       webpack-merge: 4.2.2
     dev: true
 
-  /karma@6.3.8:
-    resolution: {integrity: sha512-10wBBU9S0lBHhbCNfmmbWQaY5C1bXlKdnvzN2QKThujCI/+DKaezrI08l6bfTlpJ92VsEboq3zYKpXwK6DOi3A==}
+  /karma@6.3.16:
+    resolution: {integrity: sha512-nEU50jLvDe5yvXqkEJRf8IuvddUkOY2x5Xc4WXHz6dxINgGDrgD2uqQWeVrJs4hbfNaotn+HQ1LZJ4yOXrL7xQ==}
     engines: {node: '>= 10'}
     hasBin: true
     dependencies:
@@ -3493,6 +3493,7 @@ packages:
       log4js: 6.9.1
       mime: 2.6.0
       minimatch: 3.1.2
+      mkdirp: 0.5.6
       qjobs: 1.2.0
       range-parser: 1.2.1
       rimraf: 3.0.2

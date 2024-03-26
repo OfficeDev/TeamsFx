@@ -140,7 +140,7 @@ import {
   RecommendedOperations,
 } from "./debug/constants";
 import { openOfficeDevFolder } from "./officeDevHandlers";
-import { UserCancelError, sleep } from "@microsoft/vscode-ui";
+import { invokeTeamsAgent } from "./copilotChatHandlers";
 
 export let core: FxCore;
 export let tools: Tools;
@@ -678,128 +678,6 @@ export async function publishInDeveloperPortalHandler(
       res.error,
       getTriggerFromProperty(args)
     );
-  }
-  return res;
-}
-
-async function openGithubCopilotChat(query: string): Promise<Result<null, FxError>> {
-  const eventName = "openCopilotChat";
-  try {
-    const options = {
-      query,
-      isPartialQuery: true,
-    };
-    await vscode.commands.executeCommand("workbench.panel.chat.view.copilot.focus");
-    await vscode.commands.executeCommand("workbench.action.chat.open", options);
-    return ok(null);
-  } catch (e) {
-    const error = assembleError(e, eventName);
-    VsCodeLogInstance.error(`Cannot invoke Teams agent in Github Copilot Chat: ${error.message}`);
-    return err(error);
-  }
-}
-
-async function installGithubCopilotChatExtension(): Promise<Result<any, FxError>> {
-  const eventName = "installCopilotChat";
-  ExtTelemetry.sendTelemetryEvent(eventName);
-  try {
-    const vscodeVersion = vscode.version;
-    const confirmRes = await vscode.window.showInformationMessage(
-      "To start with Github Copilot, we recommend you to install the extenstion first.",
-      "Install",
-      "Cancel"
-    );
-
-    if (confirmRes !== "Install") {
-      const error = new UserCancelError(eventName, "cancel");
-      ExtTelemetry.sendTelemetryErrorEvent(eventName, error);
-      return err(error);
-    } else {
-      await vscode.commands.executeCommand(
-        "workbench.extensions.installExtension",
-        githubCopilotChatExtensionId,
-        {
-          installPreReleaseVersion: vscodeVersion.includes("insider"), // VSCode insider need to install Github Copilot Chat of pre-release version
-          enable: true,
-        }
-      );
-
-      ExtTelemetry.sendTelemetryEvent(eventName, {
-        [TelemetryProperty.Success]: TelemetrySuccess.Yes,
-      });
-
-      return ok(null);
-    }
-  } catch (e) {
-    const error = assembleError(e, eventName);
-    VsCodeLogInstance.error(
-      `Cannot install Github Copilot Chat due to ${error.message}. Please install it from extension marketplace and try again.`
-    );
-
-    ExtTelemetry.sendTelemetryErrorEvent(eventName, error);
-    return err(error);
-  }
-}
-
-export async function invokeTeamsAgent(args?: any[]): Promise<Result<null, FxError>> {
-  const eventName = TelemetryEvent.InvokeTeamsAgent;
-  const triggerFromProperty = getTriggerFromProperty(args);
-  ExtTelemetry.sendTelemetryEvent(eventName, triggerFromProperty);
-
-  const query =
-    triggerFromProperty["trigger-from"] === TelemetryTriggerFrom.TreeView
-      ? "@teams"
-      : "@teams /create";
-  let res;
-
-  const isExtensionInstalled = githubCopilotInstalled();
-  if (isExtensionInstalled) {
-    res = await openGithubCopilotChat(query);
-  } else {
-    VsCodeLogInstance.info(
-      "You need to install [Github Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat) first."
-    );
-    showOutputChannel();
-
-    const maxRetry = 5;
-    const installRes = await installGithubCopilotChatExtension();
-    if (installRes.isOk()) {
-      let checkCount = 0;
-      let verifyExtensionInstalled = false;
-      while (checkCount < maxRetry) {
-        verifyExtensionInstalled = githubCopilotInstalled();
-        if (!verifyExtensionInstalled) {
-          await sleep(3000);
-          checkCount++;
-        } else {
-          break;
-        }
-      }
-
-      if (verifyExtensionInstalled) {
-        await sleep(2000); // wait for extension activation
-        res = await openGithubCopilotChat(query);
-      } else {
-        const error = new SystemError(
-          eventName,
-          "CannotVerifyGithubCopilotChat",
-          "Cannot install Github Copilot Chat. Please install it from extension marketplace and try again.",
-          "Cannot install Github Copilot Chat. Please install it from extension marketplace and try again."
-        );
-        VsCodeLogInstance.error(`Cannot start Teams Agent due to ${error.message}`);
-        res = err(error);
-      }
-    } else {
-      res = installRes;
-    }
-  }
-  if (res.isErr()) {
-    ExtTelemetry.sendTelemetryErrorEvent(eventName, res.error, triggerFromProperty);
-  } else {
-    ExtTelemetry.sendTelemetryEvent(eventName, {
-      [TelemetryProperty.Success]: TelemetrySuccess.Yes,
-      ...triggerFromProperty,
-    });
   }
   return res;
 }
@@ -2130,7 +2008,6 @@ export async function decryptSecret(cipher: string, selection: vscode.Range): Pr
 }
 
 const acExtId = "TeamsDevApp.vscode-adaptive-cards";
-const githubCopilotChatExtensionId = "github.copilot-chat";
 
 export async function installAdaptiveCardExt(
   ...args: unknown[]
@@ -2167,11 +2044,6 @@ export async function installAdaptiveCardExt(
 
 export function acpInstalled(): boolean {
   const extension = vscode.extensions.getExtension(acExtId);
-  return !!extension;
-}
-
-export function githubCopilotInstalled(): boolean {
-  const extension = vscode.extensions.getExtension(githubCopilotChatExtensionId);
   return !!extension;
 }
 

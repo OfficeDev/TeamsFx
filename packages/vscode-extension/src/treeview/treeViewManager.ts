@@ -221,8 +221,8 @@ class TreeViewManager {
         { name: "debug-alt", custom: false }
       ),
       new TreeViewCommand(
-        "Get help from Github Copilot",
-        "Chat with Github Copilot to find out what you can do for your current status",
+        localize("teamstoolkit.commandsTreeViewProvider.getCopilotHelpTitle"),
+        localize("teamstoolkit.commandsTreeViewProvider.getCopilotHelpDescription"),
         "fx-extension.invokeChat",
         undefined,
         { name: "comment-discussion", custom: false }

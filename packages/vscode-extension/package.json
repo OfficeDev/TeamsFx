@@ -870,7 +870,7 @@
       },
       {
         "command": "fx-extension.invokeChat",
-        "title": "%teamstoolkit.commandsTreeViewProvider.invokeChat%",
+        "title": "%teamstoolkit.commandsTreeViewProvider.getCopilotHelpTitle%",
         "category": "Teams"
       }
     ],

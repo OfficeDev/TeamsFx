@@ -55,6 +55,7 @@ import {
   workspaceUri,
 } from "./globalVariables";
 import * as handlers from "./handlers";
+import * as copilotChatHandlers from "./copilotChatHandlers";
 import * as officeDevHandlers from "./officeDevHandlers";
 import { ManifestTemplateHoverProvider } from "./hoverProvider";
 import { VsCodeUI } from "./qm/vsc_ui";
@@ -306,7 +307,7 @@ function registerActivateCommands(context: vscode.ExtensionContext) {
 
   // Register invoke teams agent command
   const invokeTeamsAgent = vscode.commands.registerCommand("fx-extension.invokeChat", (...args) =>
-    Correlator.run(handlers.invokeTeamsAgent, args)
+    Correlator.run(copilotChatHandlers.invokeTeamsAgent, args)
   );
   context.subscriptions.push(invokeTeamsAgent);
 }

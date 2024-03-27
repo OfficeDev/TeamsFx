@@ -90,6 +90,10 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
           name: 'AZURE_OPENAI_ENDPOINT'
           value: azureOpenAIEndpoint
         }
+        {
+          name: 'AZURE_OPENAI_DEPLOYMENT_NAME'
+          value: azureOpenAIDeploymentName
+        }
         {{/useAzureOpenAI}}
       ]
       ftpsState: 'FtpsOnly'

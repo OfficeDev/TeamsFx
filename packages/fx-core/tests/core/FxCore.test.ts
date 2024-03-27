@@ -243,7 +243,7 @@ describe("Core basic APIs", () => {
 
   it("deploy aad manifest happy path", async () => {
     const promtionOnVSC =
-      'Your Microsoft Entra app has been deployed successfully. To view that, click "Learn more"';
+      'Your Microsoft Entra app has been deployed successfully. To view that, click "More info"';
 
     const core = new FxCore(tools);
     const showMessage = sandbox.spy(tools.ui, "showMessage") as unknown as sinon.SinonSpy<
@@ -275,12 +275,12 @@ describe("Core basic APIs", () => {
     assert.equal(showMessage.getCall(0).args[0], "info");
     assert.equal(showMessage.getCall(0).args[1], promtionOnVSC);
     assert.isFalse(showMessage.getCall(0).args[2]);
-    assert.equal(showMessage.getCall(0).args[3], "Learn more");
+    assert.equal(showMessage.getCall(0).args[3], "More info");
     assert.isFalse(openUrl.called);
   });
-  it("deploy aad manifest happy path with click learn more", async () => {
+  it("deploy aad manifest happy path with click more info", async () => {
     const core = new FxCore(tools);
-    sandbox.stub(tools.ui, "showMessage").resolves(ok("Learn more"));
+    sandbox.stub(tools.ui, "showMessage").resolves(ok("More info"));
     sandbox.stub(tools.ui, "openUrl").resolves(ok(true));
     const appName = await mockV3Project();
     sandbox

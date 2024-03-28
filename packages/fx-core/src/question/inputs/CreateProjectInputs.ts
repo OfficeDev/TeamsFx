@@ -45,6 +45,7 @@ export interface CreateProjectInputs extends Inputs {
     | "BotAndMessageExtension"
     | "TabNonSsoAndBot"
     | "json-taskpane"
+    | "office-content-addin"
     | "word-taskpane"
     | "word-sso"
     | "word-react"

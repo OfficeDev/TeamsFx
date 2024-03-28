@@ -53,6 +53,7 @@ export const CreateProjectOptions: CLICommandOption[] = [
       "BotAndMessageExtension",
       "TabNonSsoAndBot",
       "json-taskpane",
+      "office-content-addin",
       "word-taskpane",
       "word-sso",
       "word-react",

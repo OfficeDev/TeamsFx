@@ -83,6 +83,18 @@ export const OfficeAddinProjectConfig: IOfficeAddinProjectConfig = {
       },
       manifestPath: "manifest.json",
     },
+    "office-content-addin": {
+      title: "core.newContentAddin.label",
+      detail: "core.newContentAddin.detail",
+      localTemplate: "",
+      framework: {
+        default: {
+          typescript: "https://aka.ms/teams-toolkit/office-addin-content/ts-default",
+          javascript: "https://aka.ms/teams-toolkit/office-addin-content/js-default",
+        },
+      },
+      manifestPath: "manifest.json",
+    },
   },
   word: {
     "word-taskpane": {

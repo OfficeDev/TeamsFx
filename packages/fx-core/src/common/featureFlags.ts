@@ -115,19 +115,25 @@ export function isApiMeSSOEnabled(): boolean {
 //     if (addin-host == `outlook`) config.json.json-taskpane.default.[programming-language]
 //     else config[addin-host].[capabilities].default.[programming-language]
 // Case 3: TEAMSFX_OFFICE_ADDIN = true AND TEAMSFX_OFFICE_XML_ADDIN = true
-//     3.1 project-type option: `office-addin-type`
+//   3.1 project-type option: `office-addin-type`
 //   3.2 addin-host: not show but will use `wxpo` internally
-//   3.3 capabilities options: [`json-taskpane`, `office-addin-import`]
+//   3.3 capabilities options: [`json-taskpane`, `office-addin-import`, `office-content-addin`]
 //   3.4 programming-language options: [`typescript`, `javascript`]
 //   3.5 office-addin-framework-type options: [`default`, `react`]
+//     if (capabilities == `json-taskpane`) then [`default`, `react`]
+//     else if (capabilities == `office-addin-import`) then [`default`] (skip in UI)
+//     else if (capabilities == `office-content-addin`) then [`default`] (skip in UI)
 //   3.6 generator class: OfficeAddinGenerator
-//   3.7 template link: config.json.json-taskpane.[office-addin-framework-type].[programming-language]
+//   3.7 template link: config.json.[capabilities].[office-addin-framework-type].[programming-language]
 // case 4: TEAMSFX_OFFICE_ADDIN = true AND TEAMSFX_OFFICE_XML_ADDIN = fasle
 //   4.1 project-type option: `office-addin-type`
 //   4.2 addin-host: not show but will use `wxpo` internally
-//   4.3 capabilities options: [`jason-taskpane`, `office-addin-import`]
+//   4.3 capabilities options: [`jason-taskpane`, `office-addin-import`, `office-content-addin`]
 //   4.4 programming-language options: [`typescript`, `javascript`]
 //   4.5 office-addin-framework-type options: [`default`, `react`]
+//     if (capabilities == `json-taskpane`) then [`default`, `react`]
+//     else if (capabilities == `office-addin-import`) then [`default`] (skip in UI)
+//     else if (capabilities == `office-content-addin`) then [`default`] (skip in UI)
 //   4.6 generator class: OfficeAddinGenerator
-//   4.7 template link: config.json.json-taskpane.[office-addin-framework-type].[programming-language]
+//   4.7 template link: config.json.[capabilities].[office-addin-framework-type].[programming-language]
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

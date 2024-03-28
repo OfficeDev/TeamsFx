@@ -25,6 +25,7 @@ import { getLocalizedString } from "../../../common/localizeUtils";
 import { assembleError } from "../../../error";
 import {
   CapabilityOptions,
+  OfficeAddinHostOptions,
   ProjectTypeOptions,
   getOfficeAddinFramework,
 } from "../../../question/create";
@@ -102,12 +103,19 @@ export class OfficeAddinGenerator {
       | "typescript";
     const projectType = inputs[QuestionNames.ProjectType];
     const capability = inputs[QuestionNames.Capabilities];
-    const host: string =
-      projectType === ProjectTypeOptions.outlookAddin().id
-        ? "outlook"
-        : projectType === ProjectTypeOptions.officeAddin().id
-        ? "wxpo" // wxpo - support word, excel, powerpoint, outlook
-        : inputs[QuestionNames.OfficeAddinHost];
+    const inputHost = inputs[QuestionNames.OfficeAddinHost];
+    let host: string = inputHost;
+    if (
+      projectType === ProjectTypeOptions.outlookAddin().id ||
+      (projectType === ProjectTypeOptions.officeXMLAddin().id &&
+        inputHost === OfficeAddinHostOptions.outlook().id)
+    ) {
+      host = "outlook";
+    } else if (capability === CapabilityOptions.officeContentAddin().id) {
+      host = "xp"; // content add-in support excel, powerpoint
+    } else if (capability === "json-taskpane") {
+      host = "wxpo"; // wxpo - support word, excel, powerpoint, outlook
+    }
     const workingDir = process.cwd();
     const importProgressStr =
       projectType === ProjectTypeOptions.officeAddin().id

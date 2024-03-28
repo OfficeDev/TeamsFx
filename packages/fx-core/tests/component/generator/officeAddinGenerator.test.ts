@@ -977,7 +977,7 @@ describe("OfficeAddinGenerator for Office Addin", function () {
     // chai.assert.isTrue(stub.calledWith(context, testFolder, "office-json-addin", undefined));
   });
 
-  it(`should generate ts template if language is "typescript"`, async () => {
+  it(`should generate taskpane ts template if language is "typescript"`, async () => {
     const inputs: Inputs = {
       platform: Platform.CLI,
       projectPath: testFolder,
@@ -997,7 +997,48 @@ describe("OfficeAddinGenerator for Office Addin", function () {
     chai.assert.isTrue(stub.calledWith(context, testFolder, "office-json-addin", "ts"));
   });
 
-  it(`should generate js template if language is "JavaScript"`, async () => {
+  it(`should generate taskpane js template if language is "JavaScript"`, async () => {
+    const inputs: Inputs = {
+      platform: Platform.CLI,
+      projectPath: testFolder,
+      "app-name": "office-addin-test",
+    };
+    inputs[QuestionNames.ProjectType] = ProjectTypeOptions.officeAddin().id;
+    inputs[QuestionNames.Capabilities] = "json-taskpane";
+    inputs[QuestionNames.ProgrammingLanguage] = "JavaScript";
+    inputs[QuestionNames.OfficeAddinFramework] = "default";
+
+    sinon.stub(OfficeAddinGenerator, "doScaffolding").resolves(ok(undefined));
+    const stub = sinon.stub(Generator, "generateTemplate").resolves(ok(undefined));
+
+    const result = await OfficeAddinGenerator.generate(context, inputs, testFolder);
+
+    chai.assert.isTrue(
+      result.isOk() && stub.calledWith(context, testFolder, "office-json-addin", "js")
+    );
+  });
+
+  it(`should generate content ts template if language is "typescript"`, async () => {
+    const inputs: Inputs = {
+      platform: Platform.CLI,
+      projectPath: testFolder,
+      "app-name": "office-addin-test",
+    };
+    inputs[QuestionNames.ProjectType] = ProjectTypeOptions.officeAddin().id;
+    inputs[QuestionNames.Capabilities] = "json-taskpane";
+    inputs[QuestionNames.ProgrammingLanguage] = "typescript";
+    inputs[QuestionNames.OfficeAddinFramework] = "default";
+
+    sinon.stub(OfficeAddinGenerator, "doScaffolding").resolves(ok(undefined));
+    const stub = sinon.stub(Generator, "generateTemplate").resolves(ok(undefined));
+
+    const result = await OfficeAddinGenerator.generate(context, inputs, testFolder);
+
+    chai.assert.isTrue(result.isOk());
+    chai.assert.isTrue(stub.calledWith(context, testFolder, "office-json-addin", "ts"));
+  });
+
+  it(`should generate content js template if language is "JavaScript"`, async () => {
     const inputs: Inputs = {
       platform: Platform.CLI,
       projectPath: testFolder,

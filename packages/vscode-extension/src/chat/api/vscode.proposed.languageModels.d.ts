@@ -1,9 +1,8 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
 
-declare module 'vscode' {
+
+declare module "vscode" {
 
 	/**
 	 * Represents a language model response.
@@ -80,11 +79,17 @@ declare module 'vscode' {
 		content: string;
 
 		/**
+		 * The optional name of a user for this message.
+		 */
+		name: string | undefined;
+
+		/**
 		 * Create a new assistant message.
 		 *
 		 * @param content The content of the message.
+		 * @param name The optional name of a user for the message.
 		 */
-		constructor(content: string);
+		constructor(content: string, name?: string);
 	}
 
 	/**

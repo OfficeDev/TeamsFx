@@ -458,5 +458,8 @@
     "teamstoolkit.chatParticipants.create.selectFolder.label": "Select Folder",
     "teamstoolkit.chatParticipants.create.successfullyCreated": "Project successfully created in current workspace.",
     "teamstoolkit.chatParticipants.create.failToCreate": "Unable to create the project.",
-    "teamstoolkit.chatParticipants.default.noConceptualAnswer": "I can only answer conceptual questions."
+    "teamstoolkit.chatParticipants.default.noConceptualAnswer": "I can only answer conceptual questions.",
+    "teamstoolkit.chatParticipants.officeaddin.description": "Ask about Office Add-ins development.",
+    "teamstoolkit.chatParticipants.officeAddinCreate.description": "Describe the add-in you want to build for Office",
+    "teamstoolkit.chatParticipants.officeAddinGeneratecode.description": "Describe the code you want to generate for the Office add-in"
 }

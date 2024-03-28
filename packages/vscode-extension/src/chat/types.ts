@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 import { LanguageModelChatMessage, ChatResult } from "vscode";
-import { TeamsChatCommand } from "./consts";
+import { OfficeAddinChatCommand, TeamsChatCommand } from "./consts";
 
 export interface ITelemetryData {
   properties: { [key: string]: string };
@@ -21,7 +21,7 @@ export interface IChatTelemetryData {
 }
 
 export interface ICopilotChatResultMetadata {
-  readonly command: TeamsChatCommand | undefined;
+  readonly command: TeamsChatCommand | OfficeAddinChatCommand | undefined;
   readonly requestId: string;
 }
 

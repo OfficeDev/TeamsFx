@@ -1361,6 +1361,25 @@
             "description": "%teamstoolkit.chatParticipants.nextStep.description%"
           }
         ]
+      },
+      {
+        "id": "ms-teams-vscode-extension.office",
+        "name": "office",
+        "description": "%teamstoolkit.chatParticipants.officeaddin.description%",
+        "commands": [
+          {
+            "name": "create",
+            "description": "%teamstoolkit.chatParticipants.officeAddinCreate.description%"
+          },
+          {
+            "name": "generatecode",
+            "description": "%teamstoolkit.chatParticipants.officeAddinGeneratecode.description%"
+          },
+          {
+            "name": "nextstep",
+            "description": "%teamstoolkit.chatParticipants.nextStep.description%"
+          }
+        ]
       }
     ]
   },

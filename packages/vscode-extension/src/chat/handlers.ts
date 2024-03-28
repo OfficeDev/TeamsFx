@@ -23,7 +23,7 @@ import * as uuid from "uuid";
 import createCommandHandler from "./commands/create/createCommandHandler";
 import { ProjectMetadata } from "./commands/create/types";
 import nextStepCommandHandler from "./commands/nextstep/nextstepCommandHandler";
-import { TeamsChatCommand } from "./consts";
+import { TeamsChatCommand, OfficeAddinChatCommand } from "./consts";
 import followupProvider from "./followupProvider";
 import { defaultSystemPrompt } from "./prompts";
 import { getSampleDownloadUrlInfo, verbatimCopilotInteraction } from "./utils";
@@ -37,6 +37,9 @@ import { ChatTelemetryData } from "./telemetry";
 import { localize } from "../utils/localizeUtils";
 import { Correlator } from "@microsoft/teamsfx-core";
 import { ExtTelemetry } from "../telemetry/extTelemetry";
+import generatecodeCommandHandler from "./commands/generatecode/generatecodeCommandHandler";
+import officeAddinCreateCommandHandler from "./commands/create/officeAddinCreateCommandHandler";
+import officeAddinNextStepCommandHandler from "./commands/nextstep/officeAddinNextstepCommandHandler";
 import { FxError, Result } from "@microsoft/teamsfx-api";
 
 export function chatRequestHandler(
@@ -55,6 +58,24 @@ export function chatRequestHandler(
     return defaultHandler(request, context, response, token);
   }
   return {};
+}
+
+export function officeAddinChatRequestHandler(
+  request: ChatRequest,
+  context: ChatContext,
+  response: ChatResponseStream,
+  token: CancellationToken
+): ProviderResult<ICopilotChatResult> {
+  followupProvider.clearFollowups();
+  if (request.command == OfficeAddinChatCommand.Create) {
+    return officeAddinCreateCommandHandler(request, context, response, token);
+  } else if (request.command == OfficeAddinChatCommand.GenerateCode) {
+    return generatecodeCommandHandler(request, context, response, token);
+  } else if (request.command == OfficeAddinChatCommand.NextStep) {
+    return officeAddinNextStepCommandHandler(request, context, response, token);
+  } else {
+    return defaultHandler(request, context, response, token);
+  }
 }
 
 async function defaultHandler(

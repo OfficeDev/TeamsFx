@@ -48,6 +48,7 @@ export const CreateProjectOptions: CLICommandOption[] = [
       "copilot-plugin-new-api",
       "copilot-plugin-existing-api",
       "custom-copilot-basic",
+      "custom-copilot-rag",
       "custom-copilot-agent",
       "message-extension",
       "BotAndMessageExtension",
@@ -144,6 +145,13 @@ export const CreateProjectOptions: CLICommandOption[] = [
     description: "The authentication type for the API.",
     default: "none",
     choices: ["none", "api-key", "microsoft-entra"],
+  },
+  {
+    name: "custom-copilot-rag",
+    type: "string",
+    description: "Chat With Your Data",
+    default: "custom-copilot-rag-customize",
+    choices: ["custom-copilot-rag-azureAISearch"],
   },
   {
     name: "custom-copilot-agent",

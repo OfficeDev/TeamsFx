@@ -314,4 +314,5 @@
 /templates/**/workflow @kimizhu @dooriya @swatDong
 /templates/constraints/yml/actions @hund030 @eriolchan @huimiu
 /templates/python/custom-copilot-basic @frankqianms @blackchoey
+/templates/python/custom-copilot-rag-azure-ai-search @frankqianms @blackchoey
 /templates/scripts @hund030 @eriolchan @huimiu

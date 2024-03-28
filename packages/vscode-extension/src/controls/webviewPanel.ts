@@ -180,6 +180,12 @@ export class WebviewPanel {
               },
             });
             break;
+          case Commands.InvokeTeamsAgent:
+            await vscode.commands.executeCommand(
+              "fx-extension.invokeChat",
+              TelemetryTriggerFrom.Webview
+            );
+            break;
           default:
             break;
         }

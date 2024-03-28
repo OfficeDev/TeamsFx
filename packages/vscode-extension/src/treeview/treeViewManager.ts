@@ -220,6 +220,13 @@ class TreeViewManager {
         undefined,
         { name: "debug-alt", custom: false }
       ),
+      new TreeViewCommand(
+        localize("teamstoolkit.commandsTreeViewProvider.getCopilotHelpTitle"),
+        localize("teamstoolkit.commandsTreeViewProvider.getCopilotHelpDescription"),
+        "fx-extension.invokeChat",
+        undefined,
+        { name: "comment-discussion", custom: false }
+      ),
     ];
   }
 

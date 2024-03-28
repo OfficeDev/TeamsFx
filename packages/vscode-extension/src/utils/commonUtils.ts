@@ -323,6 +323,8 @@ export function getTriggerFromProperty(args?: any[]) {
       return { [TelemetryProperty.TriggerFrom]: TelemetryTriggerFrom.ExternalUrl };
     case TelemetryTriggerFrom.Other:
       return { [TelemetryProperty.TriggerFrom]: TelemetryTriggerFrom.Other };
+    case TelemetryTriggerFrom.CreateAppQuestionFlow:
+      return { [TelemetryProperty.TriggerFrom]: TelemetryTriggerFrom.CreateAppQuestionFlow };
     default:
       return { [TelemetryProperty.TriggerFrom]: TelemetryTriggerFrom.Unknow };
   }

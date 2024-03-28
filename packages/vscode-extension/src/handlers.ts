@@ -140,6 +140,7 @@ import {
   RecommendedOperations,
 } from "./debug/constants";
 import { openOfficeDevFolder } from "./officeDevHandlers";
+import { invokeTeamsAgent } from "./copilotChatHandlers";
 
 export let core: FxCore;
 export let tools: Tools;
@@ -376,6 +377,10 @@ export async function createNewProjectHandler(...args: any[]): Promise<Result<an
   }
 
   const res = result.value as CreateProjectResult;
+  if (res.shouldInvokeTeamsAgent) {
+    await invokeTeamsAgent([TelemetryTriggerFrom.CreateAppQuestionFlow]);
+    return result;
+  }
   const projectPathUri = Uri.file(res.projectPath);
   // show local debug button by default
   if (isValidOfficeAddInProject(projectPathUri.fsPath)) {

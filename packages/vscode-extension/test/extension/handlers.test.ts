@@ -309,6 +309,32 @@ describe("handlers", () => {
       clock.restore();
     });
 
+    it("createNewProjectHandler - invoke Copilot", async () => {
+      const mockCore = new MockCore();
+      sinon
+        .stub(mockCore, "createProject")
+        .resolves(ok({ projectPath: "", shouldInvokeTeamsAgent: true }));
+      sinon.stub(handlers, "core").value(mockCore);
+      const sendTelemetryEventFunc = sinon.stub(ExtTelemetry, "sendTelemetryEvent");
+      sinon.stub(ExtTelemetry, "sendTelemetryErrorEvent");
+      sinon.stub(globalVariables, "checkIsSPFx").returns(false);
+      sandbox.stub(vscode.extensions, "getExtension").returns({ name: "github.copilot" } as any);
+      const executeCommandStub = sandbox.stub(vscode.commands, "executeCommand").resolves();
+
+      await handlers.createNewProjectHandler();
+
+      chai.assert.isTrue(
+        sendTelemetryEventFunc.calledWith(extTelemetryEvents.TelemetryEvent.CreateProjectStart)
+      );
+      chai.assert.isTrue(
+        sendTelemetryEventFunc.calledWith(extTelemetryEvents.TelemetryEvent.CreateProject)
+      );
+      chai.assert.equal(executeCommandStub.callCount, 2);
+      chai.assert.equal(executeCommandStub.args[0][0], "workbench.panel.chat.view.copilot.focus");
+      chai.assert.equal(executeCommandStub.args[1][0], "workbench.action.chat.open");
+      sinon.restore();
+    });
+
     it("provisionHandler()", async () => {
       sinon.stub(handlers, "core").value(new MockCore());
       sinon.stub(ExtTelemetry, "sendTelemetryEvent");

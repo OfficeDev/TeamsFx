@@ -99,7 +99,39 @@ export class ValidateWithTestCasesDriver implements StepDriver {
         return err(appStudioTokenRes.error);
       }
       const appStudioToken = appStudioTokenRes.value;
-
+      // Check if the app has ongoing validation
+      const existingValidationResponse = await AppStudioClient.getAppValidationRequestList(
+        manifest.id,
+        appStudioToken
+      );
+      if (existingValidationResponse.appValidations) {
+        for (const validation of existingValidationResponse.appValidations) {
+          if (validation.status === AsyncAppValidationStatus.InProgress) {
+            if (context.platform === Platform.CLI) {
+              const message: Array<{ content: string; color: Colors }> = [
+                {
+                  content: `A validation is currently in progress, please submit later. You can find this existing validation from `,
+                  color: Colors.BRIGHT_YELLOW,
+                },
+                {
+                  content: `${getAppStudioEndpoint()}/apps/${manifest.id}/app-validation/${
+                    validation.id
+                  }`,
+                  color: Colors.BRIGHT_CYAN,
+                },
+              ];
+              context.ui?.showMessage("warn", message, false);
+            } else {
+              const message = getLocalizedString(
+                "driver.teamsApp.progressBar.validateWithTestCases.conflict",
+                `${getAppStudioEndpoint()}/apps/${manifest.id}/app-validation/${validation.id}`
+              );
+              context.logProvider.warning(message);
+            }
+            return ok(new Map());
+          }
+        }
+      }
       const response: AsyncAppValidationResponse = await AppStudioClient.submitAppValidationRequest(
         manifest.id,
         appStudioToken

@@ -47,7 +47,7 @@
     "adaptive-expressions": "^4.20.0",
     "adaptivecards": "~2.10.0",
     "adaptivecards-templating": "^2.1.0",
-    "markdown-it": "^12.3.2",
+    "markdown-it": "^13.0.2",
     "react": "^17.0.2"
   },
   "publishConfig": {

@@ -1142,7 +1142,13 @@ describe("manifestUpdater", () => {
     );
 
     expect(result).to.deep.equal(expectedManifest);
-    expect(warnings).to.deep.equal([]);
+    expect(warnings).to.deep.equal([
+      {
+        type: WarningType.OperationOnlyContainsOptionalParam,
+        content: Utils.format(ConstantString.OperationOnlyContainsOptionalParam, "getPets"),
+        data: "getPets",
+      },
+    ]);
   });
 
   it("should contain auth property in manifest if pass the api key auth", async () => {
@@ -2243,7 +2249,13 @@ describe("generateCommands", () => {
         type: "query",
       },
     ]);
-    expect(warnings).to.deep.equal([]);
+    expect(warnings).to.deep.equal([
+      {
+        type: WarningType.OperationOnlyContainsOptionalParam,
+        content: Utils.format(ConstantString.OperationOnlyContainsOptionalParam, "createPet"),
+        data: "createPet",
+      },
+    ]);
   });
 
   it("should not show warning for each GET/POST operation in the spec if only contains 1 optional parameters", async () => {
@@ -2320,7 +2332,18 @@ describe("generateCommands", () => {
         type: "query",
       },
     ]);
-    expect(warnings).to.deep.equal([]);
+    expect(warnings).to.deep.equal([
+      {
+        type: WarningType.OperationOnlyContainsOptionalParam,
+        content: Utils.format(ConstantString.OperationOnlyContainsOptionalParam, "getPets"),
+        data: "getPets",
+      },
+      {
+        type: WarningType.OperationOnlyContainsOptionalParam,
+        content: Utils.format(ConstantString.OperationOnlyContainsOptionalParam, "createPet"),
+        data: "createPet",
+      },
+    ]);
   });
 
   it("should only generate commands for GET operation with required parameter", async () => {

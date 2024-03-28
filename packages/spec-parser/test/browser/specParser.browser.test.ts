@@ -180,13 +180,13 @@ describe("SpecParser in Browser", () => {
               title: "UserId",
               description: "User Id",
             },
+            {
+              name: "name",
+              title: "Name",
+              description: "User Name",
+            },
           ],
           description: "Get user by user id, balabala",
-          warning: {
-            type: WarningType.OperationOnlyContainsOptionalParam,
-            content: Utils.format(ConstantString.OperationOnlyContainsOptionalParam, "getUserById"),
-            data: "getUserById",
-          },
         },
       ]);
     });

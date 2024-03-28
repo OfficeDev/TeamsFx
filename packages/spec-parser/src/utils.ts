@@ -639,7 +639,7 @@ export class Utils {
   static parseApiInfo(
     operationItem: OpenAPIV3.OperationObject,
     options: ParseOptions
-  ): [IMessagingExtensionCommand, WarningResult | undefined] {
+  ): IMessagingExtensionCommand {
     const requiredParams: IParameter[] = [];
     const optionalParams: IParameter[] = [];
     const paramObject = operationItem.parameters as OpenAPIV3.ParameterObject[];
@@ -689,13 +689,7 @@ export class Utils {
 
     const operationId = operationItem.operationId!;
 
-    const parameters = [];
-
-    if (requiredParams.length !== 0) {
-      parameters.push(...requiredParams);
-    } else {
-      parameters.push(optionalParams[0]);
-    }
+    const parameters = [...requiredParams, ...optionalParams];
 
     const command: IMessagingExtensionCommand = {
       context: ["compose"],
@@ -708,16 +702,7 @@ export class Utils {
         ConstantString.CommandDescriptionMaxLens
       ),
     };
-    let warning: WarningResult | undefined = undefined;
-
-    if (requiredParams.length === 0 && optionalParams.length > 1) {
-      warning = {
-        type: WarningType.OperationOnlyContainsOptionalParam,
-        content: Utils.format(ConstantString.OperationOnlyContainsOptionalParam, operationId),
-        data: operationId,
-      };
-    }
-    return [command, warning];
+    return command;
   }
 
   static listAPIs(spec: OpenAPIV3.Document, options: ParseOptions): APIMap {

@@ -109,7 +109,7 @@ export class SpecParser {
           continue;
         }
 
-        const [command, warning] = Utils.parseApiInfo(pathObjectItem, this.options);
+        const command = Utils.parseApiInfo(pathObjectItem, this.options);
 
         const apiInfo: APIInfo = {
           method: method,
@@ -119,10 +119,6 @@ export class SpecParser {
           parameters: command.parameters!,
           description: command.description!,
         };
-
-        if (warning) {
-          apiInfo.warning = warning;
-        }
 
         apiInfos.push(apiInfo);
       }

@@ -5,7 +5,14 @@
 import { OpenAPIV3 } from "openapi-types";
 import fs from "fs-extra";
 import path from "path";
-import { AuthInfo, ErrorType, ParseOptions, ProjectType, WarningResult } from "./interfaces";
+import {
+  AuthInfo,
+  ErrorType,
+  ParseOptions,
+  ProjectType,
+  WarningResult,
+  WarningType,
+} from "./interfaces";
 import { Utils } from "./utils";
 import { SpecParserError } from "./specParserError";
 import { ConstantString } from "./constants";
@@ -297,17 +304,31 @@ export class ManifestUpdater {
             if (options.allowMethods?.includes(method)) {
               const operationItem = (operations as any)[method];
               if (operationItem) {
-                const [command, warning] = Utils.parseApiInfo(operationItem, options);
+                const command = Utils.parseApiInfo(operationItem, options);
+
+                if (
+                  command.parameters &&
+                  command.parameters.length >= 1 &&
+                  command.parameters.some((param) => param.isRequired)
+                ) {
+                  command.parameters = command.parameters.filter((param) => param.isRequired);
+                } else if (command.parameters && command.parameters.length > 0) {
+                  command.parameters = [command.parameters[0]];
+                  warnings.push({
+                    type: WarningType.OperationOnlyContainsOptionalParam,
+                    content: Utils.format(
+                      ConstantString.OperationOnlyContainsOptionalParam,
+                      command.id
+                    ),
+                    data: command.id,
+                  });
+                }
 
                 if (adaptiveCardFolder) {
                   const adaptiveCardPath = path.join(adaptiveCardFolder, command.id + ".json");
                   command.apiResponseRenderingTemplateFile = (await fs.pathExists(adaptiveCardPath))
                     ? ManifestUpdater.getRelativePath(manifestPath, adaptiveCardPath)
                     : "";
-                }
-
-                if (warning) {
-                  warnings.push(warning);
                 }
 
                 commands.push(command);

@@ -62,7 +62,7 @@ async function repair(req, context) {
  * @param req - The HTTP request.
  */
 function isApiKeyValid(req) {
-  const apiKey = req.headers.get("x-api-key");
+  const apiKey = req.headers.get("Authorization")?.replace("Bearer ", "").trim();
   return apiKey === process.env.API_KEY;
 }
 

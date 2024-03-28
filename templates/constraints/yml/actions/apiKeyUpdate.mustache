@@ -1,0 +1,14 @@
+  # Update API KEY
+  - uses: apiKey/update
+    with:
+      # Name of the API Key
+      name: {{ApiSpecAuthName}}      
+      # Teams app ID
+      appId: ${{TEAMS_APP_ID}}
+      {{#apiSpecPath}}
+      # Path to OpenAPI description document
+      apiSpecPath: {{{apiSpecPath}}}
+      {{/apiSpecPath}}
+      {{#registrationId}}
+      registrationId: {{{registrationId}}}
+      {{/registrationId}}

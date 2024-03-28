@@ -8,7 +8,9 @@ provision:
 
 {{#armDeploy}} deploymentName: Create-resources-for-sme {{/armDeploy}}
 
-{{#apiKeyRegister}}ApiSpecAuthName: x-api-key, primaryClientSecret: ${{SECRET_API_KEY}}, apiSpecPath: ./appPackage/apiSpecificationFile/repair.yml, ApiSpecAuthRegistrationIdEnvName: X_API_KEY_REGISTRATION_ID{{/apiKeyRegister}}
+{{#apiKeyRegister}}ApiSpecAuthName: apiKey, primaryClientSecret: ${{SECRET_API_KEY}}, apiSpecPath: ./appPackage/apiSpecificationFile/repair.yml, ApiSpecAuthRegistrationIdEnvName: APIKEY_REGISTRATION_ID{{/apiKeyRegister}}
+
+{{#apiKeyUpdate}}ApiSpecAuthName: apiKey, apiSpecPath: ./appPackage/apiSpecificationFile/repair.yml, registrationId: ${{APIKEY_REGISTRATION_ID}}{{/apiKeyUpdate}}
 
 {{#teamsAppValidateManifest}} {{/teamsAppValidateManifest}}
 

@@ -66,7 +66,7 @@ export async function repair(
  * @returns {boolean} - True if the request is authorized, false otherwise.
  */
 function isApiKeyValid(req: HttpRequest): boolean {
-  const apiKey = req.headers.get("x-api-key");
+  const apiKey = req.headers.get("Authorization")?.replace("Bearer ", "").trim();
   return apiKey === process.env.API_KEY;
 }
 

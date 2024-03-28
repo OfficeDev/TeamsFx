@@ -50,7 +50,7 @@
       "authorization": {
         "authType": "apiSecretServiceAuth",
         "apiSecretServiceAuthConfiguration": {
-          "apiSecretRegistrationId": "${{X_API_KEY_REGISTRATION_ID}}"
+          "apiSecretRegistrationId": "${{APIKEY_REGISTRATION_ID}}"
         }
       }
     }

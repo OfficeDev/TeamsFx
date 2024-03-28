@@ -8,10 +8,9 @@ servers:
     description: The repair api server
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: x-api-key
+    apiKey:
+      type: http
+      scheme: bearer
 paths:
   /repair:
     get:
@@ -26,7 +25,7 @@ paths:
             type: string
           required: false
       security:
-        - ApiKeyAuth: []
+        - apiKey: []
       responses:
         '200':
           description: A list of repairs

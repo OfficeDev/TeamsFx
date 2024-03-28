@@ -115,14 +115,16 @@ export class WrappedAxiosClient {
       method: method,
       params: this.generateParameters(error.config!.params),
       [TelemetryPropertyKey.success]: TelemetryPropertyValue.failure,
-      [TelemetryPropertyKey.errorMessage]: JSON.stringify(error.response!.data),
-      "status-code": error.response!.status.toString() ?? "undefined",
+      [TelemetryPropertyKey.errorMessage]: error.response
+        ? JSON.stringify(error.response.data)
+        : error.message ?? "undefined",
+      "status-code": error.response?.status.toString() ?? "undefined",
       ...this.generateExtraProperties(fullPath, requestData),
     };
 
     let eventName: string;
     if (this.isTDPApi(fullPath)) {
-      const correlationId = error.response!.headers[Constants.CORRELATION_ID];
+      const correlationId = error.response?.headers[Constants.CORRELATION_ID] ?? "undefined";
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       const extraData = error.response?.data ? `data: ${JSON.stringify(error.response.data)}` : "";
       const TDPApiFailedError = new DeveloperPortalAPIFailedError(

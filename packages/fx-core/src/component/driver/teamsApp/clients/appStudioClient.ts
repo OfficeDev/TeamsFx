@@ -629,13 +629,16 @@ export namespace AppStudioClient {
    * Submit App Validation Request (In-App) for which App Definitions are stored at TDP.
    * @param teamsAppId
    * @param appStudioToken
+   * @param timeoutSeconds
    * @returns
    */
   export async function submitAppValidationRequest(
     teamsAppId: string,
-    appStudioToken: string
+    appStudioToken: string,
+    timeoutSeconds = 10
   ): Promise<AsyncAppValidationResponse> {
     const requester = createRequesterWithToken(appStudioToken, region);
+    requester.defaults.timeout = timeoutSeconds * 1000;
     try {
       const response = await RetryHandler.Retry(() =>
         requester.post(`/api/v1.0/appvalidations/appdefinition/validate`, {
@@ -676,13 +679,16 @@ export namespace AppStudioClient {
    * Get App validation results by provided app validation id
    * @param appValidationId
    * @param appStudioToken
+   * @param timeoutSeconds
    * @returns
    */
   export async function getAppValidationById(
     appValidationId: string,
-    appStudioToken: string
+    appStudioToken: string,
+    timeoutSeconds = 10
   ): Promise<AsyncAppValidationResultsResponse> {
     const requester = createRequesterWithToken(appStudioToken, region);
+    requester.defaults.timeout = timeoutSeconds * 1000;
     try {
       const response = await RetryHandler.Retry(() =>
         requester.get(`/api/v1.0/appvalidations/${appValidationId}`)

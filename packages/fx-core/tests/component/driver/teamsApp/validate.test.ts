@@ -5,11 +5,23 @@ import "mocha";
 import * as sinon from "sinon";
 import chai from "chai";
 import fs from "fs-extra";
-import { ManifestUtil, SystemError, err, ok } from "@microsoft/teamsfx-api";
+import {
+  ManifestUtil,
+  SystemError,
+  err,
+  ok,
+  Platform,
+  TeamsAppManifest,
+} from "@microsoft/teamsfx-api";
 import * as commonTools from "../../../../src/common/tools";
 import { ValidateManifestDriver } from "../../../../src/component/driver/teamsApp/validate";
 import { ValidateManifestArgs } from "../../../../src/component/driver/teamsApp/interfaces/ValidateManifestArgs";
 import { IAppValidationNote } from "../../../../src/component/driver/teamsApp/interfaces/appdefinitions/IValidationResult";
+import { AsyncAppValidationResultsResponse } from "../../../../src/component/driver/teamsApp/interfaces/AsyncAppValidationResultsResponse";
+import {
+  AsyncAppValidationResponse,
+  AsyncAppValidationStatus,
+} from "../../../../src/component/driver/teamsApp/interfaces/AsyncAppValidationResponse";
 import { ValidateAppPackageDriver } from "../../../../src/component/driver/teamsApp/validateAppPackage";
 import { ValidateAppPackageArgs } from "../../../../src/component/driver/teamsApp/interfaces/ValidateAppPackageArgs";
 import { ValidateWithTestCasesDriver } from "../../../../src/component/driver/teamsApp/validateTestCases";
@@ -21,12 +33,10 @@ import {
   MockedM365Provider,
   MockedUserInteraction,
 } from "../../../plugins/solution/util";
-import { Platform, TeamsAppManifest } from "@microsoft/teamsfx-api";
 import AdmZip from "adm-zip";
 import { Constants } from "../../../../src/component/driver/teamsApp/constants";
 import { metadataUtil } from "../../../../src/component/utils/metadataUtil";
 import { InvalidActionInputError, UserCancelError } from "../../../../src/error/common";
-import { AsyncAppValidationStatus } from "../../../../src/component/driver/teamsApp/interfaces/AsyncAppValidationResponse";
 import { teamsappMgr } from "../../../../src/component/driver/teamsApp/teamsappMgr";
 import { setTools } from "../../../../src/core/globalVars";
 import { MockTools } from "../../../core/utils";
@@ -744,6 +754,178 @@ describe("teamsApp/validateWithTestCases", async () => {
     chai.assert(result.isErr());
   });
 
+  it("Invalid Validation Result Response - Null Details", async () => {
+    const mockSubmitValidationResponse: AsyncAppValidationResponse = {
+      status: AsyncAppValidationStatus.Created,
+      appValidationId: "fakeId",
+    };
+    const args: ValidateWithTestCasesArgs = {
+      appPackagePath: "fakepath",
+      showMessage: true,
+      showProgressBar: true,
+    };
+
+    const invalidValidationResultResponseJson: any = {
+      appValidationId: "appValidationId123",
+      appId: "appId123",
+      status: "Completed",
+      appVersion: "1.0.0",
+      manifestVersion: "1.0.0",
+      createdAt: "2024-03-27T12:00:00.000Z",
+      updatedAt: "2024-03-27T12:00:00.000Z",
+      validationResults: {
+        successes: null,
+        warnings: null,
+        failures: null,
+        skipped: null,
+      },
+    };
+    const invalidValidationResultResponse: AsyncAppValidationResultsResponse = <
+      AsyncAppValidationResultsResponse
+    >invalidValidationResultResponseJson;
+    sinon.stub(AppStudioClient, "getAppValidationById").resolves(invalidValidationResultResponse);
+    await teamsAppDriver.runningBackgroundJob(
+      args,
+      mockedDriverContext,
+      "test_token",
+      mockSubmitValidationResponse,
+      "test_id"
+    );
+    chai.assert(
+      mockedDriverContext.logProvider.msg.includes("Validation request completed, status:")
+    );
+  });
+
+  it("Invalid Validation Result Response - Null Validation Results", async () => {
+    const mockSubmitValidationResponse: AsyncAppValidationResponse = {
+      status: AsyncAppValidationStatus.Created,
+      appValidationId: "fakeId",
+    };
+    const args: ValidateWithTestCasesArgs = {
+      appPackagePath: "fakepath",
+      showMessage: true,
+      showProgressBar: true,
+    };
+
+    const invalidValidationResultResponseJson: any = {
+      appValidationId: "appValidationId123",
+      appId: "appId123",
+      status: "Completed",
+      appVersion: "1.0.0",
+      manifestVersion: "1.0.0",
+      createdAt: "2024-03-27T12:00:00.000Z",
+      updatedAt: "2024-03-27T12:00:00.000Z",
+      validationResults: null,
+    };
+    const invalidValidationResultResponse: AsyncAppValidationResultsResponse = <
+      AsyncAppValidationResultsResponse
+    >invalidValidationResultResponseJson;
+    sinon.stub(AppStudioClient, "getAppValidationById").resolves(invalidValidationResultResponse);
+    await teamsAppDriver.runningBackgroundJob(
+      args,
+      mockedDriverContext,
+      "test_token",
+      mockSubmitValidationResponse,
+      "test_id"
+    );
+    chai.assert(
+      mockedDriverContext.logProvider.msg.includes("Validation request completed, status:")
+    );
+  });
+
+  it("Valid Validation Result Response", async () => {
+    const mockSubmitValidationResponse: AsyncAppValidationResponse = {
+      status: AsyncAppValidationStatus.Created,
+      appValidationId: "fakeId",
+    };
+    const args: ValidateWithTestCasesArgs = {
+      appPackagePath: "fakepath",
+      showMessage: true,
+      showProgressBar: true,
+    };
+
+    const invalidValidationResultResponseJson: any = {
+      status: AsyncAppValidationStatus.Completed,
+      appValidationId: "fakeId",
+      appId: "fakeAppId",
+      appVersion: "1.0.0",
+      manifestVersion: "1.16",
+      validationResults: {
+        successes: [
+          {
+            title: "Validation_Success_Example",
+            message: "Success validation example message.",
+            artifacts: {
+              filePath: "fakePath",
+              docsUrl: "https://docs.microsoft.com",
+              policyNumber: "123",
+              policyLinkUrl: "https://docs.microsoft.com",
+              recommendation: "fakeRecommendation",
+            },
+          },
+        ],
+        warnings: [
+          {
+            title: "Validation_Warning_Example",
+            message: "Warning validation example message.",
+            artifacts: {
+              filePath: "fakePath",
+              docsUrl: "https://docs.microsoft.com",
+              policyNumber: "123",
+              policyLinkUrl: "https://docs.microsoft.com",
+              recommendation: "fakeRecommendation",
+            },
+          },
+        ],
+        failures: [
+          {
+            title: "Validation_Failure_Example",
+            message: "Failure validation example message.",
+            artifacts: {
+              filePath: "fakePath",
+              docsUrl: "https://docs.microsoft.com",
+              policyNumber: "123",
+              policyLinkUrl: "https://docs.microsoft.com",
+              recommendation: "fakeRecommendation",
+            },
+          },
+        ],
+        skipped: [
+          {
+            title: "Validation_Skipped_Example",
+            message: "Skipped validation example message.",
+            artifacts: {
+              filePath: "fakePath",
+              docsUrl: "https://docs.microsoft.com",
+              policyNumber: "123",
+              policyLinkUrl: "https://docs.microsoft.com",
+              recommendation: "fakeRecommendation",
+            },
+          },
+        ],
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const invalidValidationResultResponse: AsyncAppValidationResultsResponse = <
+      AsyncAppValidationResultsResponse
+    >invalidValidationResultResponseJson;
+    sinon.stub(AppStudioClient, "getAppValidationById").resolves(invalidValidationResultResponse);
+    await teamsAppDriver.runningBackgroundJob(
+      args,
+      mockedDriverContext,
+      "test_token",
+      mockSubmitValidationResponse,
+      "test_id"
+    );
+    chai.assert(
+      mockedDriverContext.logProvider.msg.includes("Validation request completed, status:")
+    );
+    chai.assert(
+      mockedDriverContext.logProvider.msg.includes("1 failed, 1 warning, 1 skipped, 1 passed")
+    );
+  });
+
   it("Happy path", async () => {
     sinon.stub(fs, "pathExists").resolves(true);
     sinon.stub(fs, "readFile").callsFake(async () => {
@@ -766,10 +948,58 @@ describe("teamsApp/validateWithTestCases", async () => {
       appVersion: "1.0.0",
       manifestVersion: "1.16",
       validationResults: {
-        failures: [],
-        warnings: [],
-        successes: [],
-        skipped: [],
+        successes: [
+          {
+            title: "Validation_Success_Example",
+            message: "Success validation example message.",
+            artifacts: {
+              filePath: "fakePath",
+              docsUrl: "https://docs.microsoft.com",
+              policyNumber: "123",
+              policyLinkUrl: "https://docs.microsoft.com",
+              recommendation: "fakeRecommendation",
+            },
+          },
+        ],
+        warnings: [
+          {
+            title: "Validation_Warning_Example",
+            message: "Warning validation example message.",
+            artifacts: {
+              filePath: "fakePath",
+              docsUrl: "https://docs.microsoft.com",
+              policyNumber: "123",
+              policyLinkUrl: "https://docs.microsoft.com",
+              recommendation: "fakeRecommendation",
+            },
+          },
+        ],
+        failures: [
+          {
+            title: "Validation_Failure_Example",
+            message: "Failure validation example message.",
+            artifacts: {
+              filePath: "fakePath",
+              docsUrl: "https://docs.microsoft.com",
+              policyNumber: "123",
+              policyLinkUrl: "https://docs.microsoft.com",
+              recommendation: "fakeRecommendation",
+            },
+          },
+        ],
+        skipped: [
+          {
+            title: "Validation_Skipped_Example",
+            message: "Skipped validation example message.",
+            artifacts: {
+              filePath: "fakePath",
+              docsUrl: "https://docs.microsoft.com",
+              policyNumber: "123",
+              policyLinkUrl: "https://docs.microsoft.com",
+              recommendation: "fakeRecommendation",
+            },
+          },
+        ],
       },
       createdAt: new Date(),
       updatedAt: new Date(),

@@ -20,8 +20,9 @@ export const defaultSystemPrompt = () => {
     4. If it is a conceptual question, provide your answers. 
     5. If it is not a conceptual quesiton, say "${defaultNoConcuptualAnswer}".
     6. If the user asks for a specific project or technical question, say "${defaultNoConcuptualAnswer}".
-    7. Do not overwhelm the user with too much information. Keep responses short and sweet.
-    8. Think step by step and provide the answer.
+    7. If the user asks any "how to" question, say "${defaultNoConcuptualAnswer}".
+    8. Do not overwhelm the user with too much information. Keep responses short and sweet.
+    9. Think step by step and provide the answer.
     </Instruction>
   
     <Conceptual Sample>

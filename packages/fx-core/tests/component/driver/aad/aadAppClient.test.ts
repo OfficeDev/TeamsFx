@@ -492,7 +492,7 @@ describe("AadAppClient", async () => {
           expect(err.source).equals("AadAppClient");
           expect(err.name).equals("DeleteOrUpdatePermissionFailed");
           expect(err.message).equals(
-            "Unable to update or delete an existing permission when it's enabled. One possible reason is that the ACCESS_AS_USER_PERMISSION_ID environment variable is changed for selected environment. Ensure your permission id(s) are identical with the actual Microsoft Entra application and try again.\n"
+            "Unable to update or delete an existing permission when it's enabled. One possible reason is that the ACCESS_AS_USER_PERMISSION_ID environment variable has changed for selected environment. Ensure your permission id(s) match the actual Microsoft Entra application and try again.\n"
           );
         }
       );
@@ -519,7 +519,7 @@ describe("AadAppClient", async () => {
           expect(err.source).equals("AadAppClient");
           expect(err.name).equals("HostNameNotOnVerifiedDomain");
           expect(err.message).equals(
-            "Unable to set identifierUri because the value is not on verified domain: Mocked error message"
+            "Unable to set identifierUri as the value is not on verified domain: Mocked error message"
           );
           expect(err.helpLink).equals("https://aka.ms/teamsfx-multi-tenant");
         }

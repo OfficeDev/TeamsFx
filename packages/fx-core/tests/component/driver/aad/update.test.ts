@@ -441,7 +441,7 @@ describe("aadAppUpdate", async () => {
       .is.instanceOf(HttpClientError)
       .and.property("message")
       .equals(
-        'A http client error happened while performing the aadApp/update task. The error response is: {"error":{"code":"Request_BadRequest","message":"Invalid value specified for property \'displayName\' of resource \'Application\'."}}'
+        'A http client error occurred while performing the aadApp/update task. The error response is: {"error":{"code":"Request_BadRequest","message":"Invalid value specified for property \'displayName\' of resource \'Application\'."}}'
       );
   });
 
@@ -475,7 +475,7 @@ describe("aadAppUpdate", async () => {
       .is.instanceOf(HttpServerError)
       .and.property("message")
       .equals(
-        'A http server error happened while performing the aadApp/update task. Please try again later. The error response is: {"error":{"code":"InternalServerError","message":"Internal server error"}}'
+        'A http server error occurred while performing the aadApp/update task. Try again later. The error response is: {"error":{"code":"InternalServerError","message":"Internal server error"}}'
       );
   });
 
@@ -620,7 +620,7 @@ describe("aadAppUpdate", async () => {
     expect(endTelemetry.properties["error-code"]).to.equal("aadAppUpdate.HttpServerError");
     expect(endTelemetry.properties["error-type"]).to.equal("system");
     // expect(endTelemetry.properties["error-message"]).to.equal(
-    //   'A http server error happened while performing the aadApp/update task. Please try again later. The error response is: {"error":{"code":"InternalServerError","message":"Internal server error"}}'
+    //   'A http server error occurred while performing the aadApp/update task. Try again later. The error response is: {"error":{"code":"InternalServerError","message":"Internal server error"}}'
     // );
   });
 

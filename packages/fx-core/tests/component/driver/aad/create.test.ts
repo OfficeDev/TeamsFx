@@ -405,7 +405,7 @@ describe("aadAppCreate", async () => {
       .is.instanceOf(HttpClientError)
       .and.has.property("message")
       .and.equals(
-        'A http client error happened while performing the aadApp/create task. The error response is: {"error":{"code":"Request_BadRequest","message":"Invalid value specified for property \'displayName\' of resource \'Application\'."}}'
+        'A http client error occurred while performing the aadApp/create task. The error response is: {"error":{"code":"Request_BadRequest","message":"Invalid value specified for property \'displayName\' of resource \'Application\'."}}'
       );
   });
 
@@ -434,7 +434,7 @@ describe("aadAppCreate", async () => {
       .is.instanceOf(HttpServerError)
       .and.has.property("message")
       .and.equals(
-        'A http server error happened while performing the aadApp/create task. Please try again later. The error response is: {"error":{"code":"InternalServerError","message":"Internal server error"}}'
+        'A http server error occurred while performing the aadApp/create task. Try again later. The error response is: {"error":{"code":"InternalServerError","message":"Internal server error"}}'
       );
   });
 
@@ -598,7 +598,7 @@ describe("aadAppCreate", async () => {
     expect(endTelemetry.properties["error-code"]).to.equal("aadAppCreate.HttpClientError");
     expect(endTelemetry.properties["error-type"]).to.equal("user");
     // expect(endTelemetry.properties["error-message"]).to.equal(
-    //   'A http client error happened while performing the aadApp/create task. The error response is: {"error":{"code":"Request_BadRequest","message":"Invalid value specified for property \'displayName\' of resource \'Application\'."}}'
+    //   'A http client error occurred while performing the aadApp/create task. The error response is: {"error":{"code":"Request_BadRequest","message":"Invalid value specified for property \'displayName\' of resource \'Application\'."}}'
     // );
   });
 

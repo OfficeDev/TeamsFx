@@ -173,7 +173,7 @@ describe("botAadAppCreate", async () => {
     ).to.be.rejected.then((error) => {
       expect(error instanceof HttpClientError).to.be.true;
       expect(error.message).contains(
-        'A http client error happened while performing the botAadApp/create task. The error response is: {"error":{"code":"Request_BadRequest","message":"Invalid value specified for property \'displayName\' of resource \'Application\'."}}'
+        'A http client error occurred while performing the botAadApp/create task. The error response is: {"error":{"code":"Request_BadRequest","message":"Invalid value specified for property \'displayName\' of resource \'Application\'."}}'
       );
     });
   });
@@ -201,7 +201,7 @@ describe("botAadAppCreate", async () => {
     ).to.be.rejected.then((error) => {
       expect(error instanceof HttpServerError).to.be.true;
       expect(error.message).equals(
-        'A http server error happened while performing the botAadApp/create task. Please try again later. The error response is: {"error":{"code":"InternalServerError","message":"Internal server error"}}'
+        'A http server error occurred while performing the botAadApp/create task. Try again later. The error response is: {"error":{"code":"InternalServerError","message":"Internal server error"}}'
       );
     });
   });

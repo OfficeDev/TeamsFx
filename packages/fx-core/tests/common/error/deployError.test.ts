@@ -20,10 +20,10 @@ describe("DeployEmptyFolderError", () => {
     expect(error).to.be.instanceOf(UserError);
     expect(error.source).to.equal("azureDeploy");
     expect(error.message).to.equal(
-      `Unable to locate any files in the distribution folder: '${folderPath}'. Please ensure that the folder is not empty and that all necessary files have been included.`
+      `Unable to locate any files in the distribution folder: '${folderPath}'. Make sure the folder includes all necessary files.`
     );
     expect(error.displayMessage).to.equal(
-      `Unable to locate any files in the distribution folder: '${folderPath}'. Please ensure that the folder is not empty and that all necessary files have been included.`
+      `Unable to locate any files in the distribution folder: '${folderPath}'. Make sure the folder includes all necessary files.`
     );
   });
 });
@@ -34,10 +34,10 @@ describe("CheckDeploymentStatusTimeoutError", () => {
     expect(error).to.be.instanceOf(UserError);
     expect(error.source).to.equal("azureDeploy");
     expect(error.message).to.equal(
-      "Unable to check deployment status because the process timed out. Check your internet connection and try again. If the issue persists, please review the deployment logs (Deployment -> Deployment center -> Logs) in Azure portal to identify any issues that may have occurred."
+      "Unable to check deployment status because the process timed out. Check your internet connection and try again. If the issue persists, review the deployment logs (Deployment -> Deployment center -> Logs) in Azure portal to identify any issues that may have occurred."
     );
     expect(error.displayMessage).to.equal(
-      "Unable to check deployment status because the process timed out. Check your internet connection and try again. If the issue persists, please review the deployment logs (Deployment -> Deployment center -> Logs) in Azure portal to identify any issues that may have occurred."
+      "Unable to check deployment status because the process timed out. Check your internet connection and try again. If the issue persists, review the deployment logs (Deployment -> Deployment center -> Logs) in Azure portal to identify any issues that may have occurred."
     );
   });
 });
@@ -101,7 +101,7 @@ describe("CacheFileInUse", () => {
     expect(error).to.be.instanceOf(UserError);
     expect(error.source).to.equal("azureDeploy");
     expect(error.message).to.equal(
-      `Failed to clear the distribution zip file in ${path}. The file may be currently in use. Please close any applications using the file and try again.`
+      `Unable to clear the distribution zip file in ${path} as it may be currently in use. Close any apps using the file and try again.`
     );
   });
 });

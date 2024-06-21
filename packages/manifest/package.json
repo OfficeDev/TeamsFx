@@ -43,7 +43,7 @@
   },
   "scripts": {
     "prebuild": "npm run generate-manifest",
-    "build": "rimraf build && npx tsc -p ./",
+    "build": "npx tsc -p ./ --incremental",
     "test": "npm run test:unit",
     "test:unit": "npx nyc --reporter=lcov mocha --no-timeouts --require ts-node/register test/**/*.test.ts ",
     "lint": "eslint \"**/*.ts\"",

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "commonjs",
+    "module": "ES6",
     "target": "es2017",
     "outDir": "build",
     "lib": ["es6", "dom.iterable", "dom"],
@@ -11,14 +11,15 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "declarationMap": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "jsx": "react",
     "declaration": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    // Don't automatically include anything.
+    // Only include `@types` packages that we need to import.
+    "types" : []
   },
   "include": ["src"],
   "exclude": ["node_modules", "**/tests/*"]

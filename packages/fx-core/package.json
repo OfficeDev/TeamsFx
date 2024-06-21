@@ -71,7 +71,7 @@
     "test:tdpClient": "nyc mocha \"tests/client/tdpClient.test.ts\"",
     "clean": "rm -rf build",
     "prebuild": "npm run gen:cli",
-    "build": "rimraf build && npx tsc -p ./",
+    "build": "npx tsc -p ./ --incremental",
     "lint:fix": "eslint --fix \"src/**/*.ts\" \"tests/**/*.ts\"",
     "prepublishOnly": "npm run build",
     "package": "rimraf build && webpack --mode production --config ./webpack.config.js",
@@ -81,7 +81,7 @@
     "installAll": "npm run install:tabs",
     "checkUnusedStrings": "node ./scripts/find-unused-strings.js ./resource/package.nls.json ./src || exit 1",
     "clean:strings": "node ./scripts/delete-unused-strings.js ./resource/package.nls.json ./src",
-    "gen:cli": "npx ts-node ./src/question/generator.ts && npx prettier --write \"src/question/options/*.ts\" && npx prettier --write \"src/question/inputs/*.ts\""
+    "gen:cli": "npx tsx ./src/question/generator.ts && npx prettier --write \"src/question/options/*.ts\" && npx prettier --write \"src/question/inputs/*.ts\""
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
@@ -118,7 +118,7 @@
     "klaw": "^3.0.0",
     "md5": "^2.3.0",
     "mime": "^2.5.2",
-    "mustache": "^4.2.0",
+    "mustache": "^4.1.0",
     "node-fetch": "2.7.0",
     "node-forge": "^1.3.1",
     "office-addin-manifest": "^1.13.1",
@@ -204,6 +204,7 @@
     "ts-morph": "^19.0.0",
     "ts-node": "^9.1.1",
     "tslib": "^2.3.1",
+    "tsx": "^4.15.6",
     "typescript": "4.3.5",
     "webpack": "^5.61.0"
   },

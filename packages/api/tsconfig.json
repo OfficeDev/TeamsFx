@@ -14,7 +14,10 @@
         "allowJs": true,
         "declarationMap": true,
         "moduleResolution": "node",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        // Don't automatically include anything.
+        // Only include `@types` packages that we need to import.
+        "types" : ["node"]
     },
     "include": ["src"],
     "exclude": ["node_modules", "**/__tests__/*"]

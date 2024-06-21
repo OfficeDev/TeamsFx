@@ -3,7 +3,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "types": ["reflect-metadata", "node"],
-    "module": "commonjs",
+    "module": "ES6",
     "target": "es2017",
     "outDir": "build",
     "lib": ["es6", "dom.iterable", "dom"],

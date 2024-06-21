@@ -17,7 +17,7 @@
     "lint:staged": "lint-staged",
     "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
     "prebuild": "npx json2ts --input src/schemas/envConfig.json --output src/schemas/envConfig.ts",
-    "build": "tsc -p ./",
+    "build": "npx tsc -p ./ --incremental",
     "build:api-markdown": "npm run build && rimraf ../../docs/api && npx api-documenter markdown -i temp -o ../../docs/api",
     "postbuild": "npx copyfiles src/schemas/*.json build/schemas/",
     "lint:fix": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",

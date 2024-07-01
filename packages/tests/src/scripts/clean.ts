@@ -50,20 +50,20 @@ async function main() {
     }
   }
 
-  console.log(`clean AAD (exclude ${excludePrefix})`);
-  const aadList = await cleanService.listAad();
-  if (aadList) {
-    for (const aad of aadList) {
-      for (const name of aadNamePrefixList) {
-        if (
-          !aad.displayName?.startsWith("delete")
-        ) {
-          console.log(aad.displayName);
-          await cleanService.deleteAad(aad.id!);
-        }
-      }
-    }
-  }
+  // console.log(`clean AAD (exclude ${excludePrefix})`);
+  // const aadList = await cleanService.listAad();
+  // if (aadList) {
+  //   for (const aad of aadList) {
+  //     for (const name of aadNamePrefixList) {
+  //       if (
+  //         !aad.displayName?.startsWith("delete")
+  //       ) {
+  //         console.log(aad.displayName);
+  //         await cleanService.deleteAad(aad.id!);
+  //       }
+  //     }
+  //   }
+  // }
 
   console.log(`clean app in app studio`);
   const addStudioCleanService = await AppStudioCleanHelper.create(

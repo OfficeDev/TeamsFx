@@ -159,10 +159,10 @@ describe("aadAppCreate", async () => {
     expect(result.result._unsafeUnwrap().size).to.equal(6);
     expect(result.summaries.length).to.equal(2);
     expect(result.summaries).includes(
-      `Created Microsoft Entra application with object id ${expectedObjectId}`
+      `Created Microsoft Entra app with object id ${expectedObjectId}`
     );
     expect(result.summaries).includes(
-      `Generated client secret for Microsoft Entra application with object id ${expectedObjectId}`
+      `Generated client secret for Microsoft Entra app with object id ${expectedObjectId}`
     );
   });
 
@@ -270,10 +270,10 @@ describe("aadAppCreate", async () => {
     expect(result.result._unsafeUnwrap().size).to.equal(6);
     expect(result.summaries.length).to.equal(2);
     expect(result.summaries).includes(
-      `Created Microsoft Entra application with object id ${expectedObjectId}`
+      `Created Microsoft Entra app with object id ${expectedObjectId}`
     );
     expect(result.summaries).includes(
-      `Generated client secret for Microsoft Entra application with object id ${expectedObjectId}`
+      `Generated client secret for Microsoft Entra app with object id ${expectedObjectId}`
     );
   });
 
@@ -297,7 +297,7 @@ describe("aadAppCreate", async () => {
     expect(result.result._unsafeUnwrap().size).to.equal(1); // 1 new env and 2 existing env
     expect(result.summaries.length).to.equal(1);
     expect(result.summaries).includes(
-      `Generated client secret for Microsoft Entra application with object id existing value`
+      `Generated client secret for Microsoft Entra app with object id existing value`
     );
   });
 
@@ -355,7 +355,7 @@ describe("aadAppCreate", async () => {
     expect(result.result._unsafeUnwrap().size).to.equal(5);
     expect(result.summaries.length).to.equal(1);
     expect(result.summaries).includes(
-      `Created Microsoft Entra application with object id ${expectedObjectId}`
+      `Created Microsoft Entra app with object id ${expectedObjectId}`
     );
   });
 
@@ -375,7 +375,7 @@ describe("aadAppCreate", async () => {
       .is.instanceOf(MissingEnvUserError)
       .and.has.property(
         "message",
-        "Cannot generate client secret. Environment variable AAD_APP_OBJECT_ID is not set."
+        "Unable to generate client secret. Environment variable AAD_APP_OBJECT_ID is not set."
       );
   });
 
@@ -688,10 +688,10 @@ describe("aadAppCreate", async () => {
     expect(result.result._unsafeUnwrap().size).to.equal(6);
     expect(result.summaries.length).to.equal(2);
     expect(result.summaries).includes(
-      `Created Microsoft Entra application with object id ${expectedObjectId}`
+      `Created Microsoft Entra app with object id ${expectedObjectId}`
     );
     expect(result.summaries).includes(
-      `Generated client secret for Microsoft Entra application with object id ${expectedObjectId}`
+      `Generated client secret for Microsoft Entra app with object id ${expectedObjectId}`
     );
   });
 

@@ -153,7 +153,7 @@ describe("aadAppUpdate", async () => {
     const informationSpy = sinon.spy(mockedDriverContext.logProvider, "info");
     const result = await updateAadAppDriver.execute(args, mockedDriverContext);
     chai.assert.isTrue(informationSpy.called);
-    chai.assert.equal(informationSpy.getCall(0).args[0], "Executing action aadApp/update");
+    chai.assert.equal(informationSpy.getCall(0).args[0], "Executing action aadApp/update...");
     const manifestOutputFilePath = path.join(
       mockedDriverContext.projectPath,
       outputRoot,
@@ -166,7 +166,7 @@ describe("aadAppUpdate", async () => {
     );
     chai.assert.equal(
       informationSpy.getCall(2).args[0],
-      `Applied manifest ${manifestPath} to Microsoft Entra application with object id 00000000-0000-0000-0000-000000000000`
+      `Applied manifest ${manifestPath} to Microsoft Entra app with object id 00000000-0000-0000-0000-000000000000`
     );
     chai.assert.equal(
       informationSpy.getCall(3).args[0],
@@ -192,7 +192,7 @@ describe("aadAppUpdate", async () => {
     expect(result.summaries.length).to.equal(1);
     console.log(result.summaries[0]);
     expect(result.summaries).includes(
-      `Applied manifest ${args.manifestPath} to Microsoft Entra application with object id ${expectedObjectId}`
+      `Applied manifest tests/component/driver/aad/testAssets/manifest.json to Microsoft Entra application with object id 00000000-0000-0000-0000-000000000000`
     );
   });
   it("should success with valid manifest on cli", async () => {

@@ -35,8 +35,7 @@ async function main() {
     for (const app of teamsAppList) {
       for (const name of appNamePrefixList) {
         if (
-          app?.teamsAppDefinition?.displayName?.startsWith(name) &&
-          !app?.teamsAppDefinition?.displayName?.startsWith(excludePrefix)
+          !app?.teamsAppDefinition?.displayName?.startsWith("delete")
         ) {
           console.log(app?.teamsAppDefinition?.displayName);
           try {
@@ -57,8 +56,7 @@ async function main() {
     for (const aad of aadList) {
       for (const name of aadNamePrefixList) {
         if (
-          aad.displayName?.startsWith(name) &&
-          !aad.displayName?.startsWith(excludePrefix)
+          !aad.displayName?.startsWith("delete")
         ) {
           console.log(aad.displayName);
           await cleanService.deleteAad(aad.id!);
@@ -79,8 +77,7 @@ async function main() {
     for (const app of appStudioAppList) {
       for (const name of appStudioAppNamePrefixList) {
         if (
-          app?.displayName?.startsWith(name) &&
-          !app?.displayName?.startsWith(excludePrefix)
+          !app?.displayName?.startsWith("delete")
         ) {
           console.log(app?.displayName);
           try {

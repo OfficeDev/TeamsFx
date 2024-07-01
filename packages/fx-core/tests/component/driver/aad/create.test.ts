@@ -708,6 +708,6 @@ describe("aadAppCreate", async () => {
     expect(result.result._unsafeUnwrapErr())
       .is.instanceOf(UserError)
       .and.has.property("message")
-      .and.contains("action cannot be completed as the following parameter(s):");
+      .and.contains("action can't be completed as the following parameter(s):");
   });
 });

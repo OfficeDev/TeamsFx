@@ -430,7 +430,7 @@ describe("Core basic APIs", () => {
       // Cannot assert the full message because the mocked code can't get correct env file path
       assert.include(
         res.error.message,
-        "The program cannot proceed as the following environment variables are missing: 'AAD_APP_OBJECT_ID', which are required for file: fake path. Make sure the required variables are set either by editing the .env file"
+        "The program can't proceed as the following environment variables are missing: 'AAD_APP_OBJECT_ID', which are required for file: fake path. Make sure the required variables are set either by editing the .env file"
       );
       assert.include(
         res.error.message,

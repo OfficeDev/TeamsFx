@@ -82,11 +82,14 @@ import {
   azureAccountSignOutHelpHandler,
   cmpAccountsHandler,
   createAccountHandler,
-} from "./handlers/accountHandlers";
+} from "./handlers/accounts/accountHandlers";
 import { activate as activateHandlers } from "./handlers/activate";
 import { autoOpenProjectHandler } from "./handlers/autoOpenProjectHandler";
-import { checkCopilotCallback, checkSideloadingCallback } from "./handlers/checkAccessCallback";
-import { checkCopilotAccessHandler } from "./handlers/checkCopilotAccess";
+import {
+  checkCopilotCallback,
+  checkSideloadingCallback,
+} from "./handlers/accounts/checkAccessCallback";
+import { checkCopilotAccessHandler } from "./handlers/accounts/checkCopilotAccess";
 import { manageCollaboratorHandler } from "./handlers/collaboratorHandlers";
 import {
   openFolderHandler,
@@ -158,9 +161,9 @@ import { openReadMeHandler } from "./handlers/readmeHandlers";
 import {
   refreshCopilotCallback,
   refreshSideloadingCallback,
-} from "./handlers/refreshAccessHandlers";
+} from "./handlers/accounts/refreshAccessHandlers";
 import { showOutputChannelHandler } from "./handlers/showOutputChannel";
-import { signinAzureCallback, signinM365Callback } from "./handlers/signinAccountHandlers";
+import { signinAzureCallback, signinM365Callback } from "./handlers/accounts/signinAccountHandlers";
 import { openTutorialHandler, selectTutorialsHandler } from "./handlers/tutorialHandlers";
 import {
   createProjectFromWalkthroughHandler,

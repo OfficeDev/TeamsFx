@@ -6,7 +6,7 @@ import * as sinon from "sinon";
 import * as chai from "chai";
 import { window } from "vscode";
 
-import { ProgressHandler } from "../../src/progressHandler";
+import { ProgressHandler } from "../../src/debug/progressHandler";
 import * as vsc_ui from "@microsoft/vscode-ui";
 import * as localizeUtils from "../../src/utils/localizeUtils";
 import * as vscodeMocks from "../mocks/vsc";

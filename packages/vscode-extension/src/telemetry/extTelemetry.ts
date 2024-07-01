@@ -10,7 +10,7 @@ import {
   globalStateUpdate,
 } from "@microsoft/teamsfx-core";
 import * as extensionPackage from "../../package.json";
-import { VSCodeTelemetryReporter } from "../commonlib/telemetry";
+import { VSCodeTelemetryReporter } from "./vscodeTelemetryReporter";
 import * as globalVariables from "../globalVariables";
 import { getProjectId } from "../utils/telemetryUtils";
 import { TelemetryComponentType, TelemetryEvent, TelemetryProperty } from "./extTelemetryEvents";

@@ -4,9 +4,9 @@ import { ok } from "@microsoft/teamsfx-api";
 import {
   refreshCopilotCallback,
   refreshSideloadingCallback,
-} from "../../src/handlers/refreshAccessHandlers";
-import M365TokenInstance from "../../src/commonlib/m365Login";
-import accountTreeViewProviderInstance from "../../src/treeview/account/accountTreeViewProvider";
+} from "../../../src/handlers/accounts/refreshAccessHandlers";
+import M365TokenInstance from "../../../src/commonlib/m365Login";
+import accountTreeViewProviderInstance from "../../../src/treeview/account/accountTreeViewProvider";
 
 describe("refreshAccessHandlers", () => {
   describe("refreshSideloadingCallback", async () => {

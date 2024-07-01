@@ -3,15 +3,15 @@
 
 import { Result, FxError, ok, err } from "@microsoft/teamsfx-api";
 import { AppStudioScopes, isUserCancelError } from "@microsoft/teamsfx-core";
-import { tools } from "../globalVariables";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
-import { AccountType, TelemetryEvent, TelemetryProperty } from "../telemetry/extTelemetryEvents";
-import { AzureAccountNode } from "../treeview/account/azureNode";
-import { AccountItemStatus } from "../treeview/account/common";
-import { M365AccountNode } from "../treeview/account/m365Node";
-import { getTriggerFromProperty } from "../utils/telemetryUtils";
-import envTreeProviderInstance from "../treeview/environmentTreeViewProvider";
-import azureAccountManager from "../commonlib/azureLogin";
+import { tools } from "../../globalVariables";
+import { ExtTelemetry } from "../../telemetry/extTelemetry";
+import { AccountType, TelemetryEvent, TelemetryProperty } from "../../telemetry/extTelemetryEvents";
+import { AzureAccountNode } from "../../treeview/account/azureNode";
+import { AccountItemStatus } from "../../treeview/account/common";
+import { M365AccountNode } from "../../treeview/account/m365Node";
+import { getTriggerFromProperty } from "../../utils/telemetryUtils";
+import envTreeProviderInstance from "../../treeview/environmentTreeViewProvider";
+import azureAccountManager from "../../commonlib/azureLogin";
 
 export async function signinM365Callback(...args: unknown[]): Promise<Result<null, FxError>> {
   let node: M365AccountNode | undefined;

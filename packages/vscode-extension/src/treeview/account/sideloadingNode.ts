@@ -4,7 +4,7 @@
 import * as vscode from "vscode";
 
 import { getSideloadingStatus } from "@microsoft/teamsfx-core";
-import { checkSideloadingCallback } from "../../handlers/checkAccessCallback";
+import { checkSideloadingCallback } from "../../handlers/accounts/checkAccessCallback";
 import { TelemetryTriggerFrom } from "../../telemetry/extTelemetryEvents";
 import { localize } from "../../utils/localizeUtils";
 import { DynamicNode } from "../dynamicNode";

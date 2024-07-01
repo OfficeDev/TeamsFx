@@ -3,8 +3,8 @@
 
 import { Result, FxError, ok } from "@microsoft/teamsfx-api";
 import { AppStudioScopes } from "@microsoft/teamsfx-core";
-import accountTreeViewProviderInstance from "../treeview/account/accountTreeViewProvider";
-import M365TokenInstance from "../commonlib/m365Login";
+import accountTreeViewProviderInstance from "../../treeview/account/accountTreeViewProvider";
+import M365TokenInstance from "../../commonlib/m365Login";
 
 export async function refreshSideloadingCallback(args?: any[]): Promise<Result<null, FxError>> {
   const status = await M365TokenInstance.getStatus({ scopes: AppStudioScopes });

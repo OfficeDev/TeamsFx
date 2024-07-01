@@ -5,7 +5,7 @@ import * as tools from "@microsoft/teamsfx-core/build/common/tools";
 import { errorIcon, infoIcon, passIcon } from "../../../src/treeview/account/common";
 import { SideloadingNode } from "../../../src/treeview/account/sideloadingNode";
 import { DynamicNode } from "../../../src/treeview/dynamicNode";
-import * as checkAccessCallback from "../../../src/handlers/checkAccessCallback";
+import * as checkAccessCallback from "../../../src/handlers/accounts/checkAccessCallback";
 
 describe("sideloadingNode", () => {
   const sandbox = sinon.createSandbox();

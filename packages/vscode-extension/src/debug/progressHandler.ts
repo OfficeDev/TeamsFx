@@ -8,7 +8,7 @@ import * as util from "util";
 import { ProgressLocation, window } from "vscode";
 
 import { IProgressHandler, ok } from "@microsoft/teamsfx-api";
-import { localize } from "./utils/localizeUtils";
+import { localize } from "../utils/localizeUtils";
 
 export class ProgressHandler implements IProgressHandler {
   private totalSteps: number;

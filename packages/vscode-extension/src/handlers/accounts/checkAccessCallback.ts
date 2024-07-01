@@ -2,16 +2,16 @@
 // Licensed under the MIT license.
 
 import { Result, FxError, ok } from "@microsoft/teamsfx-api";
-import { localize } from "../utils/localizeUtils";
-import { VS_CODE_UI } from "../qm/vsc_ui";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
+import { localize } from "../../utils/localizeUtils";
+import { VS_CODE_UI } from "../../qm/vsc_ui";
+import { ExtTelemetry } from "../../telemetry/extTelemetry";
 import {
   TelemetryEvent,
   TelemetryProperty,
   TelemetryTriggerFrom,
-} from "../telemetry/extTelemetryEvents";
-import { WebviewPanel } from "../controls/webviewPanel";
-import { PanelType } from "../controls/PanelType";
+} from "../../telemetry/extTelemetryEvents";
+import { WebviewPanel } from "../../controls/webviewPanel";
+import { PanelType } from "../../controls/PanelType";
 
 export async function checkCopilotCallback(args?: any[]): Promise<Result<null, FxError>> {
   VS_CODE_UI.showMessage(

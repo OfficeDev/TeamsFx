@@ -9,7 +9,7 @@ import { TelemetryReporter, ConfigFolderName } from "@microsoft/teamsfx-api";
 import { anonymizeFilePaths } from "../utils/fileSystemUtils";
 import { isFeatureFlagEnabled, FeatureFlags, getAllFeatureFlags } from "../featureFlags";
 import { getPackageVersion } from "../utils/telemetryUtils";
-import { TelemetryProperty } from "../telemetry/extTelemetryEvents";
+import { TelemetryProperty } from "./extTelemetryEvents";
 import { Correlator, getProjectMetadata } from "@microsoft/teamsfx-core";
 import { configure, getLogger, Logger } from "log4js";
 import { workspaceUri } from "../globalVariables";

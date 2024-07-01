@@ -4,7 +4,7 @@
 import * as sinon from "sinon";
 import * as chai from "chai";
 import { ProgressHelper } from "../../src/debug/progressHelper";
-import { ProgressHandler } from "../../src/progressHandler";
+import { ProgressHandler } from "../../src/debug/progressHandler";
 
 afterEach(() => {
   // Restore the default sandbox here

@@ -2,10 +2,10 @@
 // Licensed under the MIT license.
 
 import * as vscode from "vscode";
-import M365TokenInstance from "../commonlib/m365Login";
-import { signedIn } from "../commonlib/common/constant";
-import { localize } from "../utils/localizeUtils";
-import VsCodeLogInstance from "../commonlib/log";
+import M365TokenInstance from "../../commonlib/m365Login";
+import { signedIn } from "../../commonlib/common/constant";
+import { localize } from "../../utils/localizeUtils";
+import VsCodeLogInstance from "../../commonlib/log";
 import { FxError, Result, err, ok } from "@microsoft/teamsfx-api";
 import {
   AppStudioScopes,
@@ -13,8 +13,8 @@ import {
   PackageService,
   SummaryConstant,
 } from "@microsoft/teamsfx-core";
-import { wrapError } from "../error/common";
-import { signInM365 } from "../utils/accountUtils";
+import { wrapError } from "../../error/common";
+import { signInM365 } from "../../utils/accountUtils";
 
 export async function checkCopilotAccessHandler(): Promise<Result<null, FxError>> {
   // check m365 login status, if not logged in, pop up a message

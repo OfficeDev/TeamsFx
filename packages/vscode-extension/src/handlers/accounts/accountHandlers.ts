@@ -4,14 +4,14 @@
 import { QuickPickItem, window } from "vscode";
 import { FxError, OptionItem, Result, SingleSelectConfig, ok } from "@microsoft/teamsfx-api";
 import { Correlator, AppStudioScopes } from "@microsoft/teamsfx-core";
-import { ExtTelemetry } from "../telemetry/extTelemetry";
-import { AccountType, TelemetryEvent, TelemetryProperty } from "../telemetry/extTelemetryEvents";
-import { signInAzure, signOutAzure, signInM365, signOutM365 } from "../utils/accountUtils";
-import { localize } from "../utils/localizeUtils";
-import { getTriggerFromProperty } from "../utils/telemetryUtils";
-import azureAccountManager from "../commonlib/azureLogin";
-import M365TokenInstance from "../commonlib/m365Login";
-import { VS_CODE_UI } from "../qm/vsc_ui";
+import { ExtTelemetry } from "../../telemetry/extTelemetry";
+import { AccountType, TelemetryEvent, TelemetryProperty } from "../../telemetry/extTelemetryEvents";
+import { signInAzure, signOutAzure, signInM365, signOutM365 } from "../../utils/accountUtils";
+import { localize } from "../../utils/localizeUtils";
+import { getTriggerFromProperty } from "../../utils/telemetryUtils";
+import azureAccountManager from "../../commonlib/azureLogin";
+import M365TokenInstance from "../../commonlib/m365Login";
+import { VS_CODE_UI } from "../../qm/vsc_ui";
 
 export interface VscQuickPickItem extends QuickPickItem {
   /**

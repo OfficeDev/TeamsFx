@@ -3,9 +3,9 @@ import * as core from "@microsoft/teamsfx-core";
 import { PackageService } from "@microsoft/teamsfx-core";
 import * as sinon from "sinon";
 import * as vscode from "vscode";
-import VsCodeLogInstance from "../../src/commonlib/log";
-import M365TokenInstance from "../../src/commonlib/m365Login";
-import { checkCopilotAccessHandler } from "../../src/handlers/checkCopilotAccess";
+import VsCodeLogInstance from "../../../src/commonlib/log";
+import M365TokenInstance from "../../../src/commonlib/m365Login";
+import { checkCopilotAccessHandler } from "../../../src/handlers/accounts/checkCopilotAccess";
 
 describe("check copilot access", () => {
   const sandbox = sinon.createSandbox();

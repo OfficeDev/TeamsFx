@@ -19,7 +19,7 @@ import {
 import VsCodeLogInstance from "../../commonlib/log";
 import { ExtensionErrors, ExtensionSource } from "../../error/error";
 import * as globalVariables from "../../globalVariables";
-import { ProgressHandler } from "../../progressHandler";
+import { ProgressHandler } from "../progressHandler";
 import {
   TelemetryEvent,
   TelemetryProperty,

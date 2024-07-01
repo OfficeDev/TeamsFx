@@ -7,7 +7,7 @@ import M365TokenInstance from "../../../src/commonlib/m365Login";
 import { infoIcon, passIcon, warningIcon } from "../../../src/treeview/account/common";
 import { CopilotNode } from "../../../src/treeview/account/copilotNode";
 import { DynamicNode } from "../../../src/treeview/dynamicNode";
-import * as checkAccessCallback from "../../../src/handlers/checkAccessCallback";
+import * as checkAccessCallback from "../../../src/handlers/accounts/checkAccessCallback";
 
 describe("copilotNode", () => {
   const sandbox = sinon.createSandbox();

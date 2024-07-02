@@ -5,12 +5,6 @@
       "resourceBaseName": {
         "value": "mebot${{RESOURCE_SUFFIX}}"
       },
-      "botAadAppClientId": {
-        "value": "${{BOT_ID}}"
-      },
-      "botAadAppClientSecret": {
-        "value": "${{SECRET_BOT_PASSWORD}}"
-      },
       "webAppSKU": {
         "value": "B1"
       },

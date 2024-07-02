@@ -19,6 +19,7 @@ import {
   oauthQuestion,
   previewWithTeamsAppManifestQuestionNode,
   selectTeamsAppManifestQuestionNode,
+  uninstallQuestionNode,
   validateTeamsAppQuestionNode,
 } from "./other";
 export * from "./constants";
@@ -71,6 +72,9 @@ export class QuestionNodes {
   }
   addPlugin(): IQTreeNode {
     return addPluginQuestionNode();
+  }
+  uninstall(): IQTreeNode {
+    return uninstallQuestionNode();
   }
 }
 

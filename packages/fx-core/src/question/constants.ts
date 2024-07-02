@@ -77,8 +77,18 @@ export enum QuestionNames {
   M365Host = "m365-host",
 
   ManifestPath = "manifest-path",
-
+  ManifestId = "manifest-id",
+  TitleId = "title-id",
   UserEmail = "email",
+
+  UninstallMode = "mode",
+  UninstallModeManifestId = "manifest-id",
+  UninstallModeEnv = "env",
+  UninstallModeTitleId = "title-id",
+  UninstallOptions = "options",
+  UninstallOptionM365 = "m365-app",
+  UninstallOptionTDP = "app-registration",
+  UninstallOptionBot = "bot-framework-registration",
 
   collaborationAppType = "collaborationType",
   DestinationApiSpecFilePath = "destination-api-spec-location",

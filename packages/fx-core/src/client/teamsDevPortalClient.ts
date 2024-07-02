@@ -274,7 +274,15 @@ export class TeamsDevPortalClient {
     }
     throw new Error(`Cannot get the app definition with app ID ${teamsAppId}`);
   }
-
+  @hooks([ErrorContextMW({ source: "Teams", component: "TeamsDevPortalClient" })])
+  async getBotId(token: string, teamsAppId: string): Promise<string | undefined> {
+    const app = await this.getApp(token, teamsAppId);
+    if (app?.bots?.length && app.bots.length > 0) {
+      return app.bots[0].botId;
+    }
+    TOOLS.logProvider?.error(`botId not found. Input: ${teamsAppId}`);
+    return undefined;
+  }
   @hooks([ErrorContextMW({ source: "Teams", component: "TeamsDevPortalClient" })])
   async getAppPackage(token: string, teamsAppId: string): Promise<any> {
     TOOLS.logProvider?.info("Downloading app package for app " + teamsAppId);

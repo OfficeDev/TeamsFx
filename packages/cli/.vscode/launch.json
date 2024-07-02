@@ -113,6 +113,25 @@
         "${workspaceFolder}/../api/build/**/*.js"
       ],
       "console": "integratedTerminal"
+    },
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "Launch uninstall command",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/cli.js",
+      "args": ["uninstall"],
+      "outFiles": [
+        "${workspaceFolder}/lib/**/*.js",
+        "${workspaceFolder}/../fx-core/build/**/*.js",
+        "${workspaceFolder}/../api/build/**/*.js"
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/lib/**/*.js",
+        "${workspaceFolder}/../fx-core/build/**/*.js",
+        "${workspaceFolder}/../api/build/**/*.js"
+      ],
+      "console": "integratedTerminal"
     }
   ]
 }

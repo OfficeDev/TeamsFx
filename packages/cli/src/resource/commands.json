@@ -146,8 +146,12 @@
   "uninstall": {
     "description": "Remove an acquired M365 App.",
     "options": {
+      "mode": "Choose the input information to uninstall. manifest-id, env, or title-id.",
       "title-id": "Title ID of the acquired M365 App.",
-      "manifest-id": "Manifest ID of the acquired M365 App."
+      "manifest-id": "Manifest ID of the acquired M365 App.",
+      "env": "Env of the acquired M365 App.",
+      "projectPath": "Project path to uninstall, only used in env mode.",
+      "options": "Selected resourecs to uninstall. example: --uninstall-option m365-app,app-registration,bot-framework-registration"
     }
   },
   "update": {

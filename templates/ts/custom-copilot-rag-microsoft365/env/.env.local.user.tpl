@@ -32,3 +32,9 @@ AZURE_OPENAI_DEPLOYMENT_NAME='{{{azureOpenAIDeploymentName}}}'
 AZURE_OPENAI_DEPLOYMENT_NAME=
 {{/azureOpenAIDeploymentName}}
 {{/useAzureOpenAI}}
+{{#externalConnection}}
+EXTERNAL_CONNECTION='{{{externalConnection}}}'
+{{/externalConnection}}
+{{^externalConnection}}
+EXTERNAL_CONNECTION=
+{{/externalConnection}}

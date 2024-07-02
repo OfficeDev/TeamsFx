@@ -7,8 +7,9 @@ class GraphDataSource {
     /**
      * Creates a new instance of the Graph DataSource instance.
      */
-    constructor(name) {
+    constructor(name, connectionName) {
         this.name = name;
+        this.connectionName = connectionName;
     }
 
     /**
@@ -26,29 +27,21 @@ class GraphDataSource {
                 }
             });
         }
-        let graphQuery = query;
-        if (query.toLocaleLowerCase().includes("perksplus")) {
-            graphQuery = "perksplus program";
-        } else if (query.toLocaleLowerCase().includes("company") || query.toLocaleLowerCase().includes("history")) {
-            graphQuery = "company history";
-        } else if (query.toLocaleLowerCase().includes("northwind") || query.toLocaleLowerCase().includes("health")) {
-            graphQuery = "northwind health";
-        }
-
+        const graphQuery = query;
         const contentResults = [];
         const response = await this.graphClient.api("/search/query").post({
             requests: [
                 {
-                entityTypes: ["driveItem"],
-                query: {
-                    // Search for markdown files in the user's OneDrive and SharePoint
-                    // The supported file types are listed here:
-                    // https://learn.microsoft.com/sharepoint/technical-reference/default-crawled-file-name-extensions-and-parsed-file-types
-                    queryString: `${graphQuery}`,
-                },
-                // This parameter is required only when searching with application permissions
-                // https://learn.microsoft.com/graph/search-concept-searchall
-                // region: "US",
+                    entityTypes: ["externalItem"],
+                    contentSources: [
+                        `/external/connections/${this.connectionName}`
+                    ],
+                    query: {
+                        queryString: graphQuery,
+                    },
+                    // This parameter is required only when searching with application permissions
+                    // https://learn.microsoft.com/graph/search-concept-searchall
+                    // region: "US",
                 },
             ],
         });
@@ -62,9 +55,8 @@ class GraphDataSource {
         let length = 0,
         output = "";
         for (const result of contentResults) {
-            const rawContent = await this.downloadSharepointFile(
-                result.resource.webUrl
-            );
+            const rawContent = await this
+                .downloadExternalContent(result.resource.properties.substrateContentDomainId);
             if (!rawContent) {
                 continue;
             }
@@ -89,24 +81,12 @@ class GraphDataSource {
         return `<context>${result}</context>`;
     }
 
-    // Download the file from SharePoint
-    // https://docs.microsoft.com/en-us/graph/api/driveitem-get-content
-    async downloadSharepointFile(contentUrl) {
-        const encodedUrl = this.encodeSharepointContentUrl(contentUrl);
-        const fileContentResponse = await this.graphClient
-            .api(`/shares/${encodedUrl}/driveItem/content`)
-            .responseType(ResponseType.TEXT)
+    async downloadExternalContent(externalItemFullId) {
+        const externalItemId = externalItemFullId.split(',')[1];
+        const externalItem = await this.graphClient
+            .api(`/external/connections/${this.connectionName}/items/${externalItemId}`)
             .get();
-
-        return fileContentResponse;
-    }
-
-    encodeSharepointContentUrl(webUrl) {
-        const byteData = Buffer.from(webUrl, "utf-8");
-        const base64String = byteData.toString("base64");
-        return (
-            "u!" + base64String.replace("=", "").replace("/", "_").replace("+", "_")
-        );
+        return externalItem.content.value;
     }
 }
 

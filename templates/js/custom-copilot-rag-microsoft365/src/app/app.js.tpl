@@ -31,7 +31,7 @@ const planner = new ActionPlanner({
 });
 
 // Register your data source with planner
-const graphDataSource = new GraphDataSource("graph-ai-search");
+const graphDataSource = new GraphDataSource("graph-ai-search", config.externalConnection);
 planner.prompts.addDataSource(graphDataSource);
 
 // Define storage and application
@@ -44,7 +44,7 @@ const app = new Application({
   authentication: {
     settings: {
       graph: {
-        scopes: ["Files.Read.All"],
+        scopes: ["ExternalItem.Read.All"],
         msalConfig: {
           auth: {
             clientId: process.env.AAD_APP_CLIENT_ID,

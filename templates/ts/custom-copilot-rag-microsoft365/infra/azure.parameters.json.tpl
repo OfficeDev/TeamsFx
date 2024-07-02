@@ -21,6 +21,9 @@
       "value": "${{AZURE_OPENAI_DEPLOYMENT_NAME}}"
     },
     {{/useAzureOpenAI}}
+    "externalConnection": {
+      "value": "${{EXTERNAL_CONNECTION}}"
+    },
     "webAppSKU": {
       "value": "B1"
     },

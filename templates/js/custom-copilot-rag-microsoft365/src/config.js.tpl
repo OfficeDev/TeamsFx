@@ -12,6 +12,7 @@ const config = {
   azureOpenAIEndpoint: process.env.AZURE_OPENAI_ENDPOINT,
   azureOpenAIDeploymentName: process.env.AZURE_OPENAI_DEPLOYMENT_NAME,
   {{/useAzureOpenAI}}
+  externalConnection: process.env.EXTERNAL_CONNECTION,
 };
 
 module.exports = config;

@@ -18,6 +18,7 @@ param azureOpenAIEndpoint string
 param azureOpenAIDeploymentName string
 {{/useAzureOpenAI}}
 
+param externalConnection string
 param webAppSKU string
 
 @maxLength(42)
@@ -103,6 +104,10 @@ resource webApp 'Microsoft.Web/sites@2021-02-01' = {
           value: azureOpenAIDeploymentName
         }
         {{/useAzureOpenAI}}
+        {
+          name: 'EXTERNAL_CONNECTION'
+          value: externalConnection
+        }
       ]
       ftpsState: 'FtpsOnly'
     }
@@ -136,6 +141,7 @@ resource webAppSettings 'Microsoft.Web/sites/config@2021-02-01' = {
     AZURE_OPENAI_ENDPOINT: azureOpenAIEndpoint
     AZURE_OPENAI_DEPLOYMENT_NAME: azureOpenAIDeploymentName
     {{/useAzureOpenAI}}
+    EXTERNAL_CONNECTION: externalConnection
     RUNNING_ON_AZURE: '1'
   }
 }

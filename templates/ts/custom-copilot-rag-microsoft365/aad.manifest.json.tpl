@@ -21,7 +21,7 @@
             "resourceAppId": "Microsoft Graph",
             "resourceAccess": [
                 {
-                    "id": "Files.Read.All",
+                    "id": "ExternalItem.Read.All",
                     "type": "Scope"
                 }
             ]
